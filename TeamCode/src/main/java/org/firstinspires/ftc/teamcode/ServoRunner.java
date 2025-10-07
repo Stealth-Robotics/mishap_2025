@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -10,17 +11,23 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class ServoRunner extends LinearOpMode {
     private boolean isIntake = false;
     private boolean isOuttake = false;
-
     private boolean isHoodOpen = false;
+
+    private double intakeMinRage = .06;
+
+    private double intakeMaxRange = .29;
 
     @Override
     public void runOpMode() throws InterruptedException {
 
-        Servo hopperServo = hardwareMap.get(Servo.class, "hopperServo");
-        CRServo servoIntakeRight = hardwareMap.get(CRServo.class, "servoIntakeRight");
-        CRServo servoIntakeLeft = hardwareMap.get(CRServo.class, "servoIntakeLeft");
-        Servo servoFlipper = hardwareMap.get(Servo.class, "servoFlipper");
-
+        Servo hopperServo = hardwareMap.get(Servo.class, "intake_servo");
+        CRServo servoIntakeRight = hardwareMap.get(CRServo.class, "left_sweeper_servo");
+        CRServo servoIntakeLeft = hardwareMap.get(CRServo.class, "right_sweeper_servo");
+        Servo servoFlipper = hardwareMap.get(Servo.class, "kicker_servo");
+        DcMotorEx rightShooter = hardwareMap.get(DcMotorEx.class, "right_shoot_motor");
+        DcMotorEx leftShooter = hardwareMap.get(DcMotorEx.class, "left_shoot_motor");
+        rightShooter.setDirection(DcMotorSimple.Direction.REVERSE);
+        
         servoIntakeRight.setDirection(DcMotorSimple.Direction.REVERSE);
 
         waitForStart();
@@ -29,10 +36,18 @@ public class ServoRunner extends LinearOpMode {
         servoFlipper.setPosition(.2);
         while (opModeIsActive()) {
             telemetry.addLine("Running");
-            telemetry.update();
             telemetry.addData("hopperServo position:", hopperServo.getPosition());
-            //hopperServo.setPosition(gamepad1.right_trigger * 1);
             telemetry.addData("hopperServo position:", hopperServo.getPosition());
+            telemetry.addData("Shoot power:", gamepad1.right_trigger);
+            if (gamepad1.right_trigger > 0.001) {
+                rightShooter.setPower(gamepad1.right_trigger *.75);
+                leftShooter.setPower(gamepad1.right_trigger*.75);
+            }
+            else {
+
+                rightShooter.setPower(0);
+                leftShooter.setPower(0);
+            }
 
             if (gamepad1.rightBumperWasPressed()) {
                 if (isIntake) {
@@ -66,15 +81,35 @@ public class ServoRunner extends LinearOpMode {
                 servoFlipper.setPosition(.2);
             }
 
+            if (gamepad1.dpadUpWasPressed())
+            {
+                intakeMinRage += .01;
+            }
+
+            if (gamepad1.dpadDownWasPressed())
+            {
+                intakeMinRage -= .01;
+            }
+
+            if (gamepad1.dpadLeftWasPressed())
+            {
+                intakeMaxRange -= .01;
+            }
+            if (gamepad1.dpadRightWasPressed())
+            {
+                intakeMaxRange += .01;
+            }
+
             if (gamepad1.aWasPressed()) {
                 if (isHoodOpen) {
-                    hopperServo.setPosition(0);
+                    hopperServo.setPosition(intakeMinRage);
                     isHoodOpen = false;
                 } else {
-                    hopperServo.setPosition(0.22);
+                    hopperServo.setPosition(intakeMaxRange);
                     isHoodOpen = true;
                 }
             }
+            telemetry.update();
         }
     }
 }
