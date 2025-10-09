@@ -6,6 +6,9 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 @TeleOp(name="Servo Runner", group="Tests")
 public class ServoRunner extends LinearOpMode {
@@ -13,35 +16,52 @@ public class ServoRunner extends LinearOpMode {
     private boolean isOuttake = false;
     private boolean isHoodOpen = false;
 
+    private double headingOffset = 0.0;
+
     private double intakeMinRage = .06;
 
     private double intakeMaxRange = .29;
 
+    private double curShootPower = .80;
+
+
     @Override
     public void runOpMode() throws InterruptedException {
 
-        Servo hopperServo = hardwareMap.get(Servo.class, "intake_servo");
+
+        Servo hopperServo = hardwareMap.get(Servo.class, "hood_servo");
         CRServo servoIntakeRight = hardwareMap.get(CRServo.class, "left_sweeper_servo");
         CRServo servoIntakeLeft = hardwareMap.get(CRServo.class, "right_sweeper_servo");
         Servo servoFlipper = hardwareMap.get(Servo.class, "kicker_servo");
         DcMotorEx rightShooter = hardwareMap.get(DcMotorEx.class, "right_shoot_motor");
         DcMotorEx leftShooter = hardwareMap.get(DcMotorEx.class, "left_shoot_motor");
         rightShooter.setDirection(DcMotorSimple.Direction.REVERSE);
-        
+
+
         servoIntakeRight.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        IMU.Parameters imuParameters = new IMU.Parameters(
+                new RevHubOrientationOnRobot(
+                        RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
+                        RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
+                )
+        );
 
         waitForStart();
         telemetry.addLine("Started");
         telemetry.update();
         servoFlipper.setPosition(.2);
         while (opModeIsActive()) {
+
+
             telemetry.addLine("Running");
             telemetry.addData("hopperServo position:", hopperServo.getPosition());
             telemetry.addData("hopperServo position:", hopperServo.getPosition());
-            telemetry.addData("Shoot power:", gamepad1.right_trigger);
+            telemetry.addData("Shoot power:", gamepad1.right_trigger * curShootPower);
+
             if (gamepad1.right_trigger > 0.001) {
-                rightShooter.setPower(gamepad1.right_trigger *.75);
-                leftShooter.setPower(gamepad1.right_trigger*.75);
+                rightShooter.setPower(gamepad1.right_trigger * curShootPower);
+                leftShooter.setPower(gamepad1.right_trigger  * curShootPower );
             }
             else {
 
@@ -83,12 +103,12 @@ public class ServoRunner extends LinearOpMode {
 
             if (gamepad1.dpadUpWasPressed())
             {
-                intakeMinRage += .01;
+                curShootPower += .01;
             }
 
             if (gamepad1.dpadDownWasPressed())
             {
-                intakeMinRage -= .01;
+                curShootPower -= .01;
             }
 
             if (gamepad1.dpadLeftWasPressed())
