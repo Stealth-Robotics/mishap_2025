@@ -27,11 +27,4 @@ public class ShooterSubSystem {
         rightShooter.setPower(power);
         leftShooter.setPower(power);
     }
-
-    public boolean shootReady()
-    {
-        // TODO: need to get RPM values from motors
-        return true;
-    }
-
 }

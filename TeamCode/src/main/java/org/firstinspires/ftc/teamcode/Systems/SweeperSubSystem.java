@@ -9,10 +9,6 @@ public class SweeperSubSystem {
     CRServo leftSweeper;
     CRServo rightSweeper;
 
-    public boolean isSweeperOn() {
-        return leftSweeper.getPower() != 0 || rightSweeper.getPower() != 0;
-    }
-
     public SweeperSubSystem(HardwareMap hardwareMap) {
         this.hardwareMap = hardwareMap;
         leftSweeper = hardwareMap.get(CRServo.class, "left_sweeper_servo");
@@ -28,10 +24,5 @@ public class SweeperSubSystem {
     public void stopIntake() {
         leftSweeper.setPower(0);
         rightSweeper.setPower(0);
-    }
-
-    public void reverseIntake() {
-        leftSweeper.setPower(-1);
-        rightSweeper.setPower(-1);
     }
 }
