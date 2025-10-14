@@ -38,8 +38,17 @@ public class TeleOpSingleOp extends LinearOpMode {
                     -gamepad1.right_stick_x * powerMultiplier,
                     robotCentric);
 
-            if (gamepad1.aWasPressed()) {
+            if (gamepad1.yWasPressed())
+            {
                 robotSystem.resetIMU();
+            }
+
+            if (gamepad1.aWasPressed()) {
+                if (robotSystem.getShootReady()) {
+                    robotSystem.shoot();
+                }else{
+                    robotSystem.readyShoot();
+                }
             }
 
             if (gamepad1.rightBumperWasPressed()) {
@@ -78,6 +87,14 @@ public class TeleOpSingleOp extends LinearOpMode {
 
             if (gamepad1.rightStickButtonWasPressed()) {
                 robotCentric = !robotCentric;
+            }
+
+            if(gamepad1.dpadLeftWasPressed()) {
+                robotSystem.increaseShootPower();
+            }
+
+            if(gamepad1.dpadRightWasPressed()) {
+                robotSystem.decreaseShootPower();
             }
         }
     }

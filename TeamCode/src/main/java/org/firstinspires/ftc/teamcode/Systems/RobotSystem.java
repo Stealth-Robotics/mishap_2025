@@ -24,7 +24,7 @@ public class RobotSystem {
     private boolean isShootReady = false;
     protected Follower follower;
 
-    private Telemetry telemetry;
+    private final Telemetry telemetry;
 
     public RobotSystem(HardwareMap hardwareMap, Telemetry telemetry) {
         this.hardwareMap = hardwareMap;
@@ -36,7 +36,6 @@ public class RobotSystem {
         this.follower = Constants.createFollower(hardwareMap);
         kickerSys.kickReady();
         this.telemetry = telemetry;
-        //hoodSys.hoodIntake();
     }
 
     public void update() {
@@ -48,6 +47,10 @@ public class RobotSystem {
         // Robot Telemetry shown on screen
         telemetry.addData("Shooter RPM", shooterSys.getCurrentRPM());
         telemetry.update();
+    }
+
+    public boolean getShootReady() {
+        return isShootReady;
     }
 
     public Follower getFollower() {
@@ -80,8 +83,9 @@ public class RobotSystem {
                 sweeperSys.stopIntake();
                 isIntaking = false;
             }
-        }, 1000);
+        }, 500);
     }
+
     public void readyShoot()
     {
         if (!isIntaking) {
