@@ -129,6 +129,7 @@ public class ServoRunner extends LinearOpMode {
                     isHoodOpen = true;
                 }
             }
+
             telemetry.update();
         }
     }

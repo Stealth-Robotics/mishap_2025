@@ -9,10 +9,14 @@ public class SweeperSubSystem {
     CRServo leftSweeper;
     CRServo rightSweeper;
 
+    public boolean isSweeperOn() {
+        return leftSweeper.getPower() != 0 || rightSweeper.getPower() != 0;
+    }
+
     public SweeperSubSystem(HardwareMap hardwareMap) {
         this.hardwareMap = hardwareMap;
-        leftSweeper = hardwareMap.get(CRServo.class, "left_Sweeper_Servo");
-        rightSweeper = hardwareMap.get(CRServo.class, "right_Sweeper_Servo");
+        leftSweeper = hardwareMap.get(CRServo.class, "left_sweeper_servo");
+        rightSweeper = hardwareMap.get(CRServo.class, "right_sweeper_servo");
         rightSweeper.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 

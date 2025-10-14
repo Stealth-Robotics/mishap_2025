@@ -13,10 +13,16 @@ public class KickerSubSystem {
         kickerServo = hardwareMap.get(Servo.class, "kicker_servo");
     }
 
-    public void openKicker() {
+    public void kickIt() {
+
         kickerServo.setPosition(KICKER_UP);
     }
-    public void closeKicker() {
+
+    public void kickReady() {
         kickerServo.setPosition(KICKER_DOWN);
+    }
+
+    public boolean isKickReady() {
+        return kickerServo.getPosition() == KICKER_DOWN;
     }
 }
