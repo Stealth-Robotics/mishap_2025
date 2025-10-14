@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-public class SweeperSubSystem {
+public class SweeperSubsystem {
     HardwareMap hardwareMap;
     CRServo leftSweeper;
     CRServo rightSweeper;
@@ -13,7 +13,7 @@ public class SweeperSubSystem {
         return leftSweeper.getPower() != 0 || rightSweeper.getPower() != 0;
     }
 
-    public SweeperSubSystem(HardwareMap hardwareMap) {
+    public SweeperSubsystem(HardwareMap hardwareMap) {
         this.hardwareMap = hardwareMap;
         leftSweeper = hardwareMap.get(CRServo.class, "left_sweeper_servo");
         rightSweeper = hardwareMap.get(CRServo.class, "right_sweeper_servo");

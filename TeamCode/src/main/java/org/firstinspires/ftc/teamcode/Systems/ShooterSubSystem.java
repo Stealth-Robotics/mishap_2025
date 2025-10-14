@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
-public class ShooterSubSystem {
+public class ShooterSubsystem {
     private final DcMotorEx rightShooter;
     private final DcMotorEx leftShooter;
 
@@ -23,7 +23,7 @@ public class ShooterSubSystem {
 
     public double targetRPM = DEFAULT_RPM;
 
-    public ShooterSubSystem(HardwareMap hardwareMap) {
+    public ShooterSubsystem(HardwareMap hardwareMap) {
         rightShooter = hardwareMap.get(DcMotorEx.class, "right_shoot_motor");
         leftShooter = hardwareMap.get(DcMotorEx.class, "left_shoot_motor");
 

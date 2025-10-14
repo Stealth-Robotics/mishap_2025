@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.Systems;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-public class HoodSubSystem {
+public class HoodSubsystem {
 
     Servo hoodServo;
     private static final double HOOD_OPEN_POSITION = 0.29;
@@ -12,7 +12,7 @@ public class HoodSubSystem {
     private double openPosition = HOOD_OPEN_POSITION;
     private double closePosition = HOOD_CLOSED_POSITION;
 
-    public HoodSubSystem(HardwareMap hardwareMap) {
+    public HoodSubsystem(HardwareMap hardwareMap) {
         hoodServo = hardwareMap.get(Servo.class, "hood_servo");
     }
 

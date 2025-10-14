@@ -2,10 +2,9 @@ package org.firstinspires.ftc.teamcode.Systems;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-public class SpindexerSubSystem {
+public class SpindexerSubsystem {
     private final DcMotorEx spindexer;
 
     // --- Constants for your GoBilda 320 RPM Motor ---
@@ -21,7 +20,7 @@ public class SpindexerSubSystem {
     public static final double SPINDEXER_POWER_LIMIT = 0.7;
 
 
-    public SpindexerSubSystem(HardwareMap hardwareMap) {
+    public SpindexerSubsystem(HardwareMap hardwareMap) {
         spindexer = hardwareMap.get(DcMotorEx.class, "spindexer_motor");
 
         // It's good practice to set a direction. You might need to change this to FORWARD.

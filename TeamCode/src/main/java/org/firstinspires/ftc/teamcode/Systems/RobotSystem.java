@@ -11,11 +11,11 @@ import java.util.TimerTask;
 
 public class RobotSystem {
     protected HardwareMap hardwareMap;
-    protected SweeperSubSystem sweeperSys;
-    protected HoodSubSystem hoodSys;
-    protected KickerSubSystem kickerSys;
-    protected ShooterSubSystem shooterSys;
-    protected SpindexerSubSystem spindexerSys;
+    protected SweeperSubsystem sweeperSys;
+    protected HoodSubsystem hoodSys;
+    protected KickerSubsystem kickerSys;
+    protected ShooterSubsystem shooterSys;
+    protected SpindexerSubsystem spindexerSys;
 
     private boolean isIntaking = false;
 
@@ -28,11 +28,11 @@ public class RobotSystem {
 
     public RobotSystem(HardwareMap hardwareMap, Telemetry telemetry) {
         this.hardwareMap = hardwareMap;
-        this.sweeperSys = new SweeperSubSystem(hardwareMap);
-        this.hoodSys = new HoodSubSystem(hardwareMap);
-        this.kickerSys = new KickerSubSystem(hardwareMap);
-        this.shooterSys = new ShooterSubSystem(hardwareMap);
-        this.spindexerSys = new SpindexerSubSystem(hardwareMap);
+        this.sweeperSys = new SweeperSubsystem(hardwareMap);
+        this.hoodSys = new HoodSubsystem(hardwareMap);
+        this.kickerSys = new KickerSubsystem(hardwareMap);
+        this.shooterSys = new ShooterSubsystem(hardwareMap);
+        this.spindexerSys = new SpindexerSubsystem(hardwareMap);
         this.follower = Constants.createFollower(hardwareMap);
         kickerSys.kickReady();
         this.telemetry = telemetry;
