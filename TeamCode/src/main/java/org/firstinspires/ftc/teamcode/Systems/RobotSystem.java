@@ -58,6 +58,7 @@ public class RobotSystem {
     {
         isShootReady = false;
         isIntaking = true;
+        shooterSys.stop();
         kickerSys.kickReady();
         hoodSys.hoodIntake();
         sweeperSys.startIntake();
@@ -86,7 +87,7 @@ public class RobotSystem {
         if (!isIntaking) {
             kickerSys.kickReady();
             hoodSys.hoodShoot();
-            shooterSys.shoot(.95);
+            shooterSys.spinUpShooter();
         }
     }
     public void shoot() {

@@ -60,7 +60,7 @@ public class ShooterSubSystem {
     /**
      * Runs the shooter at the current targetRPM.
      */
-    public void shoot() {
+        public void spinUpShooter() {
         shoot(targetRPM);
     }
 
