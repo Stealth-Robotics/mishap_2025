@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Systems;
 import com.pedropathing.follower.Follower;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.Timer;
@@ -16,16 +17,16 @@ public class RobotSystem {
     protected ShooterSubSystem shooterSys;
     protected SpindexerSubSystem spindexerSys;
 
-    private double curShootPower = ShooterSubSystem.SHOOT_DEFAULT_POWER;
-
     private boolean isIntaking = false;
 
-    private Timer timer = new Timer();
+    private final Timer timer = new Timer();
 
     private boolean isShootReady = false;
     protected Follower follower;
 
-    public RobotSystem(HardwareMap hardwareMap) {
+    private Telemetry telemetry;
+
+    public RobotSystem(HardwareMap hardwareMap, Telemetry telemetry) {
         this.hardwareMap = hardwareMap;
         this.sweeperSys = new SweeperSubSystem(hardwareMap);
         this.hoodSys = new HoodSubSystem(hardwareMap);
@@ -34,7 +35,8 @@ public class RobotSystem {
         this.spindexerSys = new SpindexerSubSystem(hardwareMap);
         this.follower = Constants.createFollower(hardwareMap);
         kickerSys.kickReady();
-        hoodSys.hoodIntake();
+        this.telemetry = telemetry;
+        //hoodSys.hoodIntake();
     }
 
     public void update() {
@@ -43,12 +45,9 @@ public class RobotSystem {
             isShootReady = true;
         }
 
-//        if(hoodSys.shootReady() && sweeperSys.isSweeperOn())
-//        {
-//            //sweeperSys.stopIntake();
-//        }
-
-
+        // Robot Telemetry shown on screen
+        telemetry.addData("Shooter RPM", shooterSys.getCurrentRPM());
+        telemetry.update();
     }
 
     public Follower getFollower() {
@@ -59,24 +58,29 @@ public class RobotSystem {
     {
         isShootReady = false;
         isIntaking = true;
-        sweeperSys.startIntake();
         kickerSys.kickReady();
         hoodSys.hoodIntake();
+        sweeperSys.startIntake();
+    }
 
+    public void reverseIntake(){
+        isShootReady = false;
+        isIntaking = true;
+        kickerSys.kickReady();
+        hoodSys.hoodIntake();
+        sweeperSys.reverseIntake();
     }
 
     public void stopIntake(){
         hoodSys.hoodShoot();
-        new Timer().schedule(new TimerTask() {
+        timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 sweeperSys.stopIntake();
                 isIntaking = false;
             }
-        }, 500);
+        }, 1000);
     }
-
-
     public void readyShoot()
     {
         if (!isIntaking) {
@@ -89,7 +93,7 @@ public class RobotSystem {
         if (isShootReady) {
             kickerSys.kickIt();
             isShootReady = false;
-            new Timer().schedule(new TimerTask() {
+            timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
                     shooterSys.shoot(0);
@@ -101,23 +105,40 @@ public class RobotSystem {
 
     public void increaseShootPower()
     {
-        if(curShootPower < ShooterSubSystem.SHOOT_MAX_POWER)
-        {
-            curShootPower += .02;
-            shooterSys.shoot(curShootPower);
-        }
+        shooterSys.increaseRPM();
     }
 
     public void decreaseShootPower()
     {
-        if(curShootPower > ShooterSubSystem.SHOOT_DEFAULT_POWER)
-        {
-            curShootPower -= .02;
-            shooterSys.shoot(curShootPower);
-        }
+        shooterSys.decreaseRPM();
     }
 
-    public void setSpindexerPower(double power) {
-        spindexerSys.spin(power);
+    public void incrementSpindexerSlot() {
+        spindexerSys.advanceOneSlot();
+    }
+
+    public void decrementSpindexerSlot() {
+        spindexerSys.decreaseOneSlot();
+    }
+
+    public void setSpindexerSlot(int index) {
+        spindexerSys.rotateToSlot(index);
+    }
+
+    public void increaseShooterRPM(){
+        shooterSys.increaseRPM();
+    }
+
+    public void decreaseShooterRPM(){
+        shooterSys.decreaseRPM();
+    }
+
+    public void resetIMU() throws InterruptedException {
+        try {
+            follower.getPoseTracker().getLocalizer().resetIMU();
+        }catch (InterruptedException ie){
+            // empty
+        }
+
     }
 }
