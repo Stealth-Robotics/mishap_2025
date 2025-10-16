@@ -21,6 +21,11 @@ public class SweeperSubSystem {
         rightSweeper.setPower(1);
     }
 
+    public void reverseIntake() {
+        leftSweeper.setPower(-1);
+        rightSweeper.setPower(-1);
+    }
+
     public void stopIntake() {
         leftSweeper.setPower(0);
         rightSweeper.setPower(0);

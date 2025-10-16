@@ -40,8 +40,50 @@ public class RobotSystem {
         follower.update();
     }
 
+    public void startIntake(){
+        isIntaking = true;
+        hoodSys.hoodIntake();
+        sweeperSys.startIntake();
+    }
+
+    public void initTelOp(){
+        kickerSys.slapItBack();
+        hoodSys.hoodShoot();
+    }
+
+    public void toggleIntake(){
+        if(isIntaking){
+            stopIntake();
+        }else{
+            startIntake();
+        }
+    }
+    public void stopIntake(){
+        hoodSys.hoodShoot();
+        timer.schedule(
+                new TimerTask() {
+                    @Override
+                    public void run() {
+                        sweeperSys.stopIntake();
+                        isIntaking = false;
+                    }
+                },
+                500
+        );
+    }
+
     public Follower getFollower() {
         return follower;
+    }
+
+    public void resetImu() throws InterruptedException {
+        try{
+            follower.getPoseTracker().getLocalizer().resetIMU();
+
+        }catch(InterruptedException e){
+            //EMPTY
+        }
+
     }
 
 }
