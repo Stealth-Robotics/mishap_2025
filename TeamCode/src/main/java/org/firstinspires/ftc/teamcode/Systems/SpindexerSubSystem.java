@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.Systems;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
@@ -28,6 +27,9 @@ public class SpindexerSubsystem {
     // I (Integral): Corrects for steady-state error. Helps hold against gravity. (SDK default: 3.0)
     // D (Derivative): Dampens overshoot and oscillation. (SDK default: 0.0)
     private static final PIDFCoefficients SPINDEXER_PIDF = new PIDFCoefficients(16, 4, .001, 4);
+
+    // The tolerance for when the shooter is ready
+    public static final int POSITION_TOLERANCE = 5;
 
     public SpindexerSubsystem(HardwareMap hardwareMap) {
         spindexer = hardwareMap.get(DcMotorEx.class, "spindexer_motor");
@@ -141,9 +143,7 @@ public class SpindexerSubsystem {
      * This is ideal for allowing game elements to turn the spindexer.
      */
     public void setFloat() {
-        // Before floating, we already have the authoritative target in lastTargetPosition.
-        // No need to re-read from the motor.
-
+        // Disables brake mode
         spindexer.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         // Switch to a mode that doesn't actively hold position
         spindexer.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -168,10 +168,13 @@ public class SpindexerSubsystem {
 
     /**
      * Checks if the motor is currently busy moving to a target position.
-     * @return True if the motor is still moving, false if it has reached its target.
+     * @return False if the motor is still moving, true if it has reached its target.
      */
-    public boolean isBusy() {
-        return spindexer.isBusy();
+    public boolean isReady() {
+        int error = Math.abs(spindexer.getTargetPosition() - spindexer.getCurrentPosition());
+
+        // Return true if the error is within our acceptable tolerance.
+        return error <= POSITION_TOLERANCE;
     }
 
     /**

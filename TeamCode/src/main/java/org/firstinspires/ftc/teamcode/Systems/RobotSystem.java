@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Systems;
 
+import com.bylazar.telemetry.JoinedTelemetry;
 import com.pedropathing.follower.Follower;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -21,7 +22,7 @@ public class RobotSystem {
 
     private final Timer timer = new Timer();
 
-    private boolean isShootReady = false;
+    private volatile boolean isShootReady = false;
     protected Follower follower;
 
     private final Telemetry telemetry;
@@ -35,25 +36,31 @@ public class RobotSystem {
         this.spindexerSys = new SpindexerSubsystem(hardwareMap);
         this.follower = Constants.createFollower(hardwareMap);
         kickerSys.kickReady();
-        this.telemetry = telemetry;
+        this.telemetry = new JoinedTelemetry(telemetry);;
     }
 
     public void update() {
         follower.update();
-        if (shooterSys.shootReady() && hoodSys.shootReady() && kickerSys.isKickReady()) {
-            isShootReady = true;
-        }
+        shooterSys.update();
+        this.isShootReady = shooterSys.isShootReady()
+                && hoodSys.shootReady()
+                && kickerSys.isKickReady()
+                && spindexerSys.isReady();
 
         // Robot Telemetry shown on screen
-        telemetry.addData("Shooter RPM", shooterSys.getCurrentRPM());
+        telemetry.addData("Shooter RPM", shooterSys.getCurrentRpm());
+        telemetry.addData("Target RPM", shooterSys.getTargetRpm());
         telemetry.addData("Spindexer ticks", spindexerSys.getPosition());
-        telemetry.addData("ShootReady:", shooterSys.shootReady());
+        telemetry.addData("ShootReady:", shooterSys.isShootReady());
+        telemetry.addData("HoodReady:", hoodSys.shootReady());
+        telemetry.addData("KickerReady:", kickerSys.isKickReady());
+        telemetry.addData("SpindexerReady:", spindexerSys.isReady());
         telemetry.addData("IsIntaking:", isIntaking);
         telemetry.update();
     }
 
     public boolean getShootReady() {
-        return isShootReady;
+        return this.isShootReady;
     }
 
     public Follower getFollower() {
@@ -96,7 +103,7 @@ public class RobotSystem {
 
     public void readyShoot()
     {
-        if (!isIntaking) {
+        if (!isIntaking && !isShootReady) {
             kickerSys.kickReady();
             hoodSys.hoodShoot();
             shooterSys.spinUpShooter();
@@ -114,17 +121,14 @@ public class RobotSystem {
                     kickerSys.kickReady();
                 }
             }, 200);
+
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    spindexerSys.advanceOneSlot();
+                }
+            }, 500);
         }
-    }
-
-    public void increaseShootPower()
-    {
-        shooterSys.increaseRPM();
-    }
-
-    public void decreaseShootPower()
-    {
-        shooterSys.decreaseRPM();
     }
 
     public void incrementSpindexerSlot() {
@@ -139,12 +143,12 @@ public class RobotSystem {
         spindexerSys.rotateToSlot(index);
     }
 
-    public void increaseShooterRPM(){
-        shooterSys.increaseRPM();
+    public void increaseShooterRpmFar(){
+        shooterSys.increaseRpmFar();
     }
 
-    public void decreaseShooterRPM(){
-        shooterSys.decreaseRPM();
+    public void decreaseShooterRpmFar(){
+        shooterSys.decreaseRpmFar();
     }
 
     public void increaseSpindexer() {
@@ -154,12 +158,15 @@ public class RobotSystem {
         spindexerSys.nudgePosition(-5);
     }
 
+    public void setShooterTargetRange(boolean near){
+        shooterSys.setTargetRange(near);
+    }
+
     public void resetIMU() throws InterruptedException {
         try {
             follower.getPoseTracker().getLocalizer().resetIMU();
         }catch (InterruptedException ie){
             // empty
         }
-
     }
 }

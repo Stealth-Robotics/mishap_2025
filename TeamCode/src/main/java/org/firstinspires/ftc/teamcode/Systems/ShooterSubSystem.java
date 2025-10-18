@@ -4,24 +4,37 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
+import org.firstinspires.ftc.teamcode.Common.MotorVelocityReader;
+
 public class ShooterSubsystem {
     private final DcMotorEx rightShooter;
     private final DcMotorEx leftShooter;
 
+    private final MotorVelocityReader rightVelocityReader;
+    private final MotorVelocityReader leftVelocityReader;
+
+
     // Constants for motor RPM. Your GoBILDA motor has a 28 PPR encoder.
-    public static final double MAX_RPM = 5000;
+    public static final double MAX_RPM = 5100;
     public static final double MIN_RPM = 0;
-    public static final double DEFAULT_RPM = 4000;
-    public static final double RPM_CHANGE_AMOUNT = 50;
-    public static final double VELOCITY_TOLERANCE = 50; // The allowed RPM error
+    public static final double DEFAULT_RPM_FAR = 4500;
+    public static final double DEFAULT_RPM_NEAR = 3000;
+    public static final double RPM_CHANGE_AMOUNT = 100;
+    private static final double VELOCITY_TOLERANCE = 50; // The allowed RPM error
 
     // These are the ticks per revolution for a standard GoBILDA Yellow Jacket motor.
-    public static final double TICKS_PER_REV = 28;
+    private static final double TICKS_PER_REV = 28;
 
     // TODO: You MUST tune these PIDF coefficients for your specific shooter setup for optimal performance.
-    public static PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(90, .5, 10, 13);
+    private static final PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(90, .5, 10, 13);
 
-    public double targetRPM = DEFAULT_RPM;
+    private double targetRpmFar = DEFAULT_RPM_FAR;
+
+    private double targetRpmNear = DEFAULT_RPM_NEAR;
+
+    private Boolean isNear = false;
+    private double currentRpm = 0;
+
 
     public ShooterSubsystem(HardwareMap hardwareMap) {
         rightShooter = hardwareMap.get(DcMotorEx.class, "right_shoot_motor");
@@ -37,6 +50,13 @@ public class ShooterSubsystem {
         // Set PIDF coefficients for velocity control
         leftShooter.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, MOTOR_VELO_PID);
         rightShooter.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, MOTOR_VELO_PID);
+        // Initialize the new velocity readers
+        rightVelocityReader = new MotorVelocityReader(rightShooter, TICKS_PER_REV);
+        leftVelocityReader = new MotorVelocityReader(leftShooter, TICKS_PER_REV);
+    }
+
+    public void update(){
+        updateAverageRpm();
     }
 
     /**
@@ -60,7 +80,7 @@ public class ShooterSubsystem {
      * Runs the shooter at the current targetRPM.
      */
         public void spinUpShooter() {
-        setRpms(targetRPM);
+            setRpms(isNear ? targetRpmNear : targetRpmFar);
     }
 
     /**
@@ -74,73 +94,105 @@ public class ShooterSubsystem {
     /**
      * Increases the target RPM.
      */
-    public void increaseRPM() {
-        if (targetRPM >= MAX_RPM) {
+    public void increaseRPMNear() {
+        if(targetRpmNear >= MAX_RPM){
             return;
         }
 
-        targetRPM += RPM_CHANGE_AMOUNT;
-        // If the motors a running increase speed now
-        if (getCurrentRPM() > MIN_RPM) {
-            setRpms(targetRPM);
+        targetRpmNear += RPM_CHANGE_AMOUNT;
+        if(getCurrentRpm() > MIN_RPM) {
+            setRpms(targetRpmNear);
         }
     }
 
     /**
      * Decreases the target RPM.
      */
-    public void decreaseRPM() {
-        if (targetRPM <= MIN_RPM) {
+    public void decreaseRPMNear() {
+        if(targetRpmNear <= MIN_RPM){
             return;
         }
 
-        targetRPM -= RPM_CHANGE_AMOUNT;
-        if (getCurrentRPM() > MIN_RPM) {
-            setRpms(targetRPM);
+        targetRpmNear -= RPM_CHANGE_AMOUNT;
+        if(getCurrentRpm() > MIN_RPM) {
+            setRpms(targetRpmNear);
         }
+    }
+
+    /**
+     * Increases the target RPM.
+     */
+    public void increaseRpmFar() {
+        if (targetRpmFar >= MAX_RPM) {
+            return;
+        }
+
+        targetRpmFar += RPM_CHANGE_AMOUNT;
+        // If the motors a running increase speed now
+        if (getCurrentRpm() > MIN_RPM) {
+            setRpms(targetRpmFar);
+        }
+    }
+
+    /**
+     * Decreases the target RPM.
+     */
+    public void decreaseRpmFar() {
+        if (targetRpmFar <= MIN_RPM) {
+            return;
+        }
+
+        targetRpmFar -= RPM_CHANGE_AMOUNT;
+        if (getCurrentRpm() > MIN_RPM) {
+            setRpms(targetRpmFar);
+        }
+    }
+
+    public double getTargetRpm(){
+        return isNear ? targetRpmNear : targetRpmFar;
     }
 
     public void SpinDown() {
         setRpms(0);
     }
 
-
     /**
      * Checks if the shooter motors are at their target RPM within a tolerance.
      * @return True if the motors are at the target speed.
      */
-    public boolean shootReady() {
-
-        if (getCurrentRPM() <= MIN_RPM) {
-            return false;
-        }
-
-        // Convert RPM to ticks per second for the getVelocity()
-            double targetVelocity = targetRPM * TICKS_PER_REV / 60;
-            double currentRightVelocity = rightShooter.getVelocity();
-            double currentLeftVelocity = leftShooter.getVelocity();
-
-        double rightError = Math.abs(targetVelocity - currentRightVelocity);
-        double leftError = Math.abs(targetVelocity - currentLeftVelocity);
-
-        return (rightError <= VELOCITY_TOLERANCE) && (leftError <= VELOCITY_TOLERANCE);
+    public boolean isShootReady() {
+        double currentRPM = getCurrentRpm();
+        double targetRPM = isNear ? targetRpmNear : targetRpmFar;
+        double error = Math.abs(currentRPM - targetRPM);
+        return error <= VELOCITY_TOLERANCE;
     }
 
     /**
      * Gets the current average RPM of the shooter motors.
      * @return The average RPM.
      */
-    public double getCurrentRPM() {
-        // Convert the average ticks per second back to RPM
-        double avgTicksPerSecond = (rightShooter.getVelocity() + leftShooter.getVelocity()) / 2;
-        return (avgTicksPerSecond / TICKS_PER_REV) * 60;
+    public double getCurrentRpm() {
+        return currentRpm;
     }
 
     /**
      * Gets the target RPM.
      * @return The target RPM.
      */
-    public double getTargetRPM() {
-        return targetRPM;
+    public double getTargetRpmFar() {
+        return targetRpmFar;
     }
+
+    public double getTargetRpmNear() {
+        return targetRpmNear;
+    }
+
+    public void setTargetRange(boolean isNear) {
+        this.isNear = isNear;
+    }
+
+    private void updateAverageRpm() {
+        this.currentRpm = (rightVelocityReader.getRpm() + leftVelocityReader.getRpm()) / 2;
+    }
+
 }

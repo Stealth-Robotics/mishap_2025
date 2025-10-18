@@ -10,10 +10,11 @@ import org.firstinspires.ftc.teamcode.Systems.RobotSystem;
 @TeleOp (name = "_TeleOp Driver Only", group = "Main")
 public class TeleOpSingleOp extends LinearOpMode {
 
-    private Boolean robotCentric = false;
-
-    private Boolean slowMode = false;
     private static final double SLOW_MODE_MULTIPLIER = 0.3;
+    private boolean robotCentric = false;
+    private boolean slowMode = false;
+    private boolean shootIt = false;
+
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -26,6 +27,7 @@ public class TeleOpSingleOp extends LinearOpMode {
 
         while (opModeIsActive()) {
             robotSystem.update();
+            boolean isShootReady = robotSystem.getShootReady();
 
             if (gamepad1.leftStickButtonWasPressed()) {
                 slowMode = !slowMode;
@@ -44,12 +46,19 @@ public class TeleOpSingleOp extends LinearOpMode {
             }
 
             if (gamepad1.aWasPressed()) {
-                if (robotSystem.getShootReady()) {
-                    telemetry.addLine("Ready to shoot");
-                    robotSystem.shoot();
-                }else{
-                    telemetry.addLine("Not ready to shoot");
+                shootIt = !shootIt;
+                if (shootIt && !robotSystem.getShootReady()){
                     robotSystem.readyShoot();
+                }
+            }
+
+            if (shootIt) {
+                if (isShootReady) {
+                    telemetry.addLine("Score!!!!!!!");
+                    robotSystem.shoot();
+                    shootIt = false;
+                } else {
+                    telemetry.addLine("Not ready to shoot");
                 }
             }
 
@@ -72,11 +81,11 @@ public class TeleOpSingleOp extends LinearOpMode {
             }
 
             if (gamepad1.dpadUpWasPressed()) {
-                robotSystem.increaseShooterRPM();
+                robotSystem.increaseShooterRpmFar();
             }
 
             if (gamepad1.dpadDownWasPressed()) {
-                robotSystem.decreaseShooterRPM();
+                robotSystem.decreaseShooterRpmFar();
             }
 
             if (gamepad1.rightStickButtonWasPressed()) {
@@ -90,7 +99,15 @@ public class TeleOpSingleOp extends LinearOpMode {
             if(gamepad1.dpadRightWasPressed()) {
                 robotSystem.decreaseSpindexer();
             }
+
+            if (gamepad1.left_trigger > .2){
+                robotSystem.setShooterTargetRange(false);
+            }else if (gamepad1.right_trigger > .2){
+                robotSystem.setShooterTargetRange(true);
+            }
         }
+
+        telemetry.update();
     }
 
 /*
