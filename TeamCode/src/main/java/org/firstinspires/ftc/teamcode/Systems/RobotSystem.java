@@ -86,7 +86,7 @@ public class RobotSystem {
             @Override
             public void run() {
                 sweeperSys.stopIntake();
-                spindexerSys.setBreak();
+                spindexerSys.setBrake();
                 isIntaking = false;
             }
         }, 500);
@@ -143,6 +143,13 @@ public class RobotSystem {
 
     public void decreaseShooterRPM(){
         shooterSys.decreaseRPM();
+    }
+
+    public void increaseSpindexer() {
+        spindexerSys.nudgePosition(-5);
+    }
+    public void decreaseSpindexer() {
+        spindexerSys.nudgePosition(5);
     }
 
     public void resetIMU() throws InterruptedException {

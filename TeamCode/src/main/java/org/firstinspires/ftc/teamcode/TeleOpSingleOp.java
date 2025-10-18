@@ -84,11 +84,11 @@ public class TeleOpSingleOp extends LinearOpMode {
             }
 
             if(gamepad1.dpadLeftWasPressed()) {
-                robotSystem.increaseShootPower();
+                robotSystem.increaseSpindexer();
             }
 
             if(gamepad1.dpadRightWasPressed()) {
-                robotSystem.decreaseShootPower();
+                robotSystem.decreaseSpindexer();
             }
         }
     }

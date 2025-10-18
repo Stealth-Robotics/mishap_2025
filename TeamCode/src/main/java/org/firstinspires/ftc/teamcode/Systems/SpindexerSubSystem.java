@@ -3,9 +3,11 @@ package org.firstinspires.ftc.teamcode.Systems;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 public class SpindexerSubsystem {
     private final DcMotorEx spindexer;
+    private int lastTargetPosition; // Variable to store the position before floating
 
     // --- Constants for your GoBilda 312 RPM Motor ---
     // From the GoBilda website, the 19.2:1 ratio motor has 537.7 Ticks per Revolution.
@@ -19,7 +21,12 @@ public class SpindexerSubsystem {
     // You can adjust this to control the speed of the spindexer rotation.
     public static final double SPINDEXER_POWER_LIMIT = 0.4;
 
-
+    // --- PIDF Tuning ---
+    // These coefficients are used for RUN_TO_POSITION mode.
+    // P (Proportional): Increases holding power. Fights stiction. (SDK default: 10.0)
+    // I (Integral): Corrects for steady-state error. Helps hold against gravity. (SDK default: 3.0)
+    // D (Derivative): Dampens overshoot and oscillation. (SDK default: 0.0)
+    private static final PIDFCoefficients SPINDEXER_PIDF = new PIDFCoefficients(8.0, 0.05, 0.0, 0.0);
 
     public SpindexerSubsystem(HardwareMap hardwareMap) {
         spindexer = hardwareMap.get(DcMotorEx.class, "spindexer_motor");
@@ -33,17 +40,19 @@ public class SpindexerSubsystem {
 
         // Set a tolerance for how close to the target is "close enough" (in encoder ticks)
         // This can help prevent oscillations around the target.
-        spindexer.setTargetPositionTolerance(5);
+        spindexer.setTargetPositionTolerance(2);
 
-        spindexer.setTargetPosition(0);
+        // Default to BRAKE mode for holding position.
+        spindexer.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Set the motor to use the RUN_TO_POSITION mode.
         // This enables PID control for precise positioning.
         spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-
-        resetEncoder();
+        spindexer.setTargetPosition(0); // Important to set a target after mode change
+        this.lastTargetPosition = 0; // Initialize the stored position
+        spindexer.setPower(SPINDEXER_POWER_LIMIT);
     }
+
 
     /**
      * Rotates the spindexer to a specific slot number.
@@ -57,6 +66,12 @@ public class SpindexerSubsystem {
 
         // Calculate the target position in encoder ticks
         int targetPosition = (int) Math.round(slotNumber * TICKS_PER_SLOT);
+        this.lastTargetPosition = targetPosition; // Store the new target
+
+        // Ensure we are in the correct mode for position control
+        if (spindexer.getMode() != DcMotor.RunMode.RUN_TO_POSITION) {
+            spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        }
 
         spindexer.setTargetPosition(targetPosition);
         spindexer.setPower(SPINDEXER_POWER_LIMIT);
@@ -66,20 +81,84 @@ public class SpindexerSubsystem {
      * Advances the spindexer by one slot from its current target position.
      */
     public void advanceOneSlot() {
-        int currentTarget = spindexer.getTargetPosition();
-        int newTarget = currentTarget + (int)Math.round(TICKS_PER_SLOT);
+        // Ensure we are in the correct mode for position control
+        if (spindexer.getMode() != DcMotor.RunMode.RUN_TO_POSITION) {
+            spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        }
+
+        // We use lastTargetPosition as the authoritative source for the next move
+        int newTarget = this.lastTargetPosition + (int)Math.round(TICKS_PER_SLOT);
+        this.lastTargetPosition = newTarget; // Store the new target
 
         spindexer.setTargetPosition(newTarget);
         spindexer.setPower(SPINDEXER_POWER_LIMIT);
-        spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
+    /**
+     * Moves the spindexer back by one slot from its current target position.
+     */
     public void decreaseOneSlot() {
-        int currentTarget = spindexer.getTargetPosition();
-        int newTarget = currentTarget - (int)Math.round(TICKS_PER_SLOT);
+        // Ensure we are in the correct mode for position control
+        if (spindexer.getMode() != DcMotor.RunMode.RUN_TO_POSITION) {
+            spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        }
+
+        // We use lastTargetPosition as the authoritative source for the next move
+        int newTarget = this.lastTargetPosition - (int)Math.round(TICKS_PER_SLOT);
+        this.lastTargetPosition = newTarget; // Store the new target
 
         spindexer.setTargetPosition(newTarget);
+        spindexer.setPower(SPINDEXER_POWER_LIMIT);
+    }
+
+    /**
+     * Adjusts the spindexer's target position by a small amount for fine-tuning.
+     * @param ticksToNudge The number of encoder ticks to move the target by.
+     *                     Positive values move forward, negative values move backward.
+     */
+    public void nudgePosition(int ticksToNudge) {
+        // Calculate the new target by adjusting the last known target position.
+        int newTarget = this.lastTargetPosition + ticksToNudge;
+        this.lastTargetPosition = newTarget; // Store the newly nudged target
+
+        // Ensure we are in a state to execute a position command.
+        if (spindexer.getMode() != DcMotor.RunMode.RUN_TO_POSITION) {
+            spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        }
+
+        // Command the motor to move to the new, fine-tuned position.
+        spindexer.setTargetPosition(newTarget);
+        spindexer.setPower(SPINDEXER_POWER_LIMIT);
+    }
+
+    /**
+     * Puts the motor into a state where it can spin freely, while still tracking position.
+     * This is ideal for allowing game elements to turn the spindexer.
+     */
+    public void setFloat() {
+        // Before floating, we already have the authoritative target in lastTargetPosition.
+        // No need to re-read from the motor.
+
+        spindexer.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        // Switch to a mode that doesn't actively hold position
+        spindexer.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        // Ensure motor power is zero to allow floating
+        spindexer.setPower(0);
+    }
+
+    /**
+     * Puts the motor into a state where it actively holds its position.
+     * It will return to the position it was targeting before setFloat() was called.
+     */
+    public void setBrake() {
+        // Set the target back to the last known target position before float was called.
+        spindexer.setTargetPosition(this.lastTargetPosition);
+        // Switch back to position-holding mode.
         spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        spindexer.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        // Apply power so the motor can move to and hold the target.
+        // The PID controller will reduce this to a holding power automatically.
+        spindexer.setPower(SPINDEXER_POWER_LIMIT);
     }
 
     /**
@@ -91,18 +170,14 @@ public class SpindexerSubsystem {
     }
 
     /**
-     * Stops the spindexer motor. Note: In RUN_TO_POSITION mode, the motor
-     * will automatically stop when it reaches the target. This is for emergency stops.
+     * Stops the spindexer motor.
      */
     public void stop() {
-        // Setting power to 0 in RUN_TO_POSITION will stop the motor from moving
-        // towards its target, but it will still hold its position if disturbed.
         spindexer.setPower(0);
     }
 
     /**
-     * Allows for manual spinning of the spindexer. This requires changing the run mode.
-     * Useful for testing or manual overrides.
+     * Allows for manual spinning of the spindexer.
      * @param power The power to apply to the motor (-1.0 to 1.0).
      */
     public void manualSpin(double power) {
@@ -118,7 +193,9 @@ public class SpindexerSubsystem {
     public void resetEncoder() {
         spindexer.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         // It's crucial to set the mode back to RUN_TO_POSITION after resetting.
-        //spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        spindexer.setTargetPosition(0);
+        this.lastTargetPosition = 0; // Also reset the stored target
+        spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
     /**
@@ -127,22 +204,5 @@ public class SpindexerSubsystem {
      */
     public double getPosition() {
         return spindexer.getCurrentPosition();
-    }
-
-    public void toggleFloat(){
-        if(spindexer.getZeroPowerBehavior() == DcMotor.ZeroPowerBehavior.FLOAT) {
-            spindexer.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        } else {
-            spindexer.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        }
-    }
-
-    public void setBreak(){
-        spindexer.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-    }
-
-    public void setFloat() {
-        spindexer.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
     }
 }
