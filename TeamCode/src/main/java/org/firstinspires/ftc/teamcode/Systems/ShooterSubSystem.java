@@ -9,11 +9,11 @@ public class ShooterSubsystem {
     private final DcMotorEx leftShooter;
 
     // Constants for motor RPM. Your GoBILDA motor has a 28 PPR encoder.
-    public static final double MAX_RPM = 5000;
-    public static final double MIN_RPM = 1000;
+    public static final double MAX_RPM = 6000;
+    public static final double MIN_RPM = 1;
     public static final double DEFAULT_RPM = 4000;
     public static final double RPM_CHANGE_AMOUNT = 50;
-    public static final double VELOCITY_TOLERANCE = 25; // The allowed RPM error
+    public static final double VELOCITY_TOLERANCE = 50; // The allowed RPM error
 
     // These are the ticks per revolution for a standard GoBILDA Yellow Jacket motor.
     public static final double TICKS_PER_REV = 28;
@@ -43,13 +43,12 @@ public class ShooterSubsystem {
      * Sets the shooter motors to a specific RPM.
      * @param rpm The target revolutions per minute.
      */
-    public void shoot(double rpm) {
+    private void setRpms(double rpm) {
         if (rpm > MAX_RPM) {
             rpm = MAX_RPM;
         } else if (rpm < MIN_RPM) {
             rpm = MIN_RPM;
         }
-        targetRPM = rpm;
 
         // Convert RPM to ticks per second for the setVelocity() method
         double ticksPerSecond = rpm * TICKS_PER_REV / 60;
@@ -61,15 +60,15 @@ public class ShooterSubsystem {
      * Runs the shooter at the current targetRPM.
      */
         public void spinUpShooter() {
-        shoot(targetRPM);
+        setRpms(targetRPM);
     }
 
     /**
      * Stops the shooter motors.
      */
     public void stop(){
-        rightShooter.setPower(0);
-        leftShooter.setPower(0);
+        rightShooter.setVelocity(0);
+        leftShooter.setVelocity(0);
     }
 
     /**
@@ -79,7 +78,12 @@ public class ShooterSubsystem {
         if (targetRPM >= MAX_RPM) {
             return;
         }
+
         targetRPM += RPM_CHANGE_AMOUNT;
+        // If the motors a running increase speed now
+        if (getCurrentRPM() > MIN_RPM) {
+            setRpms(targetRPM);
+        }
     }
 
     /**
@@ -89,17 +93,32 @@ public class ShooterSubsystem {
         if (targetRPM <= MIN_RPM) {
             return;
         }
+
         targetRPM -= RPM_CHANGE_AMOUNT;
+        if (getCurrentRPM() > MIN_RPM) {
+            setRpms(targetRPM);
+        }
     }
+
+    public void SpinDown() {
+        setRpms(0);
+    }
+
 
     /**
      * Checks if the shooter motors are at their target RPM within a tolerance.
      * @return True if the motors are at the target speed.
      */
     public boolean shootReady() {
-        double targetVelocity = targetRPM * TICKS_PER_REV / 60;
-        double currentRightVelocity = rightShooter.getVelocity();
-        double currentLeftVelocity = leftShooter.getVelocity();
+
+        if (getCurrentRPM() <= MIN_RPM) {
+            return false;
+        }
+
+        // Convert RPM to ticks per second for the getVelocity()
+            double targetVelocity = targetRPM * TICKS_PER_REV / 60;
+            double currentRightVelocity = rightShooter.getVelocity();
+            double currentLeftVelocity = leftShooter.getVelocity();
 
         double rightError = Math.abs(targetVelocity - currentRightVelocity);
         double leftError = Math.abs(targetVelocity - currentLeftVelocity);

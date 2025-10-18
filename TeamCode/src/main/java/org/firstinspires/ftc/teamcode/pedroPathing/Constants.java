@@ -13,7 +13,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Constants {
-
     public static final String leftFrontDrive = "front_left_drive";
     public static final String rightFrontDrive = "front_right_drive";
     public static final String leftBackDrive = "rear_left_drive";
@@ -41,7 +40,6 @@ public class Constants {
             .leftFrontMotorDirection(DcMotorSimple.Direction.FORWARD) //motors keep spinning wrong way so this is a solution
             .rightFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightRearMotorDirection(DcMotorSimple.Direction.REVERSE);
-
 
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
 

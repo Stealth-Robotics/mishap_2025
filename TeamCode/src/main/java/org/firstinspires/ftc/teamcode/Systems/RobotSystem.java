@@ -17,7 +17,7 @@ public class RobotSystem {
     protected ShooterSubsystem shooterSys;
     protected SpindexerSubsystem spindexerSys;
 
-    private boolean isIntaking = false;
+    public static boolean isIntaking = false;
 
     private final Timer timer = new Timer();
 
@@ -46,6 +46,9 @@ public class RobotSystem {
 
         // Robot Telemetry shown on screen
         telemetry.addData("Shooter RPM", shooterSys.getCurrentRPM());
+        telemetry.addData("Spindexer ticks", spindexerSys.getPosition());
+        telemetry.addData("ShootReady:", shooterSys.shootReady());
+        telemetry.addData("IsIntaking:", isIntaking);
         telemetry.update();
     }
 
@@ -65,6 +68,7 @@ public class RobotSystem {
         kickerSys.kickReady();
         hoodSys.hoodIntake();
         sweeperSys.startIntake();
+        spindexerSys.setFloat();
     }
 
     public void reverseIntake(){
@@ -73,6 +77,7 @@ public class RobotSystem {
         kickerSys.kickReady();
         hoodSys.hoodIntake();
         sweeperSys.reverseIntake();
+        spindexerSys.setFloat();
     }
 
     public void stopIntake(){
@@ -81,6 +86,7 @@ public class RobotSystem {
             @Override
             public void run() {
                 sweeperSys.stopIntake();
+                spindexerSys.setBreak();
                 isIntaking = false;
             }
         }, 500);
@@ -94,6 +100,7 @@ public class RobotSystem {
             shooterSys.spinUpShooter();
         }
     }
+
     public void shoot() {
         if (isShootReady) {
             kickerSys.kickIt();
@@ -101,7 +108,7 @@ public class RobotSystem {
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    shooterSys.shoot(0);
+                    shooterSys.SpinDown();
                     kickerSys.kickReady();
                 }
             }, 200);

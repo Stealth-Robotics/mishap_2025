@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 public class SpindexerSubsystem {
     private final DcMotorEx spindexer;
 
-    // --- Constants for your GoBilda 320 RPM Motor ---
+    // --- Constants for your GoBilda 312 RPM Motor ---
     // From the GoBilda website, the 19.2:1 ratio motor has 537.7 Ticks per Revolution.
     public static final double TICKS_PER_REV = 537.7;
     public static final int NUMBER_OF_SLOTS = 3; // You have 3 slots for 3 balls
@@ -17,7 +17,8 @@ public class SpindexerSubsystem {
     public static final double TICKS_PER_SLOT = TICKS_PER_REV / NUMBER_OF_SLOTS;
 
     // You can adjust this to control the speed of the spindexer rotation.
-    public static final double SPINDEXER_POWER_LIMIT = 0.7;
+    public static final double SPINDEXER_POWER_LIMIT = 0.4;
+
 
 
     public SpindexerSubsystem(HardwareMap hardwareMap) {
@@ -30,13 +31,17 @@ public class SpindexerSubsystem {
         // This makes the current position '0' when the robot starts.
         spindexer.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+        // Set a tolerance for how close to the target is "close enough" (in encoder ticks)
+        // This can help prevent oscillations around the target.
+        spindexer.setTargetPositionTolerance(5);
+
+        spindexer.setTargetPosition(0);
+
         // Set the motor to use the RUN_TO_POSITION mode.
         // This enables PID control for precise positioning.
         spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        // Set a tolerance for how close to the target is "close enough" (in encoder ticks)
-        // This can help prevent oscillations around the target.
-        spindexer.setTargetPositionTolerance(10);
+
         resetEncoder();
     }
 
@@ -66,6 +71,7 @@ public class SpindexerSubsystem {
 
         spindexer.setTargetPosition(newTarget);
         spindexer.setPower(SPINDEXER_POWER_LIMIT);
+        spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
     public void decreaseOneSlot() {
@@ -73,6 +79,7 @@ public class SpindexerSubsystem {
         int newTarget = currentTarget - (int)Math.round(TICKS_PER_SLOT);
 
         spindexer.setTargetPosition(newTarget);
+        spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
     /**
@@ -111,7 +118,7 @@ public class SpindexerSubsystem {
     public void resetEncoder() {
         spindexer.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         // It's crucial to set the mode back to RUN_TO_POSITION after resetting.
-        spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        //spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
     /**
@@ -120,5 +127,22 @@ public class SpindexerSubsystem {
      */
     public double getPosition() {
         return spindexer.getCurrentPosition();
+    }
+
+    public void toggleFloat(){
+        if(spindexer.getZeroPowerBehavior() == DcMotor.ZeroPowerBehavior.FLOAT) {
+            spindexer.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        } else {
+            spindexer.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        }
+    }
+
+    public void setBreak(){
+        spindexer.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    }
+
+    public void setFloat() {
+        spindexer.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
     }
 }

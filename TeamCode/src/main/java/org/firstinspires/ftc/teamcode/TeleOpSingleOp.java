@@ -45,8 +45,10 @@ public class TeleOpSingleOp extends LinearOpMode {
 
             if (gamepad1.aWasPressed()) {
                 if (robotSystem.getShootReady()) {
+                    telemetry.addLine("Ready to shoot");
                     robotSystem.shoot();
                 }else{
+                    telemetry.addLine("Not ready to shoot");
                     robotSystem.readyShoot();
                 }
             }
@@ -57,9 +59,9 @@ public class TeleOpSingleOp extends LinearOpMode {
                 robotSystem.stopIntake();
             }
 
-            if (gamepad1.right_trigger > 0) {
+            if (gamepad1.bWasPressed()) {
                 robotSystem.incrementSpindexerSlot();
-            } else if (gamepad1.left_trigger > 0) {
+            } else if (gamepad1.xWasPressed()) {
                 robotSystem.decrementSpindexerSlot();
             }
 
@@ -67,14 +69,6 @@ public class TeleOpSingleOp extends LinearOpMode {
                 robotSystem.reverseIntake();
             } else if (gamepad1.leftBumperWasReleased()) {
                 robotSystem.stopIntake();
-            }
-
-            if (gamepad1.xWasPressed()) {
-                robotSystem.readyShoot();
-            }
-
-            if (gamepad1.bWasPressed()) {
-                robotSystem.shoot();
             }
 
             if (gamepad1.dpadUpWasPressed()) {
