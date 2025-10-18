@@ -1,10 +1,10 @@
-package org.firstinspires.ftc.teamcode.Systems;
+package org.firstinspires.ftc.teamcode.systems;
 
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
-import org.firstinspires.ftc.teamcode.Common.MotorVelocityReader;
+import org.firstinspires.ftc.teamcode.common.MotorVelocityReader;
 
 public class ShooterSubsystem {
     private final DcMotorEx rightShooter;
@@ -15,7 +15,7 @@ public class ShooterSubsystem {
 
 
     // Constants for motor RPM. Your GoBILDA motor has a 28 PPR encoder.
-    public static final double MAX_RPM = 5100;
+    public static final double MAX_RPM = 5200;
     public static final double MIN_RPM = 0;
     public static final double DEFAULT_RPM_FAR = 4500;
     public static final double DEFAULT_RPM_NEAR = 3000;

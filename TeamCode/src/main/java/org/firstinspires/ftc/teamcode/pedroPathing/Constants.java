@@ -13,6 +13,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Constants {
+    public static double FIELD_SIZE_X_INCHES = 144;
+    public static double FIELD_SIZE_Y_INCHES = 144;
     public static final String leftFrontDrive = "front_left_drive";
     public static final String rightFrontDrive = "front_right_drive";
     public static final String leftBackDrive = "rear_left_drive";
