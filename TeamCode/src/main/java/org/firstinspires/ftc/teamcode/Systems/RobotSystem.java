@@ -87,9 +87,11 @@ public class RobotSystem {
             public void run() {
                 sweeperSys.stopIntake();
                 spindexerSys.setBrake();
+                // should check for ball in slot
+                spindexerSys.advanceOneSlot();
                 isIntaking = false;
             }
-        }, 500);
+        }, 300);
     }
 
     public void readyShoot()
@@ -146,10 +148,10 @@ public class RobotSystem {
     }
 
     public void increaseSpindexer() {
-        spindexerSys.nudgePosition(-5);
+        spindexerSys.nudgePosition(5);
     }
     public void decreaseSpindexer() {
-        spindexerSys.nudgePosition(5);
+        spindexerSys.nudgePosition(-5);
     }
 
     public void resetIMU() throws InterruptedException {

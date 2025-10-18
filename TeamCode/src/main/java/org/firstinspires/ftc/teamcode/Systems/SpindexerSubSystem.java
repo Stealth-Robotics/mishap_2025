@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Systems;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
@@ -19,20 +20,20 @@ public class SpindexerSubsystem {
     public static final double TICKS_PER_SLOT = TICKS_PER_REV / NUMBER_OF_SLOTS;
 
     // You can adjust this to control the speed of the spindexer rotation.
-    public static final double SPINDEXER_POWER_LIMIT = 0.4;
+    public static final double SPINDEXER_POWER_LIMIT = .17;
 
     // --- PIDF Tuning ---
     // These coefficients are used for RUN_TO_POSITION mode.
     // P (Proportional): Increases holding power. Fights stiction. (SDK default: 10.0)
     // I (Integral): Corrects for steady-state error. Helps hold against gravity. (SDK default: 3.0)
     // D (Derivative): Dampens overshoot and oscillation. (SDK default: 0.0)
-    private static final PIDFCoefficients SPINDEXER_PIDF = new PIDFCoefficients(8.0, 0.05, 0.0, 0.0);
+    private static final PIDFCoefficients SPINDEXER_PIDF = new PIDFCoefficients(16, 4, .001, 4);
 
     public SpindexerSubsystem(HardwareMap hardwareMap) {
         spindexer = hardwareMap.get(DcMotorEx.class, "spindexer_motor");
 
         // It's good practice to set a direction. You might need to change this to FORWARD.
-        spindexer.setDirection(DcMotorEx.Direction.FORWARD);
+        spindexer.setDirection(DcMotorEx.Direction.REVERSE);
 
         // Stop and reset the encoder to a known state on initialization.
         // This makes the current position '0' when the robot starts.
@@ -45,12 +46,16 @@ public class SpindexerSubsystem {
         // Default to BRAKE mode for holding position.
         spindexer.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        // Set the motor to use the RUN_TO_POSITION mode.
-        // This enables PID control for precise positioning.
-        spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         spindexer.setTargetPosition(0); // Important to set a target after mode change
         this.lastTargetPosition = 0; // Initialize the stored position
         spindexer.setPower(SPINDEXER_POWER_LIMIT);
+
+        // ...// Apply the defined PIDF coefficients to the motor for RUN_TO_POSITION mode
+        spindexer.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, SPINDEXER_PIDF);
+
+        // Set the motor to use the RUN_TO_POSITION mode.
+        spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
     }
 
 

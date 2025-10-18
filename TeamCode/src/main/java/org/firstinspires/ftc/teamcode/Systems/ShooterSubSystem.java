@@ -9,8 +9,8 @@ public class ShooterSubsystem {
     private final DcMotorEx leftShooter;
 
     // Constants for motor RPM. Your GoBILDA motor has a 28 PPR encoder.
-    public static final double MAX_RPM = 6000;
-    public static final double MIN_RPM = 1;
+    public static final double MAX_RPM = 5000;
+    public static final double MIN_RPM = 0;
     public static final double DEFAULT_RPM = 4000;
     public static final double RPM_CHANGE_AMOUNT = 50;
     public static final double VELOCITY_TOLERANCE = 50; // The allowed RPM error
@@ -19,7 +19,7 @@ public class ShooterSubsystem {
     public static final double TICKS_PER_REV = 28;
 
     // TODO: You MUST tune these PIDF coefficients for your specific shooter setup for optimal performance.
-    public static PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(50, 0, 10, 13);
+    public static PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(90, .5, 10, 13);
 
     public double targetRPM = DEFAULT_RPM;
 
