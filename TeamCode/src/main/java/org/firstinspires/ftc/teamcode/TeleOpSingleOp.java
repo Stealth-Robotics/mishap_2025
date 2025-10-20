@@ -48,7 +48,7 @@ public class TeleOpSingleOp extends LinearOpMode {
             if (gamepad1.aWasPressed()) {
                 shootIt = !shootIt;
                 if (shootIt && !robotSystem.getShootReady()){
-                    robotSystem.readyShoot();
+                    robotSystem.setReadyShoot();
                 }
             }
 

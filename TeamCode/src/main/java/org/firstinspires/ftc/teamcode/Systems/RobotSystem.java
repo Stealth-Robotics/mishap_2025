@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.systems;
 
-import com.bylazar.telemetry.JoinedTelemetry;
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -25,6 +26,7 @@ public class RobotSystem {
     private volatile boolean isShootReady = false;
     protected Follower follower;
 
+    private final TelemetryManager telemetryM;
     private final Telemetry telemetry;
 
     public RobotSystem(HardwareMap hardwareMap, Telemetry telemetry) {
@@ -35,28 +37,28 @@ public class RobotSystem {
         this.shooterSys = new ShooterSubsystem(hardwareMap);
         this.spindexerSys = new SpindexerSubsystem(hardwareMap);
         this.follower = Constants.createFollower(hardwareMap);
-        kickerSys.kickReady();
-        this.telemetry = new JoinedTelemetry(telemetry);;
+        this.telemetry = telemetry;
+        this.telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
     }
 
     public void update() {
         follower.update();
         shooterSys.update();
-        this.isShootReady = shooterSys.isShootReady()
+        this.isShootReady = shooterSys.isReadyToShoot()
                 && hoodSys.shootReady()
                 && kickerSys.isKickReady()
                 && spindexerSys.isReady();
 
         // Robot Telemetry shown on screen
-        telemetry.addData("Shooter RPM", shooterSys.getCurrentRpm());
-        telemetry.addData("Target RPM", shooterSys.getTargetRpm());
-        telemetry.addData("Spindexer ticks", spindexerSys.getPosition());
-        telemetry.addData("ShootReady:", shooterSys.isShootReady());
-        telemetry.addData("HoodReady:", hoodSys.shootReady());
-        telemetry.addData("KickerReady:", kickerSys.isKickReady());
-        telemetry.addData("SpindexerReady:", spindexerSys.isReady());
-        telemetry.addData("IsIntaking:", isIntaking);
-        telemetry.update();
+        telemetryM.addData("Shooter RPM", shooterSys.getCurrentRpm());
+        telemetryM.addData("Target RPM", shooterSys.getTargetRpm());
+        telemetryM.addData("Spindexer ticks", spindexerSys.getPosition());
+        telemetryM.addData("ShootReady:", shooterSys.isReadyToShoot());
+        telemetryM.addData("HoodReady:", hoodSys.shootReady());
+        telemetryM.addData("KickerReady:", kickerSys.isKickReady());
+        telemetryM.addData("SpindexerReady:", spindexerSys.isReady());
+        telemetryM.addData("IsIntaking:", isIntaking);
+        telemetryM.update(telemetry);
     }
 
     public boolean getShootReady() {
@@ -101,23 +103,23 @@ public class RobotSystem {
         }, 300);
     }
 
-    public void readyShoot()
+    public void setReadyShoot()
     {
         if (!isIntaking && !isShootReady) {
             kickerSys.kickReady();
             hoodSys.hoodShoot();
-            shooterSys.spinUpShooter();
+            shooterSys.runShooter();
         }
     }
 
-    public void shoot() {
+    public boolean shoot() {
         if (isShootReady) {
             kickerSys.kickIt();
             isShootReady = false;
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    shooterSys.SpinDown();
+                    shooterSys.stop();
                     kickerSys.kickReady();
                 }
             }, 200);
@@ -128,7 +130,11 @@ public class RobotSystem {
                     spindexerSys.advanceOneSlot();
                 }
             }, 500);
+
+            return true;
         }
+
+        return false;
     }
 
     public void incrementSpindexerSlot() {

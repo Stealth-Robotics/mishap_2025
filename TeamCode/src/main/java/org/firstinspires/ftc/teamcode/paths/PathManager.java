@@ -57,6 +57,11 @@ public class PathManager implements Path {
         return Alliance.isRed() ? redPathSegments.size() : bluePathSegments.size();
     }
 
+    @Override
+    public int getSegmentIndex() {
+        return currentPath;
+    }
+
     /**
      * Sets the start pose for the path manager.
      *

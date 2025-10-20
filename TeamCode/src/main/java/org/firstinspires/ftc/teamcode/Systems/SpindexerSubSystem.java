@@ -5,6 +5,8 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
+import java.util.Arrays;
+
 public class SpindexerSubsystem {
     private final DcMotorEx spindexer;
     private int lastTargetPosition; // Variable to store the position before floating
@@ -26,10 +28,16 @@ public class SpindexerSubsystem {
     // P (Proportional): Increases holding power. Fights stiction. (SDK default: 10.0)
     // I (Integral): Corrects for steady-state error. Helps hold against gravity. (SDK default: 3.0)
     // D (Derivative): Dampens overshoot and oscillation. (SDK default: 0.0)
-    private static final PIDFCoefficients SPINDEXER_PIDF = new PIDFCoefficients(16, 4, .001, 4);
+    // F (Friction): Provides an overriding power of friction.
+    private static final PIDFCoefficients SPINDEXER_PIDF = new PIDFCoefficients(16, 4, .002, 4);
 
     // The tolerance for when the shooter is ready
     public static final int POSITION_TOLERANCE = 5;
+
+    public SlotState[] slotStates = new SlotState[NUMBER_OF_SLOTS];
+
+    // FIX: Initialized to a valid starting slot, 0.
+    private int currentSlot = 0;
 
     public SpindexerSubsystem(HardwareMap hardwareMap) {
         spindexer = hardwareMap.get(DcMotorEx.class, "spindexer_motor");
@@ -58,6 +66,32 @@ public class SpindexerSubsystem {
         // Set the motor to use the RUN_TO_POSITION mode.
         spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
+        this.rotateToSlot(0);
+        this.setSlotsEmpty();
+    }
+
+    public void setSlotsEmpty() {
+        Arrays.fill(slotStates, SlotState.EMPTY);
+    }
+
+    public void setSlotsAuto(){
+        Arrays.fill(slotStates, SlotState.ARTIFACT_PURPLE);
+        slotStates[0] = SlotState.ARTIFACT_GREEN;
+        currentSlot = 0;
+    }
+
+    public void setSlotState(int slotNumber, SlotState state) {
+        int wrappedSlotNumber = slotNumber % NUMBER_OF_SLOTS;
+        slotStates[wrappedSlotNumber] = state;
+    }
+
+    public SlotState getSlotState(int slotNumber) {
+        int wrappedSlotNumber = slotNumber % NUMBER_OF_SLOTS;
+        return slotStates[wrappedSlotNumber];
+    }
+
+    public int getCurrentSlot() {
+        return currentSlot;
     }
 
 
@@ -82,6 +116,7 @@ public class SpindexerSubsystem {
 
         spindexer.setTargetPosition(targetPosition);
         spindexer.setPower(SPINDEXER_POWER_LIMIT);
+        currentSlot = slotNumber;
     }
 
     /**
@@ -99,6 +134,7 @@ public class SpindexerSubsystem {
 
         spindexer.setTargetPosition(newTarget);
         spindexer.setPower(SPINDEXER_POWER_LIMIT);
+        currentSlot = (currentSlot + 1) % NUMBER_OF_SLOTS;
     }
 
     /**
@@ -116,6 +152,11 @@ public class SpindexerSubsystem {
 
         spindexer.setTargetPosition(newTarget);
         spindexer.setPower(SPINDEXER_POWER_LIMIT);
+
+        // FIX: This correctly handles wrapping for negative numbers.
+        // (0 - 1 + 3) % 3 = 2.
+        // (2 - 1 + 3) % 3 = 1.
+        currentSlot = (currentSlot - 1 + NUMBER_OF_SLOTS) % NUMBER_OF_SLOTS;
     }
 
     /**
@@ -204,6 +245,8 @@ public class SpindexerSubsystem {
         spindexer.setTargetPosition(0);
         this.lastTargetPosition = 0; // Also reset the stored target
         spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        // After resetting encoders, our logical slot should also be zero.
+        this.currentSlot = 0;
     }
 
     /**
@@ -212,5 +255,12 @@ public class SpindexerSubsystem {
      */
     public double getPosition() {
         return spindexer.getCurrentPosition();
+    }
+
+    public enum SlotState {
+        EMPTY,
+        ARTIFACT_PURPLE,
+        ARTIFACT_GREEN,
+        UNKNOWN
     }
 }

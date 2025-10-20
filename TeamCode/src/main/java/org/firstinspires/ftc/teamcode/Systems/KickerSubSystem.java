@@ -11,6 +11,7 @@ public class KickerSubsystem {
 
     public KickerSubsystem(HardwareMap hardwareMap) {
         kickerServo = hardwareMap.get(Servo.class, "kicker_servo");
+        kickReady();
     }
 
     public void kickIt() {

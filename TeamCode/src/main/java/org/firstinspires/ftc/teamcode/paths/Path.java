@@ -13,4 +13,6 @@ public interface Path {
 
     int getSegmentCount();
 
+    int getSegmentIndex();
+
 }
