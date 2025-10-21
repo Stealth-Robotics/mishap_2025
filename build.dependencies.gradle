@@ -24,7 +24,7 @@ dependencies {
         exclude group: "com.acmerobotics.dashboard"
     }
 
-    implementation("com.bylazar:fullpanels:1.0.6") {
+    implementation("com.bylazar:fullpanels:1.0.7") {
         exclude group: "com.acmerobotics.slothboard"
     }
 }

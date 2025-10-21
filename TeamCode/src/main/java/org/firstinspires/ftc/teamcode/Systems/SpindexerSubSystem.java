@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.systems;
 
+import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -7,6 +8,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import java.util.Arrays;
 
+@Configurable
 public class SpindexerSubsystem {
     private final DcMotorEx spindexer;
     private int lastTargetPosition; // Variable to store the position before floating
@@ -29,7 +31,7 @@ public class SpindexerSubsystem {
     // I (Integral): Corrects for steady-state error. Helps hold against gravity. (SDK default: 3.0)
     // D (Derivative): Dampens overshoot and oscillation. (SDK default: 0.0)
     // F (Friction): Provides an overriding power of friction.
-    private static final PIDFCoefficients SPINDEXER_PIDF = new PIDFCoefficients(16, 4, .002, 4);
+    public static PIDFCoefficients SPINDEXER_PIDF = new PIDFCoefficients(18, 6, 0, 4);
 
     // The tolerance for when the shooter is ready
     public static final int POSITION_TOLERANCE = 5;
