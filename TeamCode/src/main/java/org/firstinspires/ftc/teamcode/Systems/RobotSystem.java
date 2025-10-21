@@ -1,8 +1,11 @@
 package org.firstinspires.ftc.teamcode.Systems;
 
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.Timer;
@@ -20,24 +23,36 @@ public class RobotSystem {
 
     private boolean isIntaking = false;
 
+    private ColorSensorSubSystem colorSensorSubSystem;
+
+
     private Timer timer = new Timer();
 
     private boolean isShootReady = false;
     protected Follower follower;
 
-    public RobotSystem(HardwareMap hardwareMap) {
+    private Telemetry telemetry;
+    private TelemetryManager telemetryM;
+
+    public RobotSystem(HardwareMap hardwareMap, Telemetry telemetry) {
         this.hardwareMap = hardwareMap;
+        this.telemetry = telemetry;
+        this.telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
         this.sweeperSys = new SweeperSubSystem(hardwareMap);
         this.hoodSys = new HoodSubSystem(hardwareMap);
         this.kickerSys = new KickerSubSystem(hardwareMap);
         this.shooterSys = new ShooterSubSystem(hardwareMap);
         this.spindexerSys = new SpindexerSubSystem(hardwareMap);
         this.follower = Constants.createFollower(hardwareMap);
+        this.colorSensorSubSystem = new ColorSensorSubSystem(hardwareMap, telemetry);
 
     }
 
     public void update() {
         follower.update();
+        colorSensorSubSystem.update();
+        telemetryM.update(telemetry);
+
     }
 
     public void startIntake(){

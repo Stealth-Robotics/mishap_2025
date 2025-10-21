@@ -20,7 +20,7 @@ public class Teleop extends LinearOpMode {
     private static final Pose START_POSE = new Pose(0, 0, 0);
     @Override
     public void runOpMode() throws InterruptedException {
-        RobotSystem robotSystem = new RobotSystem(hardwareMap);
+        RobotSystem robotSystem = new RobotSystem(hardwareMap, telemetry);
         Follower follower = robotSystem.getFollower();
         follower.startTeleopDrive();
         follower.setStartingPose(START_POSE);
