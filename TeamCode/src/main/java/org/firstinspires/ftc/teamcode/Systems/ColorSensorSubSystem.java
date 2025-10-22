@@ -5,6 +5,7 @@ import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -15,6 +16,9 @@ public class ColorSensorSubSystem {
     Telemetry telemetry;
     TelemetryManager telemetryM;
 
+private double[] greanArtifactColorsHigh = {0.0023, 0.011, 0.0137, 40};
+
+
 
 
     //private final Color kGreenTarget = new Color().green();
@@ -22,39 +26,27 @@ public class ColorSensorSubSystem {
    // private ColorMatch
 
     public enum DetectedColor {
-        RED,
+        UNKNOWN,
+        NONE,
+        PURPLE,
         GREEN,
-        BLUE
+
     }
 
     public ColorSensorSubSystem(HardwareMap hardwareMap, Telemetry telemetry) {
         colorSensor = hardwareMap.get(RevColorSensorV3.class, "color_sensor");
         this.telemetry = telemetry;
         this.telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
-        colorSensor.setGain(4);
-
-        /*
-        purple- (with gain 4)
-            distance: 27.3983
-            red: 0.0053
-            green: 0.0069
-            blue: 0.014
-
-         green-(with gain 4)
-            distance:31.844
-            red: 0.0021
-            green: 0.0081
-            blue: 0.0067
-         */
-
+        colorSensor.setGain(12);
 
     }
+
+
 
     public void update(){
         double red = colorSensor.getNormalizedColors().red;
         double blue = colorSensor.getNormalizedColors().blue;
         double green = colorSensor.getNormalizedColors().green;
-        double distance_sensor = colorSensor.getDistance(DistanceUnit.MM);
         telemetry.addData("Distance: ", colorSensor.getDistance(DistanceUnit.MM));
         telemetry.addData("Color red: ", red);
         telemetry.addData("color blue: ", blue);
@@ -64,13 +56,52 @@ public class ColorSensorSubSystem {
 //0.0009-red
 
     }
-//    public DetectedColor getdetectcolor(){
-//
-//
-//
-//    }
 
-    //Instructions:
+    public DetectedColor getDetectedColor(){
+        NormalizedRGBA colors = colorSensor.getNormalizedColors();
 
+        float normRed, normGreen, normBlue;
+        normRed = colors.red / colors.alpha;
+        normGreen = colors.green / colors.alpha;
+        normBlue = colors.blue / colors.alpha;
+        // TODO Code to check color range
+        /*
+        Color values:
+        PURPLE BALL -
+        * Distance: 52-58
+        * Red: 0.0057 - 0.0059
+        * Blue: 0.0138
+        * Green: 0.0083
+        * gain: 8
+        GREEN BALL -
+        * Distance: 44-47
+        * Red: 0.0023 - 0.0024
+        * Blue: 0.0056
+        * Green: 0.007
+        * gain: 8
+        */
+
+        /*
+        Color values:
+        GREEN BALL -
+        * Distance: 40      34-35
+        * Red: 0.0046       0.0057
+        * Blue: 0.0132      0.0172
+        * Green: 0.0165     0.0218
+        * gain: 12
+        PURPLE BALL -
+        * Distance: 64-66       47-50
+        * Red: 0.0044           0.0075-0.0079
+        * Blue: 0.0093          0.0181-0.0183
+        * Green: 0.0071-0.0073  0.011-0.108
+        * gain: 12
+        */
+
+        return DetectedColor.UNKNOWN;
+
+
+
+
+    }
 
 }

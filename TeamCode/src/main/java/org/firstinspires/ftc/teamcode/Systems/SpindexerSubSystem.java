@@ -27,8 +27,9 @@ public class SpindexerSubSystem {
         spindexer.setPower(power);
     }
 
+    //hi
+
     public int getPosition() {
         return spindexer.getCurrentPosition();
-
     }
 }
