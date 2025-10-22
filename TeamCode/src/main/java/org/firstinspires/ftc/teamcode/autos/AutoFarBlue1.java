@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.paths.PathState;
 import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 
 // TODO: move a lot of this into a base class and extend it
-@Autonomous(name = "Far Blue1", group = "Autonomous")
+@Autonomous(name = "Far Blue1", group = "Autonomous", preselectTeleOp = "_TeleOp Driver Only")
 @Configurable // Panels
 public class AutoFarBlue1 extends OpMode {
 
@@ -38,10 +38,10 @@ public class AutoFarBlue1 extends OpMode {
 
         follower = robot.getFollower();
 
-        // TODO can update via Limelight
-        follower.setStartingPose(new Pose(56, 8.5, Math.toRadians(90)));
-
         paths = new PathFarAuto1(robot); // Build paths
+
+        // Sets the rough starting spot can update with limelight in the wait to start loop
+        follower.setStartingPose(paths.getStartPose());
 
         telemetryM.debug("Status", "Initialized");
         telemetryM.addData("Paths Count", paths.getSegmentCount());
@@ -63,33 +63,70 @@ public class AutoFarBlue1 extends OpMode {
 
     @Override
     public void loop() {
-        // Update robot systems
+        // Update robot systems and the path follower
         robot.update();
 
-        if (pathState == PathState.STOP) {
-            requestOpModeStop();
-            return;
-        }
+        switch (pathState) {
+            case IDLE:
+                // If idle, check if we need to perform an action (like shooting)
+                // or start the next path segment.
+                pathState = checkIndexForAction();
 
-        if (pathState == PathState.IDLE || pathState == PathState.WAIT) {
-            pathState = checkIndexForAction();
-        }
+                // If checkIndexForAction() didn't change the state to WAIT,
+                // then it's time to move to the next path segment.
+                if (pathState == PathState.IDLE || pathState == PathState.CONTINUE) {
+                    pathState = updateFollowerState();
+                }
+                break;
 
-        if (pathState == PathState.IDLE) {
-            pathState = updateFollowerState();
+            case BUSY:
+                // If the follower is busy, we just need to wait for it to finish.
+                // robot.update() (called above) handles the actual follower updates.
+                if (!follower.isBusy()) {
+                    // The path segment is complete, go back to IDLE to decide what's next.
+                    pathState = PathState.IDLE;
+                }
+                break;
+
+            case WAIT:
+                // The robot is waiting for a subsystem (like the shooter).
+                // Check if the action is now complete.
+                pathState = checkIndexForAction(); // This method should return CONTINUE when ready.
+                break;
+
+            case STOP:
+                // All paths are done, stop the OpMode.
+                requestOpModeStop();
+                return;
+
+            case CONTINUE:
+                // CONTINUE is used when completing a specific index task
+                pathState = updateFollowerState();
+                break;
         }
 
         // Log values to Panels and Driver Station
-        telemetryM.debug("Path State", pathState);
-        telemetryM.update(telemetry);
+        telemetryM.addData("Path State", pathState);
+        telemetryM.addData("Follower State:", follower.isBusy());
+        telemetryM.addData("Path Index", paths.getSegmentIndex());
     }
 
     private PathState checkIndexForAction() {
+
+        if (robot.isIntakeRunning())
+        {
+            // TODO: check color sensor etc.
+            robot.stopIntake();
+            return PathState.WAIT;
+        }
+
         int curIndex = paths.getSegmentIndex();
-        if (curIndex == 1 || curIndex == 6) {
+        if (curIndex == 1 || curIndex == 7) {
             if (robot.getShootReady()) {
                 if (robot.shoot()) {
-                    return PathState.IDLE;
+                    return PathState.CONTINUE;
+                } else {
+                    telemetryM.addLine("Not READY");
                 }
             }
             else {

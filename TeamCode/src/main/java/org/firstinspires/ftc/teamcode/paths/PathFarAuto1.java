@@ -32,7 +32,7 @@ public class PathFarAuto1 extends PathManager{
         addBluePath(
                 follower.pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(56.000, 8.500), new Pose(61.000, 20.000))
+                                new BezierLine(new Pose(56.000, 6.000), new Pose(61.000, 20.000))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(115))
                         .addParametricCallback(0.5, ()->robot.setReadyShoot())
@@ -41,14 +41,15 @@ public class PathFarAuto1 extends PathManager{
         addBluePath(
                 follower.pathBuilder()
                         .addPath(
+                                // SlowIntake1
                                 new BezierCurve(
                                         new Pose(61.000, 20.000),
                                         new Pose(66.496, 36.000),
                                         new Pose(42.000, 36.000)
                                 )
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(115), Math.toRadians(180))
-                        .addParametricCallback(1, ()->robot.startIntake())
+                        .setLinearHeadingInterpolation(Math.toRadians(115), Math.toRadians(0))
+                        .addParametricCallback(.9, ()-> follower.setMaxPower(.2))
                         .build());
         // Move to CHOMP POS
         addBluePath(
@@ -57,7 +58,8 @@ public class PathFarAuto1 extends PathManager{
                                 new BezierLine(new Pose(42.000, 36.000), new Pose(36.000, 36.000))
                         )
                         .setTangentHeadingInterpolation()
-                        .addParametricCallback(0, ()-> follower.setMaxPower(.2))
+                        .setReversed()
+                        .addParametricCallback(0, ()->robot.startIntake())
                         .build()
         );
 
@@ -68,10 +70,7 @@ public class PathFarAuto1 extends PathManager{
                                 new BezierLine(new Pose(36.000, 36.000), new Pose(32.000, 36.000))
                         )
                         .setTangentHeadingInterpolation()
-                        .addParametricCallback(0, ()->robot.startIntake())
-
-                        // TODO ADD CHECK for color sensor could do dynamic path build
-                        .addParametricCallback(1, ()->robot.stopIntake())
+                        .setReversed()
                         .build()
         );
 
@@ -82,23 +81,22 @@ public class PathFarAuto1 extends PathManager{
                                 new BezierLine(new Pose(32.000, 36.000), new Pose(26.000, 36.000))
                         )
                         .setTangentHeadingInterpolation()
+                        .setReversed()
                         .addParametricCallback(0, ()->robot.startIntake())
-
-                        // TODO ADD CHECK for color sensor could do dynamic path build
-                        .addParametricCallback(1, ()->robot.stopIntake())
+                        //.setTimeoutConstraint(1000)
                         .build()
         );
         // CHOMP 3
         addBluePath(
                 follower.pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(26.000, 36.000), new Pose(20.000, 36.000))
+                                new BezierLine(new Pose(26.000, 36.000), new Pose(18.000, 36.000))
                         )
                         .setTangentHeadingInterpolation()
+                        .setReversed()
+                        //.setTimeoutConstraint(1000)
                         .addParametricCallback(0, ()->robot.startIntake())
 
-                        // TODO ADD CHECK for color sensor could do dynamic path build
-                        .addParametricCallback(1, ()->robot.stopIntake())
                         .build()
         );
 
@@ -106,10 +104,22 @@ public class PathFarAuto1 extends PathManager{
         addBluePath(
                 follower.pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(20.000, 36.000), new Pose(61.000, 20.000))
+                                new BezierLine(new Pose(18.00, 36.000), new Pose(61.000, 20.000))
                         )
-                        .setConstantHeadingInterpolation(Math.toRadians(115))
+                        .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(115))
                         .addParametricCallback(0, ()->follower.setMaxPower(1))
+                        .addParametricCallback(.5, ()->robot.setReadyShoot())
+                        .build()
+        );
+
+        // HOME TEST:
+        addBluePath(
+                follower.pathBuilder()
+                        .addPath(
+                                // Path 8
+                                new BezierLine(new Pose(61.000, 20.000), new Pose(56.000, 6.000))
+                        )
+                        .setConstantHeadingInterpolation(Math.toRadians(90))
                         .build()
         );
     }

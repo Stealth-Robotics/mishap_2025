@@ -7,5 +7,6 @@ public enum PathState {
     IDLE,
     BUSY,
     WAIT,
+    CONTINUE,
     STOP
 }

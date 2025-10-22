@@ -5,25 +5,32 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 
 import java.util.Arrays;
 
 @Configurable
 public class SpindexerSubsystem {
+    // NOTE: if you would like to adjust in FTC dashboard mark members as public static (Not final)
+
     private final DcMotorEx spindexer;
     private int lastTargetPosition; // Variable to store the position before floating
 
     // --- Constants for your GoBilda 312 RPM Motor ---
     // From the GoBilda website, the 19.2:1 ratio motor has 537.7 Ticks per Revolution.
-    public static final double TICKS_PER_REV = 537.7;
+    public static final double TICKS_PER_REV =3895.9;
     public static final int NUMBER_OF_SLOTS = 3; // You have 3 slots for 3 balls
 
     // --- Calculated Position Constants ---
     // The number of encoder ticks needed to move one slot.
     public static final double TICKS_PER_SLOT = TICKS_PER_REV / NUMBER_OF_SLOTS;
 
-    // You can adjust this to control the speed of the spindexer rotation.
-    public static final double SPINDEXER_POWER_LIMIT = .17;
+    // You can adjust this to control the power of the spindexer rotation.
+    public static double SPINDEXER_POWER_LIMIT = 1;
+
+    // You can adjust this to control the velocity of the spindexer rotation.
+    public static double SPINDEXER_VELOCITY_LIMIT = 2500;
+
 
     // --- PIDF Tuning ---
     // These coefficients are used for RUN_TO_POSITION mode.
@@ -31,18 +38,21 @@ public class SpindexerSubsystem {
     // I (Integral): Corrects for steady-state error. Helps hold against gravity. (SDK default: 3.0)
     // D (Derivative): Dampens overshoot and oscillation. (SDK default: 0.0)
     // F (Friction): Provides an overriding power of friction.
-    public static PIDFCoefficients SPINDEXER_PIDF = new PIDFCoefficients(18, 6, 0, 4);
+    public static PIDFCoefficients SPINDEXER_PIDF = new PIDFCoefficients(8, 4,1.5, 1);
 
     // The tolerance for when the shooter is ready
-    public static final int POSITION_TOLERANCE = 5;
+    public static final int POSITION_TOLERANCE = 2;
 
     public SlotState[] slotStates = new SlotState[NUMBER_OF_SLOTS];
 
     // FIX: Initialized to a valid starting slot, 0.
     private int currentSlot = 0;
 
+    private final TouchSensor indexSwitch;
+
     public SpindexerSubsystem(HardwareMap hardwareMap) {
         spindexer = hardwareMap.get(DcMotorEx.class, "spindexer_motor");
+        indexSwitch = hardwareMap.get(TouchSensor.class, "index_switch");
 
         // It's good practice to set a direction. You might need to change this to FORWARD.
         spindexer.setDirection(DcMotorEx.Direction.REVERSE);
@@ -60,7 +70,7 @@ public class SpindexerSubsystem {
 
         spindexer.setTargetPosition(0); // Important to set a target after mode change
         this.lastTargetPosition = 0; // Initialize the stored position
-        spindexer.setPower(SPINDEXER_POWER_LIMIT);
+        spindexer.setVelocity(SPINDEXER_VELOCITY_LIMIT);
 
         // ...// Apply the defined PIDF coefficients to the motor for RUN_TO_POSITION mode
         spindexer.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, SPINDEXER_PIDF);
@@ -81,6 +91,12 @@ public class SpindexerSubsystem {
         slotStates[0] = SlotState.ARTIFACT_GREEN;
         currentSlot = 0;
     }
+
+    public boolean isIndexSwitchPressed() {
+        // IsPressed is reversed for our switch
+        return !indexSwitch.isPressed();
+    }
+
 
     public void setSlotState(int slotNumber, SlotState state) {
         int wrappedSlotNumber = slotNumber % NUMBER_OF_SLOTS;
@@ -117,7 +133,7 @@ public class SpindexerSubsystem {
         }
 
         spindexer.setTargetPosition(targetPosition);
-        spindexer.setPower(SPINDEXER_POWER_LIMIT);
+        spindexer.setVelocity(SPINDEXER_VELOCITY_LIMIT);
         currentSlot = slotNumber;
     }
 
@@ -135,7 +151,7 @@ public class SpindexerSubsystem {
         this.lastTargetPosition = newTarget; // Store the new target
 
         spindexer.setTargetPosition(newTarget);
-        spindexer.setPower(SPINDEXER_POWER_LIMIT);
+        spindexer.setVelocity(SPINDEXER_VELOCITY_LIMIT);
         currentSlot = (currentSlot + 1) % NUMBER_OF_SLOTS;
     }
 
@@ -153,7 +169,7 @@ public class SpindexerSubsystem {
         this.lastTargetPosition = newTarget; // Store the new target
 
         spindexer.setTargetPosition(newTarget);
-        spindexer.setPower(SPINDEXER_POWER_LIMIT);
+        spindexer.setVelocity(SPINDEXER_VELOCITY_LIMIT);
 
         // FIX: This correctly handles wrapping for negative numbers.
         // (0 - 1 + 3) % 3 = 2.
@@ -178,7 +194,7 @@ public class SpindexerSubsystem {
 
         // Command the motor to move to the new, fine-tuned position.
         spindexer.setTargetPosition(newTarget);
-        spindexer.setPower(SPINDEXER_POWER_LIMIT);
+        spindexer.setVelocity(SPINDEXER_VELOCITY_LIMIT);
     }
 
     /**
@@ -206,7 +222,7 @@ public class SpindexerSubsystem {
         spindexer.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         // Apply power so the motor can move to and hold the target.
         // The PID controller will reduce this to a holding power automatically.
-        spindexer.setPower(SPINDEXER_POWER_LIMIT);
+        spindexer.setVelocity(SPINDEXER_VELOCITY_LIMIT);
     }
 
     /**
