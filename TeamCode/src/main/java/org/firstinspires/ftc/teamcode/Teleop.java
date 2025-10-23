@@ -3,12 +3,11 @@ package org.firstinspires.ftc.teamcode;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.Systems.RobotSystem;
+import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 
-@TeleOp (name = "_TeleOp", group = "Main")
-public class Teleop extends LinearOpMode {
+@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "_TeleOp", group = "Main")
+public class TeleOp extends LinearOpMode {
 
     private RobotSystem robotSystem;
     private Boolean isRobotCentric = false;
@@ -24,17 +23,14 @@ public class Teleop extends LinearOpMode {
         Follower follower = robotSystem.getFollower();
         follower.startTeleopDrive();
         follower.setStartingPose(START_POSE);
-        robotSystem.resetImu();
-        robotSystem.initTelOp();
+        robotSystem.resetIMU();
         waitForStart();
-
-
 
         while (opModeIsActive()) {
             robotSystem.update();
 
             if (gamepad1.yWasPressed())
-                robotSystem.resetImu();
+                robotSystem.resetIMU();
 
             if (gamepad1.leftStickButtonWasPressed())
                 slowmode = !slowmode;
@@ -51,7 +47,7 @@ public class Teleop extends LinearOpMode {
                     isRobotCentric);
 
             if (gamepad1.rightBumperWasPressed()){
-                robotSystem.toggleIntake();
+                robotSystem.startIntake();
             }
 
         }
