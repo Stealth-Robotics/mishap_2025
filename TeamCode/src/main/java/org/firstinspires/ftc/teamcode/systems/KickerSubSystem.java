@@ -1,26 +1,63 @@
-package org.firstinspires.ftc.teamcode.Systems;
+package org.firstinspires.ftc.teamcode.systems;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-public class KickerSubSystem {
-    Servo kickerServo;
-    private static final double KICK = 0.5;
-    private static final double KICK_READY = 0.2;
+/**
+ * Manages the kicker mechanism of the robot.
+ * This subsystem controls a servo to "kick" or interact with an object.
+ */
+public class KickerSubsystem {
 
+    /** The servo motor responsible for the kicking action. */
+    private final Servo kickerServo;
 
-    public KickerSubSystem(HardwareMap hardwareMap) {
-        kickerServo = hardwareMap.get(Servo.class, "kicker_servo");
+    /** The servo position when the kicker is in the 'up' or 'kicked' state. */
+    private static final double KICKER_UP_POSITION = 0.5;
+
+    /** The servo position when the kicker is in the 'down' or 'ready' state. */
+    private static final double KICKER_DOWN_POSITION = 0.2;
+
+    /**
+     * A small tolerance for comparing servo positions, as direct floating-point comparison can be unreliable.
+     * Direct comparison using '==' for doubles can fail due to precision issues.
+     */
+    private static final double SERVO_POSITION_TOLERANCE = 0.01;
+
+    /**
+     * Constructs the KickerSubsystem.
+     *
+     * @param hardwareMap The hardware map from the OpMode, used to initialize the servo.
+     */
+    public KickerSubsystem(HardwareMap hardwareMap) {
+        // Initialize the servo from the robot's hardware configuration.
+        this.kickerServo = hardwareMap.get(Servo.class, "kicker_servo");
+        // Set the kicker to its initial "ready" position upon creation.
+        setReady();
     }
 
-    public void slapItBack(){
-        kickerServo.setPosition(KICK_READY);
+    /**
+     * Moves the kicker to the "up" position to perform the kick action.
+     */
+    public void kickIt() {
+        kickerServo.setPosition(KICKER_UP_POSITION);
     }
 
-    public void kick() {
-        kickerServo.setPosition(KICK);
+    /**
+     * Moves the kicker to the "down" position, preparing it for a kick.
+     * This is the default or resting state.
+     */
+    public void setReady() {
+        kickerServo.setPosition(KICKER_DOWN_POSITION);
     }
-    public double getPosition(){
-        return kickerServo.getPosition();
+
+    /**
+     * Checks if the kicker is in the "ready" (down) position.
+     *
+     * @return true if the kicker servo is at or near the ready position, false otherwise.
+     */
+    public boolean isReady() {
+        // Compare the current servo position to the target 'down' position within a tolerance.
+        return Math.abs(kickerServo.getPosition() - KICKER_DOWN_POSITION) < SERVO_POSITION_TOLERANCE;
     }
 }
