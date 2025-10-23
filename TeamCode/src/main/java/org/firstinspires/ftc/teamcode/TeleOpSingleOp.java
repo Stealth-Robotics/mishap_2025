@@ -83,6 +83,7 @@ public class TeleOpSingleOp extends OpMode {
         robot.update();
         // Protect the robot from early start
         if (!isSpindexerInitialized) {
+            telemetryM.addLine("Waiting for Spindexer JJ!!!");
             isSpindexerInitialized = robot.initSpindexer();
             return;
         }
@@ -137,7 +138,6 @@ public class TeleOpSingleOp extends OpMode {
             }
         }
 
-        // State machine logic
         if (shootState == ShootState.PREPARING) {
             if (robot.getShootReady()) {
                 shootState = ShootState.READY;

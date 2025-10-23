@@ -13,6 +13,8 @@ import org.firstinspires.ftc.teamcode.paths.Path;
 import org.firstinspires.ftc.teamcode.paths.PathState;
 import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 
+import java.util.HashSet;
+
 /**
  * base auto class for decode 25/26
  */
@@ -20,8 +22,12 @@ public abstract class AutosDecode extends OpMode {
 
     public static final double MOTIF_TIMEOUT = 2000;
     public static final double AIM_TIMEOUT = 1000;
-    private final ElapsedTime actionTimer = new ElapsedTime();
-    private static final long INTAKE_DELAY = 1500; // 0.5 second delay
+    protected final ElapsedTime actionTimer = new ElapsedTime();
+    protected static final long INTAKE_DELAY = 1000; // delay to keep hood open
+    protected final HashSet<Integer> shootIndexes = new HashSet<>();
+    protected final HashSet<Integer> intakeIndexes = new HashSet<>();
+    protected int subActionStep = 0;
+    protected int lastPathIndex = -1;
 
     protected TelemetryManager telemetryM;
     protected Follower follower;
@@ -37,10 +43,9 @@ public abstract class AutosDecode extends OpMode {
 
     /**
      * Initializes the specific paths for this autonomous routine.
-     * @param robot The robot system instance.
      * @return The configured Path object.
      */
-    protected abstract Path initPaths(RobotSystem robot);
+    protected abstract Path initPaths();
 
     /**
      * Sets the alliance for this autonomous routine.
@@ -57,7 +62,7 @@ public abstract class AutosDecode extends OpMode {
 
         // Call abstract methods to get specific configurations
         setAlliance();
-        paths = initPaths(robot);
+        paths = initPaths();
 
         follower.setStartingPose(paths.getStartPose());
 
@@ -94,6 +99,7 @@ public abstract class AutosDecode extends OpMode {
 
         // Protect the robot from early start
         if (!isSpindexerReady) {
+            telemetryM.addLine("Waiting for Spindexer JJ!!!");
             isSpindexerReady = robot.initSpindexer();
             return;
         }
@@ -146,15 +152,68 @@ public abstract class AutosDecode extends OpMode {
      * This method can be overridden by subclasses to add more complex actions.
      */
     protected PathState checkIndexForAction() {
-        if (robot.isIntakeRunning()) {
-            // TODO: check color sensor etc.
-            robot.stopIntake();
-            return PathState.WAIT;
+        int curIndex = paths.getSegmentIndex();
+        if (curIndex != lastPathIndex) {
+            subActionStep =0;
+            lastPathIndex = curIndex;
+        }
+
+        if (shootIndexes.contains(curIndex)) {
+
+            switch (subActionStep) {
+                case 0:
+                    // set the subindex to the correct next step
+                    subActionStep = startAiming() ? 2 : 1;
+                    return PathState.WAIT;
+                case 1:
+                    if (doAiming()) {
+                        ++subActionStep;
+                    }
+                    return PathState.WAIT;
+                case 2:
+                    if (robot.getShootReady()) {
+                        // TODO: change this to a shoot all artifacts
+                        if (robot.shootArtifact()) {
+                            return PathState.CONTINUE;
+                        }
+                    } else {
+                        robot.setReadyShoot();
+                        return PathState.WAIT;
+                    }
+
+                    break;
+                default:
+                    subActionStep = -1;
+                    return PathState.CONTINUE;
+            }
+        } else if (intakeIndexes.contains(curIndex)) {
+           switch (subActionStep) {
+               case 0:
+                   actionTimer.reset();
+                   ++subActionStep;
+                   return PathState.WAIT;
+               case 1:
+                    return doIntakeAction() ? PathState.CONTINUE : PathState.WAIT;
+           }
         }
 
         // Default implementation can be empty or handle common actions.
         // Specific actions are now in the overridden method in the child class.
         return PathState.IDLE;
+    }
+
+    protected boolean doIntakeAction()
+    {
+        // here we will want to check the ColorSensor and see if we intake or not
+        if (stateTimer.milliseconds() > INTAKE_DELAY) {
+            if (!robot.isIntakeRunning())
+                return true;
+
+            robot.stopIntake();
+            return true;
+        }
+
+        return false;
     }
 
     protected boolean findMotifOrTimeout() {

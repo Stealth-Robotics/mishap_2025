@@ -15,7 +15,7 @@ public class ColorSensorSubSystem {
     RevColorSensorV3 colorSensor;
     Telemetry telemetry;
     TelemetryManager telemetryM;
-
+// RED, BLUE, GREEN, Distance
 private double[] greanArtifactColorsHigh = {0.0023, 0.011, 0.0137, 40};
 
 
