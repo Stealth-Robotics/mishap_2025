@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.systems;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.common.MotorVelocityReader;
 
@@ -17,6 +18,11 @@ public class ShooterSubsystem {
 
     private final MotorVelocityReader rightVelocityReader;
     private final MotorVelocityReader leftVelocityReader;
+
+    private final ElapsedTime minShootTimer = new ElapsedTime();
+    private static final double MIN_SHOOT_TIME_MS = 1000;
+    private static final double MAX_SHOOT_TIME_MS = 5000;
+
 
 
     // --- Constants ---
@@ -77,7 +83,7 @@ public class ShooterSubsystem {
      * This method includes safety checks to ensure the RPM is within the valid range.
      * @param rpm The target revolutions per minute.
      */
-    private void setRpms(double rpm) {
+    private void setRpm(double rpm) {
         // Clamp the RPM to the allowable min/max range to prevent motor damage or unexpected behavior.
         if (rpm > MAX_RPM) {
             rpm = MAX_RPM;
@@ -95,14 +101,16 @@ public class ShooterSubsystem {
      * Runs the shooter motors at the currently selected target RPM (near or far).
      */
     public void runShooter() {
-        setRpms(isNear ? targetRpmNear : targetRpmFar);
+
+        setRpm(isNear ? targetRpmNear : targetRpmFar);
+        minShootTimer.reset();
     }
 
     /**
      * Stops the shooter motors.
      */
     public void stop(){
-        setRpms(0); // Setting RPM to 0 is the correct way to stop motors in velocity control mode.
+        setRpm(0); // Setting RPM to 0 is the correct way to stop motors in velocity control mode.
     }
 
     /**
@@ -117,7 +125,7 @@ public class ShooterSubsystem {
         targetRpmNear += RPM_CHANGE_AMOUNT;
         // If the shooter is already running and set to near, update the speed instantly.
         if(isRunning() && isNear) {
-            setRpms(targetRpmNear);
+            setRpm(targetRpmNear);
         }
     }
 
@@ -131,7 +139,7 @@ public class ShooterSubsystem {
 
         targetRpmNear -= RPM_CHANGE_AMOUNT;
         if(isRunning() && isNear) {
-            setRpms(targetRpmNear);
+            setRpm(targetRpmNear);
         }
     }
 
@@ -146,7 +154,7 @@ public class ShooterSubsystem {
         targetRpmFar += RPM_CHANGE_AMOUNT;
         // If the shooter is already running and set to far, update the speed instantly.
         if (isRunning() && !isNear) {
-            setRpms(targetRpmFar);
+            setRpm(targetRpmFar);
         }
     }
 
@@ -160,7 +168,7 @@ public class ShooterSubsystem {
 
         targetRpmFar -= RPM_CHANGE_AMOUNT;
         if (isRunning() && !isNear) {
-            setRpms(targetRpmFar);
+            setRpm(targetRpmFar);
         }
     }
 
@@ -183,8 +191,15 @@ public class ShooterSubsystem {
             return false;
         }
 
+        // Check if the minimum shoot time has elapsed.
+        double curMs = minShootTimer.milliseconds();
+        if (curMs < MIN_SHOOT_TIME_MS) {
+            return false;
+        }
+
         double error = Math.abs(currentRpm - getTargetRpm());
-        return error <= VELOCITY_TOLERANCE;
+        // if we hit target or we run out of time shoot it. Could be low on battery
+        return (error <= VELOCITY_TOLERANCE || curMs > MAX_SHOOT_TIME_MS);
     }
 
     /**

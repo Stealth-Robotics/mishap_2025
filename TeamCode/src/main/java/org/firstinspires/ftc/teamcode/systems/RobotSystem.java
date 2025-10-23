@@ -16,6 +16,9 @@ import org.firstinspires.ftc.teamcode.common.Motif;
 import org.firstinspires.ftc.teamcode.common.Pipeline;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
+import java.util.Deque;
+import java.util.LinkedList;
+
 /**
  * Container of all subsystems for the robot and wrapper for all controls.
  * This class manages the robot's overall state and coordinates actions between various subsystems
@@ -68,6 +71,7 @@ public class RobotSystem {
     }
 
     private SystemState currentState = SystemState.IDLE;
+    private final Deque<SystemState> commandQueue = new LinkedList<>();
     private final ElapsedTime stateTimer = new ElapsedTime();
 
     //==================================================================================================
@@ -427,6 +431,7 @@ public class RobotSystem {
                 if (stateTimer.milliseconds() >= STOP_INTAKE_DELAY_MS) {
                     sweeperSys.stopIntake();
                     spindexerSys.setBrake();
+                    // TODO: Check the ColorSensorSubsystem if we have something
                     spindexerSys.advanceOneSlot();
                     currentState = SystemState.IDLE;
                 }
@@ -441,6 +446,7 @@ public class RobotSystem {
                     }
                     kickerSys.isReady();
                 }
+
                 // After a longer delay, advance the spindexer to the next slot and return to IDLE.
                 if (stateTimer.milliseconds() >= SHOOT_SPINDEXER_ADVANCE_DELAY_MS) {
                     spindexerSys.advanceOneSlot();
