@@ -30,13 +30,9 @@ public class Constants {
     public static final PinpointConstants pinpointConstants = new PinpointConstants()
             .distanceUnit(DistanceUnit.MM)
             .strafePodX(strafePodOffsetMm)
-<<<<<<< HEAD
             .forwardPodY(forwardPodOffsetMm)
             .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED)
             .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED);
-=======
-            .forwardPodY(forwardPodOffsetM);
->>>>>>> main
 
     public static final MecanumConstants mecanumConstants = new MecanumConstants()
             .leftFrontMotorName(leftFrontDrive)

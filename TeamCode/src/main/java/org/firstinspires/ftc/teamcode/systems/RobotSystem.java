@@ -42,7 +42,6 @@ public class RobotSystem {
     private static final PIDFCoefficients HEADING_COEFFICIENTS
             = new PIDFCoefficients(0.018, 0.0, 0.001, 0.02);
 
-<<<<<<< HEAD
     /** Delay in milliseconds to wait before stopping the intake motors after intake is complete. */
     private static final long STOP_INTAKE_DELAY_MS = 300;
 
@@ -66,17 +65,6 @@ public class RobotSystem {
         STOPPING_INTAKE,    // A transitional state to properly stop the intake sequence.
         PREPPING_SHOOT,     // Spinning up the shooter and positioning the hood.
         SHOOTING            // A transitional state to fire a projectile and advance the spindexer.
-=======
-    public RobotSystem(HardwareMap hardwareMap) {
-        this.hardwareMap = hardwareMap;
-        this.sweeperSys = new SweeperSubSystem(hardwareMap);
-        this.hoodSys = new HoodSubSystem(hardwareMap);
-        this.kickerSys = new KickerSubSystem(hardwareMap);
-        this.shooterSys = new ShooterSubSystem(hardwareMap);
-        this.spindexerSys = new SpindexerSubSystem(hardwareMap);
-        this.follower = Constants.createFollower(hardwareMap);
-
->>>>>>> main
     }
 
     private SystemState currentState = SystemState.IDLE;
@@ -152,7 +140,6 @@ public class RobotSystem {
     public void update() {
         // Always update critical subsystems
         follower.update();
-<<<<<<< HEAD
         limelightSys.update();
         shooterSys.update();
 
@@ -203,8 +190,6 @@ public class RobotSystem {
         follower.setTeleOpDrive(y * slowMoFactor, x * slowMoFactor, turn, robotCentric);
         // It's recommended to call update after setting power for immediate effect.
         follower.update();
-=======
->>>>>>> main
     }
 
     public boolean tryAimAtTarget(double tolerance, long latency) {
@@ -367,7 +352,6 @@ public class RobotSystem {
         return follower;
     }
 
-<<<<<<< HEAD
     //==================================================================================================
     // Passthrough and Utility Methods
     //==================================================================================================
@@ -511,6 +495,3 @@ public class RobotSystem {
                 : 0;
     }
 }
-=======
-}
->>>>>>> main
