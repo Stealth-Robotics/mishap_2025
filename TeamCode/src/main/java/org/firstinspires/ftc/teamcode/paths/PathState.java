@@ -8,5 +8,8 @@ public enum PathState {
     BUSY,
     WAIT,
     CONTINUE,
+    READ_MOTIF,
+    SET_TARGET,
+    AIMING,
     STOP
 }

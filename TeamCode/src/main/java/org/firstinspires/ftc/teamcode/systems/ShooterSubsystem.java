@@ -22,8 +22,8 @@ public class ShooterSubsystem {
     // --- Constants ---
     public static final double MAX_RPM = 5200;
     public static final double MIN_RPM = 0;
-    public static final double DEFAULT_RPM_FAR = 4500;
-    public static final double DEFAULT_RPM_NEAR = 3000;
+    public static final double DEFAULT_RPM_FAR = 4800;
+    public static final double DEFAULT_RPM_NEAR = 4200;
     public static final double RPM_CHANGE_AMOUNT = 100;
     private static final double VELOCITY_TOLERANCE = 50; // The allowed RPM error in which the shooter is considered "ready".
 
@@ -43,7 +43,6 @@ public class ShooterSubsystem {
     private double targetRpmNear = DEFAULT_RPM_NEAR;
     private boolean isNear = false;
     private double currentRpm = 0;
-
 
     public ShooterSubsystem(HardwareMap hardwareMap) {
         rightShooter = hardwareMap.get(DcMotorEx.class, "right_shoot_motor");

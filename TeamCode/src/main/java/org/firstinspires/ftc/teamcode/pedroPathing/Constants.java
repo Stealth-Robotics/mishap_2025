@@ -19,10 +19,10 @@ public class Constants {
     public static final String rightFrontDrive = "front_right_drive";
     public static final String leftBackDrive = "rear_left_drive";
     public static final String rightBackDrive = "rear_right_drive";
-    private static final double forwardPodOffsetM = -76;
-    private static final double strafePodOffsetMm = 161;
+    private static final double forwardPodOffsetMm = 82.55;
+    private static final double strafePodOffsetMm = 165.1;
 
-    public static double mass = 10.1;
+    public static double mass = 11.1;
 
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(mass);
@@ -30,7 +30,7 @@ public class Constants {
     public static final PinpointConstants pinpointConstants = new PinpointConstants()
             .distanceUnit(DistanceUnit.MM)
             .strafePodX(strafePodOffsetMm)
-            .forwardPodY(forwardPodOffsetM)
+            .forwardPodY(forwardPodOffsetMm)
             .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED)
             .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED);
 
