@@ -1,7 +1,9 @@
+
 repositories {
     mavenCentral()
     google() // Needed for androidx
     maven { url = "https://mymaven.bylazar.com/releases" }
+    maven { url = "https://software-metadata.revrobotics.com/REVLib-2024.json" }
 }
 
 dependencies {
@@ -15,6 +17,7 @@ dependencies {
     implementation 'org.firstinspires.ftc:FtcCommon:11.0.0'
     implementation 'org.firstinspires.ftc:Vision:11.0.0'
     implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'org.ftclib.ftclib:core:2.1.1'
 
     implementation("com.pedropathing:ftc:2.0.3") {
         exclude group: "com.acmerobotics.dashboard"
@@ -29,3 +32,11 @@ dependencies {
     }
 }
 
+    implementation("com.pedropathing:telemetry:1.0.0") {
+        exclude group: "com.acmerobotics.dashboard"
+    }
+
+    implementation("com.bylazar:fullpanels:1.0.6") {
+        exclude group: "com.acmerobotics.slothboard"
+    }
+}
