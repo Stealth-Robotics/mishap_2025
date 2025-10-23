@@ -31,12 +31,3 @@ dependencies {
         exclude group: "com.acmerobotics.slothboard"
     }
 }
-
-    implementation("com.pedropathing:telemetry:1.0.0") {
-        exclude group: "com.acmerobotics.dashboard"
-    }
-
-    implementation("com.bylazar:fullpanels:1.0.6") {
-        exclude group: "com.acmerobotics.slothboard"
-    }
-}
