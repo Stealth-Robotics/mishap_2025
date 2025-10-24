@@ -96,12 +96,42 @@ public class ColorSensorSubSystem {
         * Green: 0.0071-0.0073  0.011-0.108
         * gain: 12
         */
+        
 
         return DetectedColor.UNKNOWN;
 
 
 
 
+    }
+
+    //This was done with no mentor and with the help of AI so there's probably a bunch of errors
+    public DetectedColor getDetectedColor() {
+        NormalizedRGBA colors = colorSensor.getNormalizedColors();
+        double distance = colorSensor.getDistance(DistanceUnit.MM);
+
+        float r = colors.red / colors.alpha;
+        float g = colors.green / colors.alpha;
+        float b = colors.blue / colors.alpha;
+
+        // Example thresholds — tweak these based on testing
+        if (distance > 45 && distance < 55 &&
+                r > 0.005 && r < 0.006 &&
+                b > 0.013 && b < 0.014 &&
+                g > 0.008 && g < 0.009) {
+            return DetectedColor.PURPLE;
+        }
+
+        else if (distance > 40 && distance < 48 &&
+                r > 0.002 && r < 0.003 &&
+                b > 0.005 && b < 0.006 &&
+                g > 0.006 && g < 0.008) {
+            return DetectedColor.GREEN;
+        }
+
+        else {
+            return DetectedColor.UNKNOWN;
+        }
     }
 
 }
