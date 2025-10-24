@@ -208,7 +208,7 @@ public class ShooterSubsystem {
      */
     public boolean isRunning() {
         // A motor's velocity might not be exactly 0 due to physics, so check against a small threshold.
-        return rightShooter.getVelocity() > 1 || leftShooter.getVelocity() > 1;
+        return rightShooter.getVelocity() > 100 || leftShooter.getVelocity() > 100;
     }
 
     /**

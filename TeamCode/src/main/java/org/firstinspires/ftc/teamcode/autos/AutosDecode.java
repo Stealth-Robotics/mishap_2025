@@ -21,9 +21,9 @@ import java.util.HashSet;
 public abstract class AutosDecode extends OpMode {
 
     public static final double MOTIF_TIMEOUT = 2000;
-    public static final double AIM_TIMEOUT = 1000;
+    public static final double AIM_TIMEOUT = 1500;
     protected final ElapsedTime actionTimer = new ElapsedTime();
-    protected static final long INTAKE_DELAY = 1000; // delay to keep hood open
+    protected static final long INTAKE_DELAY = 5000; // delay to keep hood open
     protected final HashSet<Integer> shootIndexes = new HashSet<>();
     protected final HashSet<Integer> intakeIndexes = new HashSet<>();
     protected int subActionStep = 0;
@@ -52,8 +52,10 @@ public abstract class AutosDecode extends OpMode {
      */
     protected abstract void setAlliance();
 
-    // --- Core Logic Moved from AutoFarBlue1 ---
 
+    /**
+     * Called once when the op mode is initialized.
+     */
     @Override
     public void init() {
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
@@ -72,21 +74,27 @@ public abstract class AutosDecode extends OpMode {
         robot.update();
     }
 
+    /**
+     * Called repeatively after init but before start.
+     */
     @Override
     public void init_loop() {
         robot.update();
         if (!isSpindexerReady) {
-            isSpindexerReady = robot.initSpindexer();
+            isSpindexerReady = robot.doInitSpindexer();
         }
 
         // TODO: Use this to get robot position from limelight while waiting
     }
 
+    /**
+     * Called once when the start button is pressed.
+     */
     @Override
     public void start() {
         robot.update();
+        // TODO: Any addtional 1 time actions when start button is pressed
 
-        // TODO: Can be overridden for start-specific actions
         stateTimer.reset();
     }
 
@@ -100,13 +108,13 @@ public abstract class AutosDecode extends OpMode {
         // Protect the robot from early start
         if (!isSpindexerReady) {
             telemetryM.addLine("Waiting for Spindexer JJ!!!");
-            isSpindexerReady = robot.initSpindexer();
+            isSpindexerReady = robot.doInitSpindexer();
             return;
         }
 
         switch (pathState) {
             case READ_MOTIF:
-                if (!this.findMotifOrTimeout()) {
+                if (!this.doMotifOrTimeout()) {
                     return;
                 }
 
@@ -128,6 +136,8 @@ public abstract class AutosDecode extends OpMode {
             case BUSY:
                 if (!follower.isBusy()) {
                     pathState = PathState.IDLE;
+                }else {
+                    // TODO: add code here to break follower when artifact is detected
                 }
 
                 break;
@@ -166,18 +176,18 @@ public abstract class AutosDecode extends OpMode {
                     subActionStep = startAiming() ? 2 : 1;
                     return PathState.WAIT;
                 case 1:
-                    if (doAiming()) {
+                    if (doAimingOrTimeout()) {
                         ++subActionStep;
                     }
                     return PathState.WAIT;
                 case 2:
                     if (robot.getShootReady()) {
                         // TODO: change this to a shoot all artifacts
-                        if (robot.shootArtifact()) {
+                        if (robot.tryShoot()) {
                             return PathState.CONTINUE;
                         }
                     } else {
-                        robot.setReadyShoot();
+                        robot.tryReadyShoot();
                         return PathState.WAIT;
                     }
 
@@ -206,22 +216,21 @@ public abstract class AutosDecode extends OpMode {
     {
         // here we will want to check the ColorSensor and see if we intake or not
         if (stateTimer.milliseconds() > INTAKE_DELAY) {
-            if (!robot.isIntakeRunning())
+            if (!robot.isSpindexerBusy())
                 return true;
 
             robot.stopIntake();
-            return true;
         }
 
         return false;
     }
 
-    protected boolean findMotifOrTimeout() {
+    protected boolean doMotifOrTimeout() {
         if (stateTimer.milliseconds() > MOTIF_TIMEOUT) {
             return true;
         }
 
-        return robot.readMotif();
+        return robot.doReadMotif();
     }
 
     /**
@@ -231,19 +240,19 @@ public abstract class AutosDecode extends OpMode {
      */
     public boolean startAiming() {
         stateTimer.reset();
-        return robot.tryAimAtTarget(1, 500);
+        return robot.doAimAtTarget(1, 500);
     }
 
     /**
      * Continues the aiming operation until the timeout is reached.
      * @return true for done aiming otherwise false
      */
-    protected boolean doAiming() {
+    protected boolean doAimingOrTimeout() {
         if (stateTimer.milliseconds() > AIM_TIMEOUT) {
             return true;
         }
 
-        return robot.tryAimAtTarget(1, 500);
+        return robot.doAimAtTarget(1, 500);
     }
 
     private PathState updateFollowerState() {

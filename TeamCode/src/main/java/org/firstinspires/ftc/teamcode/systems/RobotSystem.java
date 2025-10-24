@@ -52,7 +52,7 @@ public class RobotSystem {
     private static final long SHOOT_KICKER_RESET_DELAY_MS = 200;
 
     /** Delay in milliseconds to wait before advancing the spindexer to the next slot after shooting. */
-    private static final long SHOOT_SPINDEXER_ADVANCE_DELAY_MS = 500;
+    private static final long SHOOT_SPINDEXER_ADVANCE_DELAY_MS = SHOOT_KICKER_RESET_DELAY_MS * 2;
 
     //==================================================================================================
     // State Machine
@@ -71,7 +71,7 @@ public class RobotSystem {
     }
 
     private SystemState currentState = SystemState.IDLE;
-    private final Deque<SystemState> commandQueue = new LinkedList<>();
+    //private final Deque<SystemState> commandQueue = new LinkedList<>();
     private final ElapsedTime stateTimer = new ElapsedTime();
 
     //==================================================================================================
@@ -129,7 +129,7 @@ public class RobotSystem {
      *
      * @return true when the spindexer is successfully indexed and centered, otherwise false.
      */
-    public boolean initSpindexer() {
+    public boolean doInitSpindexer() {
         return spindexerSys.doInitPosition();
     }
 
@@ -196,7 +196,7 @@ public class RobotSystem {
         follower.update();
     }
 
-    public boolean tryAimAtTarget(double tolerance, long latency) {
+    public boolean doAimAtTarget(double tolerance, long latency) {
         limelightSys.getLastResult(); // Force an update of the Limelight data.
         Pose llPose = limelightSys.getAverageTxTy(latency); // Get averaged target position.
         double turn = 0;
@@ -227,7 +227,7 @@ public class RobotSystem {
      *
      * @return true if a valid motif pattern has been successfully read, otherwise false.
      */
-    public boolean readMotif() {
+    public boolean doReadMotif() {
         if (limelightSys.getCurrentPipeline() != Pipeline.APRILTAG_MOTIF) {
             if (limelightSys.setPipeline(Pipeline.APRILTAG_MOTIF)) {
                 // Waiting for the pipeline to switch, not yet ready to read.
@@ -296,13 +296,16 @@ public class RobotSystem {
     /**
      * Prepares the robot to shoot by spinning up the shooter wheels and setting the hood angle.
      */
-    public void setReadyShoot() {
+    public boolean tryReadyShoot() {
         if (currentState == SystemState.IDLE) {
             currentState = SystemState.PREPPING_SHOOT;
             kickerSys.isReady();
             hoodSys.hoodShoot();
             shooterSys.runShooter();
+            return true;
         }
+
+        return currentState == SystemState.PREPPING_SHOOT;
     }
 
 
@@ -312,7 +315,7 @@ public class RobotSystem {
      *
      * @return true if the shot was successfully initiated, false otherwise.
      */
-    public boolean shootArtifact() {
+    public boolean tryShoot() {
         if (isShootReady) {
             currentState = SystemState.SHOOTING;
             stateTimer.reset();
@@ -334,8 +337,11 @@ public class RobotSystem {
      *
      * @return true if the robot state is INTAKING or REVERSING_INTAKE.
      */
-    public boolean isIntakeRunning() {
-        return currentState == SystemState.INTAKING || currentState == SystemState.REVERSING_INTAKE;
+    public boolean isSpindexerBusy() {
+        return currentState == SystemState.INTAKING
+                || currentState == SystemState.REVERSING_INTAKE
+                || currentState == SystemState.STOPPING_INTAKE
+                || !spindexerSys.isReady();
     }
 
     /**
@@ -444,7 +450,8 @@ public class RobotSystem {
                     if (!burstFire) {
                         shooterSys.stop();
                     }
-                    kickerSys.isReady();
+
+                    kickerSys.setReady();
                 }
 
                 // After a longer delay, advance the spindexer to the next slot and return to IDLE.
@@ -468,10 +475,9 @@ public class RobotSystem {
      */
     private void displayTelemetry() {
         // TODO: remove unneeded output
-        telemetryM.addData("Robot State", currentState.name());
         telemetryM.addData("Shooter RPM", shooterSys.getCurrentRpm());
         telemetryM.addData("Target RPM", shooterSys.getTargetRpm());
-        //telemetryM.addData("Switch Pressed:", spindexerSys.isIndexSwitchPressed());
+        telemetryM.addData("Robot State", currentState.name());
         //telemetryM.addData("Spindexer Raw Position", spindexerSys.getCurrentPosition());
         //telemetryM.addData("Spindexer Slot", spindexerSys.getCurrentSlot());
         //telemetryM.addData("Shoot Ready:", isShootReady);

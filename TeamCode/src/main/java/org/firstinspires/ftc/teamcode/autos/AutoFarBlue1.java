@@ -16,13 +16,6 @@ import java.util.HashSet;
 @Autonomous(name = "Far Blue 1", group = "Autonomous", preselectTeleOp = "_TeleOp Driver Only")
 @Configurable
 public class AutoFarBlue1 extends AutosDecode {
-    // Timer for handling delays
-
-
-    // Define HashSets for your action indices
-    //protected final HashSet<Integer> shootIndexes = new HashSet<>(Arrays.asList(1, 7));
-    //protected final HashSet<Integer> intakeIndexes = new HashSet<>(Arrays.asList(3, 4, 5));
-
 
     @Override
     protected Path initPaths() {
@@ -47,9 +40,8 @@ public class AutoFarBlue1 extends AutosDecode {
             return baseState; // The base class is handling something
         }
 
-        // Add any specific actions here for the auto here
+        // TODO: Add any specific actions here for the auto here
         // shooting and intaking are in in the base class
-
 
         return PathState.IDLE;
     }
