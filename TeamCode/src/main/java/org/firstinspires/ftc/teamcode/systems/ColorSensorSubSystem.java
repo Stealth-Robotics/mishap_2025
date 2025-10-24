@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.systems;
 
 
-import android.graphics.ColorMatrix;
+
 
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
@@ -17,14 +17,34 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
     the new class will take min/max color values and distance then just have a match method to check
  */
 public class ColorSensorSubSystem {
-    RevColorSensorV3 colorSensor;
-    Telemetry telemetry;
-    TelemetryManager telemetryM;
+    private final RevColorSensorV3 colorSensor;
+    private final TelemetryManager telemetryM;
 
     // TODO: instead of an array, use a matrix (ask Jeff)
 
-    // RED, BLUE, GREEN, Distance
-    //private double[] greanArtifactColorsHigh = {0.0023, 0.011, 0.0137, 40};
+    //                                                    redHigh, redLow, greenHigh, GreenLow, blueHigh, BlueLow
+    private static final double[] greenArtifactColors = { 0.258,    0.172,   0.688,    0.516,    0.516,     0.43 };
+
+
+    private double[] purpleArtifactColors = { 0.258,    0.172,   0.688,    0.516,    0.516,     0.43 };
+
+    // Example thresholds — tweak these based on testing
+//        if (distance > 45 && distance < 55 &&
+//    r > 0.43 && r < 0.516 &&
+//    b > 1.118 && b < 1.204 &&
+//    g > 0.688 && g < 0.774) {
+//        return DetectedColor.PURPLE;
+//    }
+//
+//        else if (distance > 40 && distance < 48 &&
+//    r > 0.172 && r < 0.258 &&
+//    b > 0.43 && b < 0.516 &&
+//    g > 0.516 && g < 0.688) {
+//        return DetectedColor.GREEN;
+//    }
+
+    private static final double MAX_DISTANCE = 65;
+    private static final double MIN_DISTANCE = 20;
 
     // TODO: Move this either into its own file or in the ColorMatrix class under common
     public enum DetectedColor {
@@ -37,9 +57,8 @@ public class ColorSensorSubSystem {
 
     public ColorSensorSubSystem(HardwareMap hardwareMap, Telemetry telemetry) {
         colorSensor = hardwareMap.get(RevColorSensorV3.class, "color_sensor");
-        this.telemetry = telemetry;
         this.telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
-        colorSensor.setGain(12);
+        colorSensor.setGain(100);
 
     }
 
@@ -47,23 +66,60 @@ public class ColorSensorSubSystem {
         double red = colorSensor.getNormalizedColors().red;
         double blue = colorSensor.getNormalizedColors().blue;
         double green = colorSensor.getNormalizedColors().green;
-        telemetry.addData("Distance: ", colorSensor.getDistance(DistanceUnit.MM));
-        telemetry.addData("Color red: ", red);
-        telemetry.addData("color blue: ", blue);
-        telemetry.addData("color green: ", green);
-        telemetry.addData("gain", colorSensor.getGain());
-
-//0.0009-red
+        telemetryM.addData("Distance: ", colorSensor.getDistance(DistanceUnit.MM));
+        telemetryM.addData("Color red: ", red);
+        telemetryM.addData("color blue: ", blue);
+        telemetryM.addData("color green: ", green);
+        telemetryM.addData("gain", colorSensor.getGain());
 
     }
 
-    public DetectedColor getDetectedColor(){
+    public DetectedColor getDetectedColor() {
         NormalizedRGBA colors = colorSensor.getNormalizedColors();
+        double distance = colorSensor.getDistance(DistanceUnit.MM);
+        if (MIN_DISTANCE < distance || MAX_DISTANCE > distance)
+            return DetectedColor.NONE;
 
-        float normRed, normGreen, normBlue;
-        normRed = colors.red / colors.alpha;
-        normGreen = colors.green / colors.alpha;
-        normBlue = colors.blue / colors.alpha;
+        if (isMatch(colors,
+                greenArtifactColors[0],
+                greenArtifactColors[1],
+                greenArtifactColors[2],
+                greenArtifactColors[3],
+                greenArtifactColors[4],
+                greenArtifactColors[4])) {
+            return DetectedColor.GREEN;
+        }
+
+        if (isMatch(colors,
+                purpleArtifactColors[0],
+                purpleArtifactColors[1],
+                purpleArtifactColors[2],
+                purpleArtifactColors[3],
+                purpleArtifactColors[4],
+                purpleArtifactColors[4])) {
+            return DetectedColor.PURPLE;
+
+        }
+
+        return DetectedColor.UNKNOWN;
+    }
+
+    private static boolean isMatch(
+            NormalizedRGBA colors,
+            double redHigh,
+            double redLow,
+            double greenHigh,
+            double greenLow,
+            double blueHigh,
+            double blueLow) {
+        float r = colors.red / colors.alpha;
+        float g = colors.green / colors.alpha;
+        float b = colors.blue / colors.alpha;
+
+        return (g <= greenHigh && g >= greenLow
+        && r <= redHigh && r >= redLow
+        && b <= blueHigh && b >= blueLow);
+    }
         // TODO Code to check color range
         /*
         Color values:
@@ -97,11 +153,7 @@ public class ColorSensorSubSystem {
         * gain: 12
         */
 
-        return DetectedColor.UNKNOWN;
-
 
 
 
     }
-
-}

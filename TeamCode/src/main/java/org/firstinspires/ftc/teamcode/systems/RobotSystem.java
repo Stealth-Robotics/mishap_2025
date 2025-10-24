@@ -84,6 +84,8 @@ public class RobotSystem {
     private final LimelightSubsystem limelightSys;
     private final Follower follower;
 
+    private final ColorSensorSubSystem colorSensorSys;
+
     // --- Control and Telemetry ---
     private static final PIDFController headingController = new PIDFController(HEADING_COEFFICIENTS);
     private final TelemetryManager telemetryM;
@@ -111,6 +113,8 @@ public class RobotSystem {
         this.spindexerSys = new SpindexerSubsystem(hardwareMap);
         this.limelightSys = new LimelightSubsystem(hardwareMap);
         this.follower = Constants.createFollower(hardwareMap);
+        this.colorSensorSys = new ColorSensorSubSystem(hardwareMap, telemetry);
+
 
         this.telemetry = telemetry;
         this.telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
@@ -143,6 +147,7 @@ public class RobotSystem {
         follower.update();
         limelightSys.update();
         shooterSys.update();
+        colorSensorSys.update();
 
         // Update the overall shoot readiness flag based on subsystem states.
         this.isShootReady = (currentState == SystemState.IDLE || currentState == SystemState.PREPPING_SHOOT)
