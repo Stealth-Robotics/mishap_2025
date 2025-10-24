@@ -7,6 +7,7 @@ import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.systems.ColorSensorSubSystem;
 import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 
 @TeleOp (name = "_TeleOp Driver Only", group = "Main")
@@ -218,25 +219,5 @@ public class TeleOpSingleOp extends OpMode {
     public void stop() {
         // Ensure all motors and systems are stopped gracefully.
         telemetryM.addData("Robot", "Stopped");
-    }
-
-
-    
-
-    //save me, idk what I'm doing. There might be errors in this too
-
-    ColorSensorSubSystem colorSensorSubSystem;
-
-    @Override
-    public void init() {
-        colorSensorSubSystem = new ColorSensorSubSystem(hardwareMap, telemetry);
-    }
-
-    @Override
-    public void loop() {
-        colorSensorSubSystem.update();
-        ColorSensorSubSystem.DetectedColor color = colorSensorSubSystem.getDetectedColor();
-        telemetry.addData("Detected Color", color);
-        telemetry.update();
     }
 }
