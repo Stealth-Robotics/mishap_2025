@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.systems;
 
 
+import android.graphics.ColorMatrix;
+
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
@@ -11,20 +13,20 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
+/* TODO: Make a ColorMatrix class for holding the color values for each color
+    the new class will take min/max color values and distance then just have a match method to check
+ */
 public class ColorSensorSubSystem {
     RevColorSensorV3 colorSensor;
     Telemetry telemetry;
     TelemetryManager telemetryM;
 
-private double[] greanArtifactColorsHigh = {0.0023, 0.011, 0.0137, 40};
+    // TODO: instead of an array, use a matrix (ask Jeff)
 
+    // RED, BLUE, GREEN, Distance
+    //private double[] greanArtifactColorsHigh = {0.0023, 0.011, 0.0137, 40};
 
-
-
-    //private final Color kGreenTarget = new Color().green();
-
-   // private ColorMatch
-
+    // TODO: Move this either into its own file or in the ColorMatrix class under common
     public enum DetectedColor {
         UNKNOWN,
         NONE,
@@ -40,8 +42,6 @@ private double[] greanArtifactColorsHigh = {0.0023, 0.011, 0.0137, 40};
         colorSensor.setGain(12);
 
     }
-
-
 
     public void update(){
         double red = colorSensor.getNormalizedColors().red;

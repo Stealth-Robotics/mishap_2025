@@ -225,28 +225,15 @@ public class SpindexerSubsystem {
      * Advances the spindexer by one slot from its current target position.
      */
     public void advanceOneSlot() {
-        int newTarget = this.lastTargetPosition - (int)Math.round(TICKS_PER_SLOT);
-        this.lastTargetPosition = newTarget;
-
-        spindexer.setTargetPosition(newTarget);
-        spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spindexer.setVelocity(SPINDEXER_VELOCITY_LIMIT);
-        currentSlot = (currentSlot + 1) % NUMBER_OF_SLOTS;
+        rotateToSlot((currentSlot + 1) % NUMBER_OF_SLOTS);
     }
 
     /**
      * Moves the spindexer back by one slot from its current target position.
      */
     public void decreaseOneSlot() {
-        int newTarget = this.lastTargetPosition + (int)Math.round(TICKS_PER_SLOT);
-        this.lastTargetPosition = newTarget;
-
-        spindexer.setTargetPosition(newTarget);
-        spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spindexer.setVelocity(SPINDEXER_VELOCITY_LIMIT);
-
-        // This correctly handles wrapping for negative numbers (e.g., (0 - 1 + 3) % 3 = 2).
-        currentSlot = (currentSlot - 1 + NUMBER_OF_SLOTS) % NUMBER_OF_SLOTS;
+        //Wraps backwards
+        rotateToSlot((currentSlot - 1 + NUMBER_OF_SLOTS) % NUMBER_OF_SLOTS);
     }
 
     /**

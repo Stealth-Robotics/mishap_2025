@@ -12,8 +12,8 @@ import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 @TeleOp (name = "_TeleOp Driver Only", group = "Main")
 public class TeleOpSingleOp extends OpMode {
 
-    private boolean robotCentric = false;
-    private boolean slowMode = false;
+    private boolean isRobotCentric = false;
+    private boolean isSlowMo = false;
     private boolean autoAim = false;
 
     // State machine for shooting process
@@ -53,7 +53,7 @@ public class TeleOpSingleOp extends OpMode {
 
         // Initialize the spindexer, ensuring it only runs until it's ready.
         if (!isSpindexerInitialized) {
-            isSpindexerInitialized = robot.initSpindexer();
+            isSpindexerInitialized = robot.doInitSpindexer();
             telemetryM.addData("Spindexer", "Initializing...");
         } else {
             telemetryM.addData("Spindexer", "Ready!");
@@ -83,7 +83,8 @@ public class TeleOpSingleOp extends OpMode {
         robot.update();
         // Protect the robot from early start
         if (!isSpindexerInitialized) {
-            isSpindexerInitialized = robot.initSpindexer();
+            telemetryM.addLine("Waiting for Spindexer JJ!!!");
+            isSpindexerInitialized = robot.doInitSpindexer();
             return;
         }
 
@@ -100,10 +101,10 @@ public class TeleOpSingleOp extends OpMode {
      */
     private void handleDriveControls() {
         if (gamepad1.leftStickButtonWasPressed()) {
-            robotCentric = !robotCentric;
+            isRobotCentric = !isRobotCentric;
         }
         if (gamepad1.rightStickButtonWasPressed()) {
-            slowMode = !slowMode;
+            isSlowMo = !isSlowMo;
         }
 
         // Auto-aim is active only while the X button is held down
@@ -113,11 +114,12 @@ public class TeleOpSingleOp extends OpMode {
                 -gamepad1.left_stick_y,
                 -gamepad1.left_stick_x,
                 -gamepad1.right_stick_x,
-                slowMode,
-                robotCentric,
+                isSlowMo,
+                isRobotCentric,
                 autoAim);
 
         if (gamepad1.yWasPressed()) {
+            // TODO: can use Pose offset to keep current pose
             robot.resetIMU();
         }
     }
@@ -130,14 +132,13 @@ public class TeleOpSingleOp extends OpMode {
         if (gamepad1.aWasPressed()) {
             if (shootState == ShootState.IDLE) {
                 shootState = ShootState.PREPARING;
-                robot.setReadyShoot(); // Start preparing the shooter
+                robot.tryReadyShoot(); // Start preparing the shooter
             } else {
                 // A quick double press will keep the shooter spinning
                 shootState = ShootState.IDLE;
             }
         }
 
-        // State machine logic
         if (shootState == ShootState.PREPARING) {
             if (robot.getShootReady()) {
                 shootState = ShootState.READY;
@@ -145,8 +146,9 @@ public class TeleOpSingleOp extends OpMode {
         }
 
         if (shootState == ShootState.READY) {
-            robot.shootArtifact();
-            shootState = ShootState.SHOOTING; // Move to a transient state
+            if (robot.tryShoot()) {
+                shootState = ShootState.SHOOTING; // Move to a transient state
+            }
         }
 
         // After shooting, automatically return to idle

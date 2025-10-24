@@ -16,27 +16,19 @@ import java.util.HashSet;
 @Autonomous(name = "Far Blue 1", group = "Autonomous", preselectTeleOp = "_TeleOp Driver Only")
 @Configurable
 public class AutoFarBlue1 extends AutosDecode {
-    // Timer for handling delays
-    private final ElapsedTime actionTimer = new ElapsedTime();
-    private static final long SHOOT_SEQUENCE_DELAY_MS = 1500; // 0.5 second delay
-
-    private int subActionStep = 0;
-    private int lastPathIndex = -1;
-
-    // Define HashSets for your action indices
-    private final HashSet<Integer> shootIndexes = new HashSet<>(Arrays.asList(1, 7));
-    private final HashSet<Integer> intakeIndexes = new HashSet<>(Arrays.asList(3, 4, 5));
-
 
     @Override
-    protected Path initPaths(RobotSystem robot) {
-        // This is now the only place where you define the specific path class
+    protected Path initPaths() {
+        shootIndexes.addAll(Arrays.asList(1, 7));
+        intakeIndexes.addAll(Arrays.asList(3, 4, 5));
+
         return new PathFarAuto1(robot);
     }
 
     @Override
     protected void setAlliance() {
         // Set the specific alliance for this OpMode
+        // can use limelight data if you want
         Alliance.set(Alliance.BLUE);
     }
 
@@ -48,43 +40,9 @@ public class AutoFarBlue1 extends AutosDecode {
             return baseState; // The base class is handling something
         }
 
-        // Now, add actions specific to AutoFarBlue1
-        int curIndex = paths.getSegmentIndex();
-        if (curIndex != lastPathIndex) {
-            subActionStep =0;
-            lastPathIndex = curIndex;
-        }
+        // TODO: Add any specific actions here for the auto here
+        // shooting and intaking are in in the base class
 
-        if (shootIndexes.contains(curIndex)) {
-
-            switch (subActionStep) {
-                case 0:
-                    subActionStep = startAiming() ? 2 : 1;
-                    return PathState.WAIT;
-                case 1:
-                    if (doAiming()) {
-                        ++subActionStep;
-                    }
-                    return PathState.WAIT;
-                case 2:
-                    if (robot.getShootReady()) {
-                        if (robot.shootArtifact()) {
-                            return PathState.CONTINUE;
-                        }
-                    } else {
-                        robot.setReadyShoot();
-                        return PathState.WAIT;
-                    }
-
-                    break;
-                default:
-                    subActionStep = -1;
-                    return PathState.CONTINUE;
-            }
-        } else if (intakeIndexes.contains(curIndex)) {
-            // TODO: Add intake actions here
-        }
-
-        return PathState.IDLE; // No action taken
+        return PathState.IDLE;
     }
 }
