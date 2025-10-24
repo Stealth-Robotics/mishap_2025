@@ -16,9 +16,6 @@ import org.firstinspires.ftc.teamcode.common.Motif;
 import org.firstinspires.ftc.teamcode.common.Pipeline;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-import java.util.Deque;
-import java.util.LinkedList;
-
 /**
  * Container of all subsystems for the robot and wrapper for all controls.
  * This class manages the robot's overall state and coordinates actions between various subsystems
@@ -177,7 +174,7 @@ public class RobotSystem {
 
         if (autoAim) {
             limelightSys.getLastResult(); // Force an update of the Limelight data.
-            Pose llPose = limelightSys.getAverageTxTy(10); // Get averaged target position.
+            Pose llPose = limelightSys.getAvgTargetPose(10); // Get averaged target position.
 
             if (llPose != null) {
                 // Calculate the turn power needed to center the target.
@@ -198,7 +195,7 @@ public class RobotSystem {
 
     public boolean doAimAtTarget(double tolerance, long latency) {
         limelightSys.getLastResult(); // Force an update of the Limelight data.
-        Pose llPose = limelightSys.getAverageTxTy(latency); // Get averaged target position.
+        Pose llPose = limelightSys.getAvgTargetPose(latency); // Get averaged target position.
         double turn = 0;
         if (llPose != null) {
             // Calculate the turn power needed to center the target.
