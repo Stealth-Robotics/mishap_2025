@@ -47,7 +47,7 @@ public class LimelightSubsystem {
     private static final double LIMELIGHT_MOUNT_ANGLE_DEGREES = 20.1;
 
     /** Distance from the center of the Limelight lens to the floor, in inches. */
-    private static final double LIMELIGHT_FLOOR_HEIGHT_INCHES = 9.0;
+    private static final double LIMELIGHT_FLOOR_HEIGHT_INCHES = 9.1;
 
     /** The height of the center of an AprilTag from the floor, in inches. */
     private static final double APRIL_TAG_CENTER_HEIGHT_INCHES = 27.5; // Changed from 'f' suffix to double
@@ -87,15 +87,15 @@ public class LimelightSubsystem {
         LLResult result = this.getLastResult();
         if (result != null && result.isValid() && result.getStaleness() < 50) {
             telemetryM.addData("AprilTag ID", this.getAprilTagId());
-/*  NOTE Uncomment the below to show bot position on field
-            Pose3D botPose = this.getAveragePose3D(100);
+///*  NOTE Uncomment the below to show bot position on field
+            Pose3D botPose = this.getAvgBotPose(20);
             if (botPose != null) {
-                Pose convertedPose = getFollowPoseFromLimelight(botPose);
+                Pose convertedPose = limelightToPedroPose(botPose);
                 telemetryM.addData("Bot Pose Fixed X:", convertedPose.getX());
                 telemetryM.addData("Bot Pose Fixed Y:", convertedPose.getY());
                 telemetryM.addData("Bot Heading Fixed: ", Math.toDegrees(convertedPose.getHeading()));
             }
- */
+ //*/
         }
     }
 
@@ -107,33 +107,34 @@ public class LimelightSubsystem {
      * @return The converted {@link Pose}.
      */
     @NonNull
-    public static Pose limelightPoseToPedroPose(@NonNull Pose3D botPose) {
+    public static Pose limelightToPedroPose(@NonNull Pose3D botPose) {
 
         /* TODO: Figure out why the Pedro built in converter isn't working
-            return new Pose(
-                    botPose.getPosition().x, // not sure but may need to swap x y
-                    botPose.getPosition().y,
-                    botPose.getOrientation().getYaw(),
+        Position pose = botPose.getPosition().toUnit(DistanceUnit.INCH);
+        return new Pose(
+                    pose.x, // not sure but may need to swap x y
+                    pose.y,
+                    botPose.getOrientation().getYaw(AngleUnit.RADIANS),
                     FTCCoordinates.INSTANCE
             ).getAsCoordinateSystem(PedroCoordinates.INSTANCE);
-         */
 
-        Pose followPose = new Pose();
+     */
         double llYaw = botPose.getOrientation().getYaw(AngleUnit.DEGREES);
+        // Rotoate the limlight by LL_ANGLE_DELTA to get the robot's heading
         double imuAngle = (llYaw < 0) ? (360 + llYaw - LL_ANGLE_DELTA) : (llYaw - LL_ANGLE_DELTA);
 
         // Ensure heading is within the 0-360 degree range
         imuAngle %= 360;
-        followPose = followPose.setHeading(Math.toRadians(imuAngle));
 
         // Convert position from Limelight's coordinate system (meters, field center)
         // to the path follower's system (inches, red alliance corner).
         Position position = botPose.getPosition().toUnit(DistanceUnit.INCH);
 
         // Note: X and Y are swapped and adjusted for the different origins.
-        followPose = followPose.withY(-position.x + (Constants.FIELD_SIZE_X_INCHES / 2.0));
-        followPose = followPose.withX((Constants.FIELD_SIZE_Y_INCHES / 2.0) - (-position.y));
-        return followPose;
+        return new Pose(
+                -position.x + (Constants.FIELD_SIZE_X_INCHES / 2.0),
+                (Constants.FIELD_SIZE_Y_INCHES / 2.0) - (-position.y),
+                Math.toRadians(imuAngle));
     }
 
     /**
@@ -208,8 +209,8 @@ public class LimelightSubsystem {
      * @return The average {@link Pose3D}, or {@code null} if no valid data is available.
      */
     @Nullable
-    public Pose3D getAveragePose3D() {
-        return getAveragePose3D(QUEUE_DEFAULT_TIMEOUT_MS);
+    public Pose3D getAvgBotPose() {
+        return getAvgBotPose(QUEUE_DEFAULT_TIMEOUT_MS);
     }
 
     /**
@@ -220,7 +221,7 @@ public class LimelightSubsystem {
      * @return The average {@link Pose3D}, or {@code null} if no valid data is available.
      */
     @Nullable
-    public Pose3D getAveragePose3D(double latencyMs) {
+    public Pose3D getAvgBotPose(double latencyMs) {
         List<Pose3D> poses = new ArrayList<>();
         List<Double> xValues = new ArrayList<>();
         List<Double> yValues = new ArrayList<>();
@@ -284,18 +285,21 @@ public class LimelightSubsystem {
     }
 
     /**
-     * Calculates the average crosshair error (tx, ty) from recent results, filtered for outliers.
-     *
+     * Calculates the average average target pose filtered for outliers.
+     * NOTE: the heading is overloaded to return the target Avagerage Ta not heading
      * @param latencyMs The maximum age of a result in milliseconds to be included.
      * @return A {@link Pose} containing the average tx in X and ty in Y, or {@code null} if no valid data is available.
      */
     @Nullable
-    public Pose getAverageTxTy(long latencyMs) {
+    public Pose getAvgTargetPose(long latencyMs) {
         List<Double> txValues = new ArrayList<>();
         List<Double> tyValues = new ArrayList<>();
+        List<Double> taValues = new ArrayList<>();
+
 
         for (LLResult result : getResultsQueue()) {
             if (result.isValid() && result.getStaleness() < latencyMs) {
+                taValues.add(result.getTa());
                 txValues.add(result.getTx());
                 tyValues.add(result.getTy());
             }
@@ -307,26 +311,34 @@ public class LimelightSubsystem {
 
         double txAvg = calculateAverage(txValues);
         double tyAvg = calculateAverage(tyValues);
+        double taAvg = calculateAverage(taValues);
+        double taStdDev = calculateStandardDeviation(taValues, taAvg);
         double txStdDev = calculateStandardDeviation(txValues, txAvg);
         double tyStdDev = calculateStandardDeviation(tyValues, tyAvg);
 
         List<Double> filteredTxValues = new ArrayList<>();
         List<Double> filteredTyValues = new ArrayList<>();
+        List<Double> filteredTaValues = new ArrayList<>();
+
         for (int i = 0; i < txValues.size(); i++) {
-            if (Math.abs(txValues.get(i) - txAvg) <= 2 * txStdDev &&
-                    Math.abs(tyValues.get(i) - tyAvg) <= 2 * tyStdDev) {
+            if (Math.abs(txValues.get(i) - txAvg) <= 2 * txStdDev
+                    && Math.abs(tyValues.get(i) - tyAvg) <= 2 * tyStdDev
+                    && Math.abs(taValues.get(i) - taAvg) <= 2 * taStdDev) {
                 filteredTxValues.add(txValues.get(i));
                 filteredTyValues.add(tyValues.get(i));
+                filteredTaValues.add(taValues.get(i));
             }
         }
 
         if (filteredTxValues.isEmpty()) {
-            return new Pose(txAvg, tyAvg, 0);
+            return new Pose(txAvg, tyAvg, taAvg);
         }
 
         double filteredTxAvg = calculateAverage(filteredTxValues);
         double filteredTyAvg = calculateAverage(filteredTyValues);
-        return new Pose(filteredTxAvg, filteredTyAvg, 0);
+        double filteredTaAvg = calculateAverage(filteredTaValues);
+
+        return new Pose(filteredTxAvg, filteredTyAvg, filteredTaAvg);
     }
 
     /**
@@ -377,6 +389,19 @@ public class LimelightSubsystem {
             resultsQueue.removeFirst();
         }
         resultsQueue.addLast(result);
+    }
+
+    /**
+     * Calculates distance to a goal by using the cameras Ty value
+     * @param ty The Ty value from the camera
+     *
+     * @return The distance to the goal in inches
+     */
+    public static double calcGoalDistanceByTy(double ty) {
+        // NOTE: could take a pipeline and then select the correct target offset
+        double angleToObjectDegrees = LIMELIGHT_MOUNT_ANGLE_DEGREES + APRIL_TAG_CENTER_HEIGHT_INCHES;
+        double angleToGoalRadians = Math.toRadians(angleToObjectDegrees); //  (3.14159 / 180.0);
+        return (APRIL_TAG_CENTER_HEIGHT_INCHES - LIMELIGHT_FLOOR_HEIGHT_INCHES) / Math.tan(angleToGoalRadians);
     }
 
     /**
