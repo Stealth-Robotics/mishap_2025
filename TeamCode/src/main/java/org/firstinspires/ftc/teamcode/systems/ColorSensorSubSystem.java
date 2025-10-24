@@ -18,6 +18,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  */
 public class ColorSensorSubSystem {
     private final RevColorSensorV3 colorSensor;
+
+    private DetectedColor lastDetection = DetectedColor.UNKNOWN;
     private final TelemetryManager telemetryM;
 
     // TODO: instead of an array, use a matrix (ask Jeff)
@@ -66,11 +68,13 @@ public class ColorSensorSubSystem {
         double red = colorSensor.getNormalizedColors().red;
         double blue = colorSensor.getNormalizedColors().blue;
         double green = colorSensor.getNormalizedColors().green;
+        lastDetection = getDetectedColor();
+        telemetryM.addData("Detected color: ", lastDetection);
+
         telemetryM.addData("Distance: ", colorSensor.getDistance(DistanceUnit.MM));
         telemetryM.addData("Color red: ", red);
         telemetryM.addData("color blue: ", blue);
         telemetryM.addData("color green: ", green);
-        telemetryM.addData("gain", colorSensor.getGain());
 
     }
 
