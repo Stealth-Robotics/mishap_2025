@@ -7,10 +7,9 @@ import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.systems.ColorSensorSubSystem;
 import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 
-@TeleOp (name = "_TeleOp Driver Only", group = "Main")
+@TeleOp (name = "_TeleOp_Driver_Only", group = "Main")
 public class TeleOpSingleOp extends OpMode {
 
     private boolean isRobotCentric = false;
@@ -34,6 +33,8 @@ public class TeleOpSingleOp extends OpMode {
     @Override
     public void init() {
         robot = new RobotSystem(hardwareMap, telemetry);
+        robot.initSpindxerSlotsEmpty();
+
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
 
         follower = robot.getFollower();
@@ -181,7 +182,7 @@ public class TeleOpSingleOp extends OpMode {
             robot.startIntake();
         } else if (gamepad1.leftBumperWasPressed()) {
             robot.reverseIntake();
-        } else {
+        } else if (gamepad1.rightBumperWasReleased() || gamepad1.leftBumperWasReleased()){
             // Stop intake only if neither bumper is pressed
             robot.stopIntake();
         }
@@ -207,6 +208,7 @@ public class TeleOpSingleOp extends OpMode {
      */
     private void handleOtherControls() {
         if (gamepad1.backWasPressed()) {
+            robot.resetHighLowColors();
             robot.toggleLimelightPipeline();
         }
     }

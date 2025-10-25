@@ -12,7 +12,6 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 @TeleOp(name="Servo Runner", group="Tests")
-@Disabled
 public class ServoRunner extends LinearOpMode {
     private boolean isIntake = false;
     private boolean isOuttake = false;
@@ -20,9 +19,9 @@ public class ServoRunner extends LinearOpMode {
 
     private double headingOffset = 0.0;
 
-    private double intakeMinRage = .06;
+    private double intakeMinRage = .00;
 
-    private double intakeMaxRange = .29;
+    private double intakeMaxRange = .59;
 
     private double curShootPower = .80;
 
@@ -57,8 +56,8 @@ public class ServoRunner extends LinearOpMode {
 
 
             telemetry.addLine("Running");
-            telemetry.addData("hopperServo position:", hopperServo.getPosition());
-            telemetry.addData("hopperServo position:", hopperServo.getPosition());
+            telemetry.addData("Hood High:", intakeMaxRange);
+            telemetry.addData("Hood Low:", intakeMinRage);
             telemetry.addData("Shoot power:", gamepad1.right_trigger * curShootPower);
 
             if (gamepad1.right_trigger > 0.001) {
@@ -74,9 +73,11 @@ public class ServoRunner extends LinearOpMode {
             if (gamepad1.rightBumperWasPressed()) {
                 if (isIntake) {
                     isIntake = false;
+                    hopperServo.setPosition(intakeMinRage);
                     servoIntakeRight.setPower(0);
                     servoIntakeLeft.setPower(0);
                 } else {
+                    hopperServo.setPosition(intakeMaxRange);
                     servoIntakeRight.setPower(1);
                     servoIntakeLeft.setPower(1);
                     isIntake = true;
@@ -105,12 +106,12 @@ public class ServoRunner extends LinearOpMode {
 
             if (gamepad1.dpadUpWasPressed())
             {
-                curShootPower += .01;
+                intakeMinRage += .01;
             }
 
             if (gamepad1.dpadDownWasPressed())
             {
-                curShootPower -= .01;
+                intakeMinRage -= .01;
             }
 
             if (gamepad1.dpadLeftWasPressed())

@@ -1,8 +1,6 @@
 package org.firstinspires.ftc.teamcode.systems;
 
-
-
-
+import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
@@ -12,103 +10,102 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.common.SlotState;
 
-/* TODO: Make a ColorMatrix class for holding the color values for each color
-    the new class will take min/max color values and distance then just have a match method to check
- */
+@Configurable
 public class ColorSensorSubSystem {
     private final RevColorSensorV3 colorSensor;
 
-    private DetectedColor lastDetection = DetectedColor.UNKNOWN;
+    private SlotState lastDetection = SlotState.UNKNOWN;
     private final TelemetryManager telemetryM;
 
-    // TODO: instead of an array, use a matrix (ask Jeff)
+    public static double[] greenArtifactColors =
+//          redHigh, redLow, greenHigh, GreenLow, blueHigh, BlueLow
+            {1.9,       0.6,    6.0,       2.5,    3.5,      2.0};
 
-    //                                                    redHigh, redLow, greenHigh, GreenLow, blueHigh, BlueLow
-    private static final double[] greenArtifactColors = { 0.258,    0.172,   0.688,    0.516,    0.516,     0.43 };
+    public static double[] purpleArtifactColors =
+//          redHigh, redLow, greenHigh, GreenLow, blueHigh, BlueLow
+            {2.5,       1.1,    3.3,        1.7,    6.0,       2.7};
 
-
-    private double[] purpleArtifactColors = { 0.258,    0.172,   0.688,    0.516,    0.516,     0.43 };
-
-    // Example thresholds — tweak these based on testing
-//        if (distance > 45 && distance < 55 &&
-//    r > 0.43 && r < 0.516 &&
-//    b > 1.118 && b < 1.204 &&
-//    g > 0.688 && g < 0.774) {
-//        return DetectedColor.PURPLE;
-//    }
-//
-//        else if (distance > 40 && distance < 48 &&
-//    r > 0.172 && r < 0.258 &&
-//    b > 0.43 && b < 0.516 &&
-//    g > 0.516 && g < 0.688) {
-//        return DetectedColor.GREEN;
-//    }
-
-    private static final double MAX_DISTANCE = 65;
+    private static final double MAX_DISTANCE = 75;
     private static final double MIN_DISTANCE = 20;
 
-    // TODO: Move this either into its own file or in the ColorMatrix class under common
-    public enum DetectedColor {
-        UNKNOWN,
-        NONE,
-        PURPLE,
-        GREEN,
+    //TODO: test code
+    private double
+            redMaxHigh = -1, redMinLow = 10,
+            greenMaxHigh = -1, greenMinLow = 10,
+            blueMaxHigh = -1, blueMinLow = 10;
 
-    }
 
     public ColorSensorSubSystem(HardwareMap hardwareMap, Telemetry telemetry) {
         colorSensor = hardwareMap.get(RevColorSensorV3.class, "color_sensor");
         this.telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
         colorSensor.setGain(100);
+    }
 
+    public void resetHighLow() {
+        redMaxHigh = -1;
+        redMinLow = 10;
+        greenMaxHigh = -1;
+        greenMinLow = 10;
+        blueMaxHigh = -1;
+        blueMinLow = 10;
     }
 
     public void update(){
-        double red = colorSensor.getNormalizedColors().red;
-        double blue = colorSensor.getNormalizedColors().blue;
-        double green = colorSensor.getNormalizedColors().green;
+        NormalizedRGBA colors = colorSensor.getNormalizedColors();
         lastDetection = getDetectedColor();
         telemetryM.addData("Detected color: ", lastDetection);
-
+        // TEST CODE
         telemetryM.addData("Distance: ", colorSensor.getDistance(DistanceUnit.MM));
-        telemetryM.addData("Color red: ", red);
-        telemetryM.addData("color blue: ", blue);
-        telemetryM.addData("color green: ", green);
-
+//        telemetryM.addData("Color red: ", colors.red / colors.alpha);
+//        telemetryM.addData("color green: ", colors.green / colors.alpha);
+//        telemetryM.addData("color blue: ", colors.blue / colors.alpha);
+        telemetryM.addData("Red High: ", redMaxHigh);
+        telemetryM.addData("Red Low: ", redMinLow);
+        telemetryM.addData("Green High: ", greenMaxHigh);
+        telemetryM.addData("Green Low: ", greenMinLow);
+        telemetryM.addData("Blue High: ", blueMaxHigh);
+        telemetryM.addData("Blue Low: ", blueMinLow);
     }
 
-    public DetectedColor getDetectedColor() {
+    public SlotState getDetectedColor() {
         NormalizedRGBA colors = colorSensor.getNormalizedColors();
         double distance = colorSensor.getDistance(DistanceUnit.MM);
-        if (MIN_DISTANCE < distance || MAX_DISTANCE > distance)
-            return DetectedColor.NONE;
-
+        if (!(distance >= MIN_DISTANCE) || !(distance <= MAX_DISTANCE)) {
+            return SlotState.EMPTY;
+        }
+        telemetryM.addLine("Green Check");
         if (isMatch(colors,
                 greenArtifactColors[0],
                 greenArtifactColors[1],
                 greenArtifactColors[2],
                 greenArtifactColors[3],
                 greenArtifactColors[4],
-                greenArtifactColors[4])) {
-            return DetectedColor.GREEN;
+                greenArtifactColors[5])) {
+            return SlotState.ARTIFACT_GREEN;
         }
-
+        telemetryM.addLine("Purple Check");
         if (isMatch(colors,
                 purpleArtifactColors[0],
                 purpleArtifactColors[1],
                 purpleArtifactColors[2],
                 purpleArtifactColors[3],
                 purpleArtifactColors[4],
-                purpleArtifactColors[4])) {
-            return DetectedColor.PURPLE;
+                purpleArtifactColors[5])) {
+            return SlotState.ARTIFACT_PURPLE;
 
         }
 
-        return DetectedColor.UNKNOWN;
+        return SlotState.UNKNOWN;
     }
 
-    private static boolean isMatch(
+    public SlotState getLastDetection() {
+        return lastDetection;
+    }
+
+
+    private  boolean isMatch(
             NormalizedRGBA colors,
             double redHigh,
             double redLow,
@@ -120,44 +117,25 @@ public class ColorSensorSubSystem {
         float g = colors.green / colors.alpha;
         float b = colors.blue / colors.alpha;
 
-        return (g <= greenHigh && g >= greenLow
-        && r <= redHigh && r >= redLow
-        && b <= blueHigh && b >= blueLow);
+        //TODO: temp code
+        if (r > this.redMaxHigh)
+            this.redMaxHigh = r;
+        if (r < this.redMinLow)
+            this.redMinLow = r;
+        if (g > this.greenMaxHigh)
+            this.greenMaxHigh = g;
+        if (g < this.greenMinLow)
+            this.greenMinLow = g;
+        if (b > this.blueMaxHigh)
+            this.blueMaxHigh = b;
+        if (b < this.blueMinLow)
+            this.blueMinLow = b;
+
+        // END TEMP CODE
+
+        return (
+                (r <= redHigh && r >= redLow)
+                && (g <= greenHigh && g >= greenLow)
+                && (b <= blueHigh && b >= blueLow));
     }
-        // TODO Code to check color range
-        /*
-        Color values:
-        PURPLE BALL -
-        * Distance: 52-58
-        * Red: 0.0057 - 0.0059
-        * Blue: 0.0138
-        * Green: 0.0083
-        * gain: 8
-        GREEN BALL -
-        * Distance: 44-47
-        * Red: 0.0023 - 0.0024
-        * Blue: 0.0056
-        * Green: 0.007
-        * gain: 8
-        */
-
-        /*
-        Color values:
-        GREEN BALL -
-        * Distance: 40      34-35
-        * Red: 0.0046       0.0057
-        * Blue: 0.0132      0.0172
-        * Green: 0.0165     0.0218
-        * gain: 12
-        PURPLE BALL -
-        * Distance: 64-66       47-50
-        * Red: 0.0044           0.0075-0.0079
-        * Blue: 0.0093          0.0181-0.0183
-        * Green: 0.0071-0.0073  0.011-0.108
-        * gain: 12
-        */
-
-
-
-
-    }
+}

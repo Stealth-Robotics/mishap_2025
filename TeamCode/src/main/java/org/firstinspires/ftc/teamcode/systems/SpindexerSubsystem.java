@@ -7,6 +7,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
+import org.firstinspires.ftc.teamcode.common.SlotState;
+
 import java.util.Arrays;
 /**
  * Manages the spindexer mechanism, which is a rotating drum that holds and positions artifacts for shooting.
@@ -22,6 +24,8 @@ public class SpindexerSubsystem {
     //==================================================================================================
 
     // NOTE: if you would like to adjust in FTC dashboard mark members as public static (Not final)
+    /** The number of ticks to move backward after the index switch is released to center a slot. */
+    public static int INDEX_OFFSET_TICKS = 120;
 
     /** Ticks per revolution for the GoBilda 312 RPM motor (537.7) geared up. */
     public static final double TICKS_PER_REV = 3895.9;
@@ -30,29 +34,17 @@ public class SpindexerSubsystem {
     /** The number of encoder ticks needed to move one slot. */
     public static final double TICKS_PER_SLOT = TICKS_PER_REV / NUMBER_OF_SLOTS;
 
-    /** The number of ticks to move backward after the index switch is released to center a slot. */
-    public static final int INDEX_OFFSET_TICKS = 80;
-
     /** The tolerance, in ticks, for considering the motor to have reached its target position. */
     public static final int POSITION_TOLERANCE = 2;
 
     /** The maximum power limit for spindexer rotation. */
-    public static double SPINDEXER_POWER_LIMIT = 1;
+    public static double SPINDEXER_POWER_LIMIT = .5;
     /** The maximum velocity (in ticks/sec) for spindexer rotation in RUN_TO_POSITION mode. */
-    public static double SPINDEXER_VELOCITY_LIMIT = 2500;
+    public static double SPINDEXER_VELOCITY_LIMIT = 2600;
 
     /** PIDF coefficients for position control, tunable via FTC-Dashboard. */
-    public static PIDFCoefficients SPINDEXER_PIDF = new PIDFCoefficients(8, 4,1.5, 1);
-
-    /**
-     * Defines the possible states of each slot in the spindexer.
-     */
-    public enum SlotState {
-        EMPTY,
-        ARTIFACT_PURPLE,
-        ARTIFACT_GREEN,
-        UNKNOWN
-    }
+    // TODO: More tuning needed
+    public static PIDFCoefficients SPINDEXER_PIDF = new PIDFCoefficients(6, 4,0.2, 1);
 
     //==================================================================================================
     //  P R I V A T E   M E M B E R   V A R I A B L E S
@@ -72,6 +64,10 @@ public class SpindexerSubsystem {
 
     /** The current state of the homing/initialization process. */
     private IndexingState indexingState = IndexingState.START;
+
+    public SlotState getIntakeSlotState() {
+        return getSlotState(currentSlot + 1);
+    }
 
     /**
      * State machine enum to manage the multi-step homing process.
@@ -182,7 +178,7 @@ public class SpindexerSubsystem {
      */
     public boolean rotateToArtifact(SlotState desiredColor) {
         // Start searching from the slot immediately after the current one.
-        int startingSlot = (currentSlot + 1) % NUMBER_OF_SLOTS;
+        int startingSlot = currentSlot;
 
         // Loop through all slots once to find a match.
         for (int i = 0; i < NUMBER_OF_SLOTS; i++) {
@@ -225,16 +221,30 @@ public class SpindexerSubsystem {
      * Advances the spindexer by one slot from its current target position.
      */
     public void advanceOneSlot() {
-        rotateToSlot((currentSlot + 1) % NUMBER_OF_SLOTS);
+        int newTarget = this.lastTargetPosition - (int)Math.round(TICKS_PER_SLOT);
+        this.lastTargetPosition = newTarget;
+
+        spindexer.setTargetPosition(newTarget);
+        spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        spindexer.setVelocity(SPINDEXER_VELOCITY_LIMIT);
+        currentSlot = (currentSlot + 1) % NUMBER_OF_SLOTS;
     }
 
     /**
      * Moves the spindexer back by one slot from its current target position.
      */
     public void decreaseOneSlot() {
-        //Wraps backwards
-        rotateToSlot((currentSlot - 1 + NUMBER_OF_SLOTS) % NUMBER_OF_SLOTS);
+        int newTarget = this.lastTargetPosition + (int)Math.round(TICKS_PER_SLOT);
+        this.lastTargetPosition = newTarget;
+
+        spindexer.setTargetPosition(newTarget);
+        spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        spindexer.setVelocity(SPINDEXER_VELOCITY_LIMIT);
+
+        // This correctly handles wrapping for negative numbers (e.g., (0 - 1 + 3) % 3 = 2).
+        currentSlot = (currentSlot - 1 + NUMBER_OF_SLOTS) % NUMBER_OF_SLOTS;
     }
+
 
     /**
      * Adjusts the spindexer's target position by a small number of ticks for fine-tuning.
@@ -279,13 +289,18 @@ public class SpindexerSubsystem {
      * @param state The state of the newly intaked artifact.
      */
     public void setIntakeSlotState(SlotState state) {
-        setSlotState(currentSlot - 1, state);
+        setSlotState(currentSlot + 1, state);
     }
+
+    public void setIntakeSlotEmpty() {
+        setIntakeSlotState(SlotState.EMPTY);
+    }
+
 
     /**
      * Marks the current slot as empty, typically after shooting an artifact.
      */
-    public void setCurrentSlotEmpty() {
+    public void setShootSlotEmpty() {
         slotStates[currentSlot] = SlotState.EMPTY;
     }
 
@@ -314,6 +329,11 @@ public class SpindexerSubsystem {
         int wrappedSlotNumber = slotNumber % NUMBER_OF_SLOTS;
         return slotStates[wrappedSlotNumber];
     }
+
+    public SlotState getSlotState() {
+        return slotStates[currentSlot];
+    }
+
 
     /** Returns a copy of the array representing the state of all slots. */
     public SlotState[] getSlotStates() {
@@ -385,6 +405,7 @@ public class SpindexerSubsystem {
         spindexer.setTargetPosition(0); // Important to set a target after mode change
         this.lastTargetPosition = 0; // Initialize the stored position
         spindexer.setVelocity(SPINDEXER_VELOCITY_LIMIT);
+        spindexer.setPower(SPINDEXER_POWER_LIMIT);
 
         // ...// Apply the defined PIDF coefficients to the motor for RUN_TO_POSITION mode
         spindexer.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, SPINDEXER_PIDF);

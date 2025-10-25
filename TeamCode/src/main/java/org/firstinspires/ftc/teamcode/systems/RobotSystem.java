@@ -14,6 +14,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.common.AprilTagIds;
 import org.firstinspires.ftc.teamcode.common.Motif;
 import org.firstinspires.ftc.teamcode.common.Pipeline;
+import org.firstinspires.ftc.teamcode.common.SlotState;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 /**
@@ -43,7 +44,7 @@ public class RobotSystem {
             = new PIDFCoefficients(0.018, 0.0, 0.001, 0.02);
 
     /** Delay in milliseconds to wait before stopping the intake motors after intake is complete. */
-    private static final long STOP_INTAKE_DELAY_MS = 300;
+    private static final long STOP_INTAKE_DELAY_MS = 800;
 
     /** Delay in milliseconds to wait before resetting the kicker to its ready position after shooting. */
     private static final long SHOOT_KICKER_RESET_DELAY_MS = 200;
@@ -322,7 +323,7 @@ public class RobotSystem {
             currentState = SystemState.SHOOTING;
             stateTimer.reset();
             kickerSys.kickIt();
-            spindexerSys.setCurrentSlotEmpty();
+            spindexerSys.setShootSlotEmpty();
             isShootReady = false; // Prevent immediate re-triggering.
             return true;
         }
@@ -367,6 +368,20 @@ public class RobotSystem {
     //==================================================================================================
     // Passthrough and Utility Methods
     //==================================================================================================
+
+    // TODO: Temp Code:
+    public void resetHighLowColors() {
+        colorSensorSys.resetHighLow();
+    }
+
+    /** SetSlotsEmpty */
+    public void initSpindxerSlotsEmpty() {
+        spindexerSys.setSlotsEmpty();
+    }
+
+    public void initSpindxerSlotsAuto() {
+        spindexerSys.setSlotsAuto();
+    }
 
     /** Sets the LED motif pattern. */
     public void setMotifPattern(Motif motifPattern) { this.motifPattern = motifPattern; }
@@ -440,7 +455,14 @@ public class RobotSystem {
                     sweeperSys.stopIntake();
                     spindexerSys.setBrake();
                     // TODO: Check the ColorSensorSubsystem if we have something
-                    spindexerSys.advanceOneSlot();
+                    SlotState slotState = colorSensorSys.getLastDetection();
+                    if (slotState != SlotState.EMPTY) {
+                        spindexerSys.setIntakeSlotState(slotState);
+                        spindexerSys.advanceOneSlot();
+                    }else {
+                        spindexerSys.setIntakeSlotEmpty();
+                    }
+
                     currentState = SystemState.IDLE;
                 }
                 break;
@@ -464,7 +486,17 @@ public class RobotSystem {
                 break;
 
             case IDLE:
+                // IDLE state keep an eye on the intaking slot
+                SlotState slotState = colorSensorSys.getLastDetection();
+                if (slotState != SlotState.EMPTY) {
+                    if (spindexerSys.getIntakeSlotState() == SlotState.EMPTY
+                            || spindexerSys.getIntakeSlotState() == SlotState.UNKNOWN) {
+                        spindexerSys.setIntakeSlotState(slotState);
+                    }
+                }
+
             case INTAKING:
+                // TODO: add code here to advance the spindexer if Artifact detected also check if full
             case REVERSING_INTAKE:
             case PREPPING_SHOOT:
                 // No timed actions are needed in these states; they are controlled by user input.
@@ -479,7 +511,11 @@ public class RobotSystem {
         // TODO: remove unneeded output
         telemetryM.addData("Shooter RPM", shooterSys.getCurrentRpm());
         telemetryM.addData("Target RPM", shooterSys.getTargetRpm());
-        telemetryM.addData("Robot State", currentState.name());
+        //telemetryM.addData("Robot State", currentState.name());
+        telemetryM.addData("Shoot Slot Index", spindexerSys.getCurrentSlot());
+        telemetryM.addData("Shoot Slot State:", spindexerSys.getSlotState());
+        telemetryM.addData("Intake Slot State:", spindexerSys.getIntakeSlotState());
+        //telemetryM.addData("Shooter Ready:", shooterSys.isReadyToShoot());
         //telemetryM.addData("Spindexer Raw Position", spindexerSys.getCurrentPosition());
         //telemetryM.addData("Spindexer Slot", spindexerSys.getCurrentSlot());
         //telemetryM.addData("Shoot Ready:", isShootReady);

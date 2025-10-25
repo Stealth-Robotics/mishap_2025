@@ -20,8 +20,8 @@ public class ShooterSubsystem {
     private final MotorVelocityReader leftVelocityReader;
 
     private final ElapsedTime minShootTimer = new ElapsedTime();
-    private static final double MIN_SHOOT_TIME_MS = 1000;
-    private static final double MAX_SHOOT_TIME_MS = 5000;
+    private static final double MIN_SHOOT_TIME_MS = 500;
+    private static final double MAX_SHOOT_TIME_MS = 3000;
 
 
 
@@ -31,7 +31,7 @@ public class ShooterSubsystem {
     public static final double DEFAULT_RPM_FAR = 4800;
     public static final double DEFAULT_RPM_NEAR = 4200;
     public static final double RPM_CHANGE_AMOUNT = 100;
-    private static final double VELOCITY_TOLERANCE = 50; // The allowed RPM error in which the shooter is considered "ready".
+    private static final double VELOCITY_TOLERANCE = 100; // The allowed RPM error in which the shooter is considered "ready".
 
     // Encoder ticks per revolution for a GoBILDA Yellow Jacket motor.
     private static final double TICKS_PER_REV = 28;
@@ -42,6 +42,7 @@ public class ShooterSubsystem {
     // I (Integral): Corrects for small, steady-state errors.
     // D (Derivative): Prevents overshooting the target.
     // F (Feedforward): Proactively applies power based on the target velocity, which is crucial for velocity control.
+    // TODO: more tuning needed
     private static final PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(90, .5, 10, 13);
 
     // --- State Variables ---
@@ -110,6 +111,7 @@ public class ShooterSubsystem {
      * Stops the shooter motors.
      */
     public void stop(){
+
         setRpm(0); // Setting RPM to 0 is the correct way to stop motors in velocity control mode.
     }
 
@@ -198,8 +200,13 @@ public class ShooterSubsystem {
         }
 
         double error = Math.abs(currentRpm - getTargetRpm());
-        // if we hit target or we run out of time shoot it. Could be low on battery
-        return (error <= VELOCITY_TOLERANCE || curMs > MAX_SHOOT_TIME_MS);
+        // if for some reason the shooter cant reach requested RPM just shoot it
+        if (error <= VELOCITY_TOLERANCE || curMs > MAX_SHOOT_TIME_MS) {
+            minShootTimer.reset();
+            return true;
+        }
+
+        return false;
     }
 
     /**

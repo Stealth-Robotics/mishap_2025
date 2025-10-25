@@ -86,8 +86,9 @@ public class LimelightSubsystem {
     public void update() {
         LLResult result = this.getLastResult();
         if (result != null && result.isValid() && result.getStaleness() < 50) {
+            telemetryM.addData("Pipeline", this.getCurrentPipeline());
             telemetryM.addData("AprilTag ID", this.getAprilTagId());
-///*  NOTE Uncomment the below to show bot position on field
+/*  NOTE Uncomment the below to show bot position on field
             Pose3D botPose = this.getAvgBotPose(20);
             if (botPose != null) {
                 Pose convertedPose = limelightToPedroPose(botPose);
@@ -95,7 +96,7 @@ public class LimelightSubsystem {
                 telemetryM.addData("Bot Pose Fixed Y:", convertedPose.getY());
                 telemetryM.addData("Bot Heading Fixed: ", Math.toDegrees(convertedPose.getHeading()));
             }
- //*/
+ */
         }
     }
 
@@ -296,7 +297,6 @@ public class LimelightSubsystem {
         List<Double> tyValues = new ArrayList<>();
         List<Double> taValues = new ArrayList<>();
 
-
         for (LLResult result : getResultsQueue()) {
             if (result.isValid() && result.getStaleness() < latencyMs) {
                 taValues.add(result.getTa());
@@ -398,7 +398,6 @@ public class LimelightSubsystem {
      * @return The distance to the goal in inches
      */
     public static double calcGoalDistanceByTy(double ty) {
-        // NOTE: could take a pipeline and then select the correct target offset
         double angleToObjectDegrees = LIMELIGHT_MOUNT_ANGLE_DEGREES + APRIL_TAG_CENTER_HEIGHT_INCHES;
         double angleToGoalRadians = Math.toRadians(angleToObjectDegrees); //  (3.14159 / 180.0);
         return (APRIL_TAG_CENTER_HEIGHT_INCHES - LIMELIGHT_FLOOR_HEIGHT_INCHES) / Math.tan(angleToGoalRadians);

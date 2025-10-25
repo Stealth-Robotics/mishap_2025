@@ -20,7 +20,7 @@ public class AutoFarBlue1 extends AutosDecode {
     @Override
     protected Path initPaths() {
         shootIndexes.addAll(Arrays.asList(1, 7));
-        intakeIndexes.addAll(Arrays.asList(3, 4, 5));
+        intakeIndexes.addAll(Arrays.asList(3, 4, 5, 6));
 
         return new PathFarAuto1(robot);
     }
