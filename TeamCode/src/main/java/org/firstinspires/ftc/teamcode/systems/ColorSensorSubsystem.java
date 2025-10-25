@@ -43,6 +43,7 @@ public class ColorSensorSubsystem {
         colorSensor.setGain(100);
     }
 
+    // TODO: REMOVE once this is tested
     public void resetHighLow() {
         redMaxHigh = -1;
         redMinLow = 10;
@@ -53,14 +54,15 @@ public class ColorSensorSubsystem {
     }
 
     public void update(){
-        NormalizedRGBA colors = colorSensor.getNormalizedColors();
         lastDetection = getDetectedColor();
         telemetryM.addData("Detected color: ", lastDetection);
         // TEST CODE
         telemetryM.addData("Distance: ", colorSensor.getDistance(DistanceUnit.MM));
+//        NormalizedRGBA colors = colorSensor.getNormalizedColors();
 //        telemetryM.addData("Color red: ", colors.red / colors.alpha);
 //        telemetryM.addData("color green: ", colors.green / colors.alpha);
 //        telemetryM.addData("color blue: ", colors.blue / colors.alpha);
+        // TODO: this should be deleted once this is tested
         telemetryM.addData("Red High: ", redMaxHigh);
         telemetryM.addData("Red Low: ", redMinLow);
         telemetryM.addData("Green High: ", greenMaxHigh);
@@ -69,13 +71,14 @@ public class ColorSensorSubsystem {
         telemetryM.addData("Blue Low: ", blueMinLow);
     }
 
-    public SlotState getDetectedColor() {
+    private  SlotState getDetectedColor() {
         NormalizedRGBA colors = colorSensor.getNormalizedColors();
         double distance = colorSensor.getDistance(DistanceUnit.MM);
         if (!(distance >= MIN_DISTANCE) || !(distance <= MAX_DISTANCE)) {
             return SlotState.EMPTY;
         }
-        telemetryM.addLine("Green Check");
+
+        // Test for green artifact
         if (isMatch(colors,
                 greenArtifactColors[0],
                 greenArtifactColors[1],
@@ -85,7 +88,8 @@ public class ColorSensorSubsystem {
                 greenArtifactColors[5])) {
             return SlotState.ARTIFACT_GREEN;
         }
-        telemetryM.addLine("Purple Check");
+
+        // Test for Purple Artifact
         if (isMatch(colors,
                 purpleArtifactColors[0],
                 purpleArtifactColors[1],

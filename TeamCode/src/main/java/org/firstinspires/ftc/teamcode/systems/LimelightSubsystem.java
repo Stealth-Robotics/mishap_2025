@@ -88,6 +88,12 @@ public class LimelightSubsystem {
         if (result != null && result.isValid() && result.getStaleness() < 50) {
             telemetryM.addData("Pipeline", this.getCurrentPipeline());
             telemetryM.addData("AprilTag ID", this.getAprilTagId());
+            Pose targetPose = this.getAvgTargetPose(20);
+            if (targetPose != null) {
+                telemetryM.addData("Target Distance Ty: ", calcGoalDistanceByTy(targetPose.getY()));
+            }
+
+
 /*  NOTE Uncomment the below to show bot position on field
             Pose3D botPose = this.getAvgBotPose(20);
             if (botPose != null) {
