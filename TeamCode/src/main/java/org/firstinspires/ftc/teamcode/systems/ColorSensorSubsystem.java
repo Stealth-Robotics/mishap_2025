@@ -13,7 +13,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.common.SlotState;
 
 @Configurable
-public class ColorSensorSubSystem {
+public class ColorSensorSubsystem {
     private final RevColorSensorV3 colorSensor;
 
     private SlotState lastDetection = SlotState.UNKNOWN;
@@ -37,7 +37,7 @@ public class ColorSensorSubSystem {
             blueMaxHigh = -1, blueMinLow = 10;
 
 
-    public ColorSensorSubSystem(HardwareMap hardwareMap, Telemetry telemetry) {
+    public ColorSensorSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
         colorSensor = hardwareMap.get(RevColorSensorV3.class, "color_sensor");
         this.telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
         colorSensor.setGain(100);

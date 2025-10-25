@@ -85,7 +85,7 @@ public class RobotSystem {
     private final LimelightSubsystem limelightSys;
     private final Follower follower;
 
-    private final ColorSensorSubSystem colorSensorSys;
+    private final ColorSensorSubsystem colorSensorSys;
 
     // --- Control and Telemetry ---
     private static final PIDFController headingController = new PIDFController(HEADING_COEFFICIENTS);
@@ -114,7 +114,7 @@ public class RobotSystem {
         this.spindexerSys = new SpindexerSubsystem(hardwareMap);
         this.limelightSys = new LimelightSubsystem(hardwareMap);
         this.follower = Constants.createFollower(hardwareMap);
-        this.colorSensorSys = new ColorSensorSubSystem(hardwareMap, telemetry);
+        this.colorSensorSys = new ColorSensorSubsystem(hardwareMap, telemetry);
 
 
         this.telemetry = telemetry;
