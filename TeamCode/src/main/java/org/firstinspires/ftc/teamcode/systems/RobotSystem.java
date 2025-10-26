@@ -418,7 +418,9 @@ public class RobotSystem {
         return false;
     }
 
-    public boolean isSho
+    public boolean startShootMotif() {
+        return true;
+    }
     public boolean continueShootMotif() {
 
 
@@ -667,12 +669,12 @@ public class RobotSystem {
         // TODO: remove unneeded output
         //telemetryM.addData("Shooter RPM", shooterSys.getCurrentRpm());
         //telemetryM.addData("Target RPM", shooterSys.getTargetRpm());
-        telemetryM.addData("Robot State", currentState.name());
-        telemetryM.addData("Shoot Slot Index", spindexerSys.getCurShootSlot());
-        telemetryM.addData("Shoot Slot State:", spindexerSys.getShootSlotState());
-        telemetryM.addData("Intake Slot State:", spindexerSys.getIntakeSlotState());
-        telemetryM.addData("Is Auto Intaking:", isAutoIntaking);
-        telemetryM.addData("Hood State:", hoodSys.getHoodState());
+//        telemetryM.addData("Robot State", currentState.name());
+//        telemetryM.addData("Shoot Slot Index", spindexerSys.getCurShootSlot());
+//        telemetryM.addData("Shoot Slot State:", spindexerSys.getShootSlotState());
+//        telemetryM.addData("Intake Slot State:", spindexerSys.getIntakeSlotState());
+//        telemetryM.addData("Is Auto Intaking:", isAutoIntaking);
+//        telemetryM.addData("Hood State:", hoodSys.getHoodState());
 
         //telemetryM.addData("Shooter Ready:", shooterSys.isReadyToShoot());
         //telemetryM.addData("Spindexer Raw Position", spindexerSys.getCurrentPosition());
