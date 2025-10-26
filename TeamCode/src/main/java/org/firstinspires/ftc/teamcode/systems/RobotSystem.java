@@ -271,7 +271,7 @@ public class RobotSystem {
                 // Calculate the turn power needed to center the target.
                 double output = getScaledTxOutput(llPose.getX(), AUTO_AIM_TOLERANCE);
                 // The output is applied to the rotation power (note: may need to be inverted).
-                turn = -output;
+                turn = output;
             } else {
                 // If the target is lost, reset the PID controller to prevent integral windup.
                 headingController.reset();
@@ -292,7 +292,7 @@ public class RobotSystem {
             // Calculate the turn power needed to center the target.
             double output = getScaledTxOutput(llPose.getX(), tolerance);
             // The output is applied to the rotation power (note: may need to be inverted).
-            turn = -output;
+            turn = output;
         } else {
             // If the target is lost, reset the PID controller to prevent integral windup.
             headingController.reset();

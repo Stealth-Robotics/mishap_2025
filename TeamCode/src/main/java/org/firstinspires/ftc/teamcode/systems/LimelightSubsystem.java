@@ -94,7 +94,7 @@ public class LimelightSubsystem {
             }
 
 
-/*  NOTE Uncomment the below to show bot position on field
+//*  NOTE Uncomment the below to show bot position on field
             Pose3D botPose = this.getAvgBotPose(20);
             if (botPose != null) {
                 Pose convertedPose = limelightToPedroPose(botPose);
@@ -102,7 +102,7 @@ public class LimelightSubsystem {
                 telemetryM.addData("Bot Pose Fixed Y:", convertedPose.getY());
                 telemetryM.addData("Bot Heading Fixed: ", Math.toDegrees(convertedPose.getHeading()));
             }
- */
+ //*/
         }
     }
 

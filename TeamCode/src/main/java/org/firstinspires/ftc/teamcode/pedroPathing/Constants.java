@@ -31,8 +31,8 @@ public class Constants {
             .distanceUnit(DistanceUnit.MM)
             .strafePodX(strafePodOffsetMm)
             .forwardPodY(forwardPodOffsetMm)
-            .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED)
-            .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED);
+            .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD)
+            .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);
 
 
     public static final MecanumConstants mecanumConstants = new MecanumConstants()
@@ -40,9 +40,8 @@ public class Constants {
             .rightFrontMotorName(rightFrontDrive)
             .leftRearMotorName(leftBackDrive)
             .rightRearMotorName(rightBackDrive)
-            .leftFrontMotorDirection(DcMotorSimple.Direction.FORWARD) //motors keep spinning wrong way so this is a solution
-            .rightFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
-            .rightRearMotorDirection(DcMotorSimple.Direction.REVERSE);
+            .leftRearMotorDirection(DcMotorSimple.Direction.FORWARD)
+            ;
 
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
 

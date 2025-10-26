@@ -113,9 +113,9 @@ public class TeleOpSingleOp extends OpMode {
         autoAim = gamepad1.x;
 
         robot.drive(
-                -gamepad1.left_stick_y,
-                -gamepad1.left_stick_x,
-                -gamepad1.right_stick_x,
+                gamepad1.left_stick_y,
+                gamepad1.left_stick_x,
+                gamepad1.right_stick_x,
                 isSlowMo,
                 isRobotCentric,
                 autoAim);
