@@ -22,10 +22,25 @@ public class Constants {
     private static final double forwardPodOffsetMm = 82.55;
     private static final double strafePodOffsetMm = 165.1;
 
-    public static double mass = 11.1;
+    private static final double forwardVelocity = 61.6;
+    private static final double strafeVelocity = 50.1;
+
+    // Acceleration of the drivetrain when power is cut in inches/second^2 (should be negative)
+    // if not negative, then the robot thinks that its going to go faster under 0 power
+    // The smaller (negative) the number the further the robot will travel under 0 power
+    private static final double forwardZeroPowerAcceleration = -37.14; // -38.7776 LOW // -51.637 FULL;
+
+    // Acceleration of the drivetrain when power is cut in inches/second^2 (should be negative)
+    // if not negative, then the robot thinks that its going to go faster under 0 power
+    private static final double lateralZeroPowerAcceleration = -66.36; // 90.7 FULL
+
+    public static double mass = 10.3;
 
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(mass);
+            .mass(mass)
+            .forwardZeroPowerAcceleration(forwardZeroPowerAcceleration)
+            .lateralZeroPowerAcceleration(lateralZeroPowerAcceleration)
+            ;
 
     public static final PinpointConstants pinpointConstants = new PinpointConstants()
             .distanceUnit(DistanceUnit.MM)
@@ -34,7 +49,6 @@ public class Constants {
             .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED)
             .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED);
 
-
     public static final MecanumConstants mecanumConstants = new MecanumConstants()
             .leftFrontMotorName(leftFrontDrive)
             .rightFrontMotorName(rightFrontDrive)
@@ -42,7 +56,9 @@ public class Constants {
             .rightRearMotorName(rightBackDrive)
             .leftFrontMotorDirection(DcMotorSimple.Direction.FORWARD) //motors keep spinning wrong way so this is a solution
             .rightFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
-            .rightRearMotorDirection(DcMotorSimple.Direction.REVERSE);
+            .rightRearMotorDirection(DcMotorSimple.Direction.REVERSE)
+            .xVelocity(forwardVelocity)
+            .yVelocity(strafeVelocity);
 
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
 

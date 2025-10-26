@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.systems;
 
+import androidx.annotation.Nullable;
+
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
@@ -13,6 +15,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.sun.tools.javac.util.List;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.common.AprilTagIds;
 import org.firstinspires.ftc.teamcode.common.Motif;
 import org.firstinspires.ftc.teamcode.common.Pipeline;
@@ -453,6 +456,26 @@ public class RobotSystem {
     }
 
     /**
+     * Gets the current Pedro pose from limelight 3D pose
+     * @param latency number of milliseconds to sample the average pose
+     * @return the current pose of the robot or null if no pose is available
+     */
+    @Nullable
+    public Pose getPedroPoseFromLimelight(long latency)
+    {
+        Pose3D botPose = limelightSys.getAvgBotPose(latency);
+        if (botPose == null) {
+            return null;
+        }
+
+        return LimelightSubsystem.limelightToPedroPose(botPose);
+    }
+
+    //==================================================================================================
+    // Passthrough and Utility Methods
+    //==================================================================================================
+
+    /**
      * Gets the path-following controller instance.
      *
      * @return The {@link Follower} object used for pathing and driving.
@@ -460,10 +483,6 @@ public class RobotSystem {
     public Follower getFollower() {
         return follower;
     }
-
-    //==================================================================================================
-    // Passthrough and Utility Methods
-    //==================================================================================================
 
     // TODO: Temp Code:
     public void resetHighLowColors() {

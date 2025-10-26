@@ -94,10 +94,12 @@ public class PathManager implements Path {
     public void setStartPose(Pose startPose) {
         this.startPose = startPose;
         robot.getFollower().setStartingPose(this.startPose);
+    }
 
+    public static void setAlianceFromPose(Pose startPose) {
         // Determine alliance based on which side of the field the robot starts on.
         // Assumes Red is on the positive X side.
-        if (startPose.getX() > (Constants.FIELD_SIZE_X_INCHES / 2.0)) {
+        if (startPose.getX() > (Constants.FIELD_SIZE_X_INCHES / 2)) {
             Alliance.set(Alliance.RED);
         } else {
             Alliance.set(Alliance.BLUE);
@@ -110,7 +112,7 @@ public class PathManager implements Path {
      * @return The starting {@link Pose} of the first path in the sequence.
      * @throws IndexOutOfBoundsException if no paths are defined for the active alliance.
      */
-    public Pose getStartPose() {
+    public Pose getPathStart() {
         if (Alliance.isRed()) {
             if (redPathSegments.isEmpty()) {
                 throw new IndexOutOfBoundsException("No paths defined for the Red alliance.");

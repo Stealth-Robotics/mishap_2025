@@ -29,7 +29,7 @@ public interface Path {
      *
      * @return The Pose object representing the path's start.
      */
-    Pose getStartPose();
+    Pose getPathStart();
 
     /**
      * Returns the total number of segments that make up the entire path.

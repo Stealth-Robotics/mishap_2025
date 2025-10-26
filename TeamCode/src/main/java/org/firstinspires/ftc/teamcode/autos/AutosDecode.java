@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.autos;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -11,7 +12,9 @@ import org.firstinspires.ftc.teamcode.common.Alliance;
 import org.firstinspires.ftc.teamcode.common.Motif;
 import org.firstinspires.ftc.teamcode.common.Pipeline;
 import org.firstinspires.ftc.teamcode.paths.Path;
+import org.firstinspires.ftc.teamcode.paths.PathManager;
 import org.firstinspires.ftc.teamcode.paths.PathState;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 
 import java.util.HashSet;
@@ -48,10 +51,9 @@ public abstract class AutosDecode extends OpMode {
      */
     protected abstract Path initPaths();
 
-    /**
-     * Sets the alliance for this autonomous routine.
-     */
-    protected abstract void setAlliance();
+    /** Last pose that was estimated by the limelight*/
+    protected Pose lastPose;
+
 
     /**
      * Called once when the op mode is initialized.
@@ -80,8 +82,42 @@ public abstract class AutosDecode extends OpMode {
         }
 
         // TODO: Use this to get robot position from limelight while waiting
+        Pose curPose = robot.getPedroPoseFromLimelight(800);
+        if (curPose != null) {
+            this.lastPose = curPose;
+            // TODO: TEMP CODE
+            telemetryM.addData("Got Pose",
+                    (curPose.getY() > (Constants.FIELD_SIZE_X_INCHES / 2)) ? "RED" : "BLUE");
+            telemetryM.addData("X", curPose.getX());
+            telemetryM.addData("Y", curPose.getY());
+        }
 
     }
+
+    /**
+     * Sets the alliance for this autonomous routine.
+     * Use limitlight if not overriden.
+     */
+    protected void setAlliance() {
+        // this means if we don't get a pose we will default to RED alliance
+        if (lastPose != null) {
+            PathManager.setAlianceFromPose(lastPose);
+        }
+    }
+
+    /**
+     * Allows for overriding the start Pose of the follower.
+     * By default we will attempt to get the limelight Pose and use that
+     */
+    protected void setStartingPose() {
+        if (lastPose != null) {
+            follower.setStartingPose(lastPose);
+        }
+        else {
+            follower.setStartingPose(paths.getPathStart());
+        }
+    }
+
 
     /**
      * Called once when the start button is pressed.
@@ -90,12 +126,16 @@ public abstract class AutosDecode extends OpMode {
     public void start() {
         robot.update();
         // TODO: Any addtional 1 time actions when start button is pressed
-        // Call abstract methods to get specific configurations
+
+        // must be called before initPaths
         setAlliance();
         paths = initPaths();
-        follower.setStartingPose(paths.getStartPose());
+        // must be called after initPaths.
+        setStartingPose();
+
         telemetryM.addData("Paths Count", paths.getSegmentCount());
 
+        // this means the hood will stay open during intaking
         robot.setAutoIntaking(true);
         stateTimer.reset();
     }
@@ -140,8 +180,6 @@ public abstract class AutosDecode extends OpMode {
             case BUSY:
                 if (!follower.isBusy()) {
                     pathState = PathState.IDLE;
-                }else {
-                    // TODO: add code here to break follower when artifact is detected
                 }
 
                 break;
@@ -226,15 +264,9 @@ public abstract class AutosDecode extends OpMode {
             robot.stopIntake();
             return true;
         }
-//        // here we will want to check the ColorSensor and see if we intake or not
-//        if (stateTimer.milliseconds() > INTAKE_DELAY) {
-//            if (!robot.isSpindexerBusy())
-//                return true;
-//
-//            robot.stopIntake();
-//        }
 
-        return true;
+        // hold up if the spindexer is busy but not too long
+        return !robot.isSpindexerBusy() || stateTimer.milliseconds() > INTAKE_DELAY;
     }
 
     /**

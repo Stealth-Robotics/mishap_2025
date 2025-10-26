@@ -93,7 +93,6 @@ public class LimelightSubsystem {
                 telemetryM.addData("Target Distance Ty: ", calcGoalDistanceByTy(targetPose.getY()));
             }
 
-
 /*  NOTE Uncomment the below to show bot position on field
             Pose3D botPose = this.getAvgBotPose(20);
             if (botPose != null) {
@@ -239,7 +238,7 @@ public class LimelightSubsystem {
      * @return The average {@link Pose3D}, or {@code null} if no valid data is available.
      */
     @Nullable
-    public Pose3D getAvgBotPose(double latencyMs) {
+    public Pose3D getAvgBotPose(long latencyMs) {
         List<Pose3D> poses = new ArrayList<>();
         List<Double> xValues = new ArrayList<>();
         List<Double> yValues = new ArrayList<>();

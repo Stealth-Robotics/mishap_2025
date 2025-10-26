@@ -25,11 +25,21 @@ public class AutoFarBlue1 extends AutosDecode {
         return new PathFarAuto1(robot);
     }
 
+    // TODO: uncomment if you don't want limelight to be used as aliance positioning
+//    @Override
+//    protected void setAliance() {
+//        // Set the specific alliance for this OpMode
+//        // can use limelight data if you want
+//        Alliance.set(Alliance.BLUE);
+//    }
+
+    /**
+     * This is overriding using the limelight as the start Pose
+     * this can be removed once limelight is tuned
+     */
     @Override
-    protected void setAlliance() {
-        // Set the specific alliance for this OpMode
-        // can use limelight data if you want
-        Alliance.set(Alliance.BLUE);
+    protected void setStartingPose() {
+        follower.setStartingPose(paths.getPathStart());
     }
 
     @Override
