@@ -226,9 +226,15 @@ public abstract class AutosDecode extends OpMode {
             robot.stopIntake();
             return true;
         }
+//        // here we will want to check the ColorSensor and see if we intake or not
+//        if (stateTimer.milliseconds() > INTAKE_DELAY) {
+//            if (!robot.isSpindexerBusy())
+//                return true;
+//
+//            robot.stopIntake();
+//        }
 
-        // hold up if the spindexer is busy but not too long
-        return !robot.isSpindexerBusy() || stateTimer.milliseconds() > INTAKE_DELAY;
+        return true;
     }
 
     /**
