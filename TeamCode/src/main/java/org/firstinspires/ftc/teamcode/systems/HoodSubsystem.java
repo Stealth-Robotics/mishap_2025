@@ -20,10 +20,14 @@ public class HoodSubsystem {
     private final Servo hoodServo;
 
     /** The default servo position when the hood is open for intake. */
-    private static final double HOOD_OPEN_POSITION = 0.59;
+    private static final double HOOD_OPEN_POSITION = 0.56;
 
     /** The default servo position when the hood is closed for shooting. */
     private static final double HOOD_CLOSED_POSITION = 0.0;
+
+    /** Needs to be adjusted based on hood transition time **/
+    private static final long HOOD_TRANSITION_TIME = 800;
+
 
     /** The current target position for the hood's open state. Can be tuned. */
     private double openPosition = HOOD_OPEN_POSITION;
@@ -31,8 +35,15 @@ public class HoodSubsystem {
     /** The current target position for the hood's closed state. Can be tuned. */
     private double closePosition = HOOD_CLOSED_POSITION;
 
-    /** A flag indicating if the hood is in the shooting position. True if ready to shoot. */
-    private boolean isInShootPosition = true;
+    private static final Timer timer = new Timer();
+
+    private HoodState hoodState = HoodState.INTAKE;
+
+    public enum HoodState {
+        INTAKE,
+        SHOOT,
+        TRANSITIONING
+    }
 
     //** Constructor **//
 
@@ -44,7 +55,7 @@ public class HoodSubsystem {
     public HoodSubsystem(HardwareMap hardwareMap) {
         hoodServo = hardwareMap.get(Servo.class, "hood_servo");
         // Set the hood to the shooting position by default upon initialization.
-        hoodShoot();
+        setShootPose();
     }
 
     //** Public Methods **//
@@ -53,9 +64,16 @@ public class HoodSubsystem {
      * Moves the hood to the "intake" (open) position.
      * This allows the robot to collect game elements.
      */
-    public void hoodIntake() {
-        isInShootPosition = false;
+    public void setIntakePose() {
+        hoodState = HoodState.TRANSITIONING;
         hoodServo.setPosition(openPosition);
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                hoodState = HoodState.INTAKE;
+            }
+        }, HOOD_TRANSITION_TIME); // 200ms delay
+
     }
 
     /**
@@ -63,15 +81,16 @@ public class HoodSubsystem {
      * A short delay is introduced before the system is considered ready to shoot,
      * allowing the servo time to move.
      */
-    public void hoodShoot() {
+    public void setShootPose() {
         hoodServo.setPosition(closePosition);
+
         // Schedule a task to update the state after a delay, ensuring the servo has moved.
-        new Timer().schedule(new TimerTask() {
+        timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                isInShootPosition = true;
+                hoodState = HoodState.SHOOT;
             }
-        }, 500); // 200ms delay
+        }, HOOD_TRANSITION_TIME); // 200ms delay
     }
 
     /**
@@ -80,8 +99,17 @@ public class HoodSubsystem {
      * @return true if the hood is in the shoot position, false otherwise.
      */
     public boolean isReadyToShoot() {
-        return isInShootPosition;
+        return (hoodState == HoodState.SHOOT);
     }
+
+    public boolean isReadyInTake() {
+        return (hoodState == HoodState.INTAKE);
+    }
+
+    public HoodState getHoodState() {
+        return hoodState;
+    }
+
 
     /**
      * Increases the servo's open position value by a small amount for tuning.

@@ -7,5 +7,6 @@ public enum SlotState {
     EMPTY,
     ARTIFACT_PURPLE,
     ARTIFACT_GREEN,
+    TRANSITIONING,
     UNKNOWN
 }

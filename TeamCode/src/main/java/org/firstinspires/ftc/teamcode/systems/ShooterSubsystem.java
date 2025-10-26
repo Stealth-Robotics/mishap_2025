@@ -23,8 +23,6 @@ public class ShooterSubsystem {
     private static final double MIN_SHOOT_TIME_MS = 500;
     private static final double MAX_SHOOT_TIME_MS = 3000;
 
-
-
     // --- Constants ---
     public static final double MAX_RPM = 5200;
     public static final double MIN_RPM = 0;

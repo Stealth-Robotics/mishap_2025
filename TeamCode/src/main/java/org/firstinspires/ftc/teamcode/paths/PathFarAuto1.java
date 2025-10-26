@@ -32,11 +32,11 @@ public class PathFarAuto1 extends PathManager{
         addBluePath(
                 follower.pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(56.000, 8.5), new Pose(61.000, 20.000))
+                                new BezierLine(new Pose(56.000, 9), new Pose(61.000, 20.000))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(115))
+                        // spin up early
                         .addParametricCallback(0.1, robot::tryReadyShoot)
-                        //.setTimeoutConstraint(1000)
                         .build());
         // Move to line 1 intake area
         addBluePath(
@@ -64,7 +64,7 @@ public class PathFarAuto1 extends PathManager{
                         .build()
         );
 
-        // COMP 1
+        // Artifact 1
         addBluePath(
                 follower.pathBuilder()
                         .addPath(
@@ -75,7 +75,7 @@ public class PathFarAuto1 extends PathManager{
                         .build()
         );
 
-        // CHOMP 2
+        // artifact 2
         addBluePath(
                 follower.pathBuilder()
                         .addPath(
@@ -83,19 +83,16 @@ public class PathFarAuto1 extends PathManager{
                         )
                         .setTangentHeadingInterpolation()
                         .setReversed()
-                        .addParametricCallback(0, robot::startIntake)
                         .build()
         );
-        // CHOMP 3
+        // Artifact 3 we hope
         addBluePath(
                 follower.pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(26.000, 36.000), new Pose(18.000, 36.000))
+                                new BezierLine(new Pose(26.000, 36.000), new Pose(10.000, 36.000))
                         )
                         .setTangentHeadingInterpolation()
                         .setReversed()
-                        .addParametricCallback(0, robot::startIntake)
-
                         .build()
         );
 
@@ -103,15 +100,17 @@ public class PathFarAuto1 extends PathManager{
         addBluePath(
                 follower.pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(18.00, 36.000), new Pose(61.000, 20.000))
+                                new BezierLine(new Pose(10, 36.000), new Pose(61.000, 20.000))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(115))
                         .addParametricCallback(0, ()->follower.setMaxPower(1))
+                        .addParametricCallback(0, robot::stopIntake)
+                        // get the shooter motors spinning early
                         .addParametricCallback(0.5, robot::tryReadyShoot)
                         //.setTimeoutConstraint(1000)
                         .build()
         );
-
+        //TODO: CONINUE TO ROW 2 or the side area
         // HOME TEST:
         addBluePath(
                 follower.pathBuilder()

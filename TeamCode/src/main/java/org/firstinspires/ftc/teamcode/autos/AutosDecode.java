@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.common.Alliance;
+import org.firstinspires.ftc.teamcode.common.Motif;
 import org.firstinspires.ftc.teamcode.common.Pipeline;
 import org.firstinspires.ftc.teamcode.paths.Path;
 import org.firstinspires.ftc.teamcode.paths.PathState;
@@ -52,7 +53,6 @@ public abstract class AutosDecode extends OpMode {
      */
     protected abstract void setAlliance();
 
-
     /**
      * Called once when the op mode is initialized.
      */
@@ -62,15 +62,10 @@ public abstract class AutosDecode extends OpMode {
         robot = new RobotSystem(hardwareMap, telemetry);
         follower = robot.getFollower();
 
-        // Call abstract methods to get specific configurations
-        setAlliance();
-        paths = initPaths();
-
-        follower.setStartingPose(paths.getStartPose());
-
         telemetryM.debug("Status", "Initialized");
-        telemetryM.addData("Paths Count", paths.getSegmentCount());
-
+        // TODO: TEMP CODE
+        robot.initSpindxerSlotsEmpty();
+        //robot.initSpindxerSlotsAuto();
         robot.update();
     }
 
@@ -95,7 +90,13 @@ public abstract class AutosDecode extends OpMode {
     public void start() {
         robot.update();
         // TODO: Any addtional 1 time actions when start button is pressed
+        // Call abstract methods to get specific configurations
+        setAlliance();
+        paths = initPaths();
+        follower.setStartingPose(paths.getStartPose());
+        telemetryM.addData("Paths Count", paths.getSegmentCount());
 
+        robot.setAutoIntaking(true);
         stateTimer.reset();
     }
 
@@ -115,6 +116,7 @@ public abstract class AutosDecode extends OpMode {
 
         switch (pathState) {
             case READ_MOTIF:
+                // wait till the last minute to read the obelisk to get the motif
                 if (!this.doMotifOrTimeout()) {
                     return;
                 }
@@ -122,6 +124,7 @@ public abstract class AutosDecode extends OpMode {
                 pathState = PathState.SET_TARGET;
                 break;
             case SET_TARGET:
+                // set the target for correct aliance
                 robot.setLimelightPipeline(Alliance.isRed()
                         ? Pipeline.APRILTAG_TARGET_RED
                         : Pipeline.APRILTAG_TARGET_BLUE);
@@ -213,21 +216,35 @@ public abstract class AutosDecode extends OpMode {
         return PathState.IDLE;
     }
 
+    /**
+     * Any acctions required durring the intake phase
+     * @return true once done otherwise false
+     */
     protected boolean doIntakeAction()
     {
-        // here we will want to check the ColorSensor and see if we intake or not
-        if (stateTimer.milliseconds() > INTAKE_DELAY) {
-            if (!robot.isSpindexerBusy())
-                return true;
-
+        if (robot.isSpindexerFull()) {
             robot.stopIntake();
+            return true;
         }
+//        // here we will want to check the ColorSensor and see if we intake or not
+//        if (stateTimer.milliseconds() > INTAKE_DELAY) {
+//            if (!robot.isSpindexerBusy())
+//                return true;
+//
+//            robot.stopIntake();
+//        }
 
-        return false;
+        return true;
     }
 
+    /**
+     * Attempt to get the current motif from the obelisk
+     * @return false for still looking true for found or timed out.
+     */
     protected boolean doMotifOrTimeout() {
+        // If we timout set the mofif to the loaded pattern of GPP
         if (stateTimer.milliseconds() > MOTIF_TIMEOUT) {
+            robot.setMotifPattern(Motif.GPP);
             return true;
         }
 
@@ -256,6 +273,11 @@ public abstract class AutosDecode extends OpMode {
         return robot.doAimAtTarget(1, 500);
     }
 
+    /**
+     * Keeps the follower moving and tracking the path.
+     *
+     * @return The current state of the follower.
+     */
     private PathState updateFollowerState() {
         if (pathState == PathState.WAIT) {
             return pathState;

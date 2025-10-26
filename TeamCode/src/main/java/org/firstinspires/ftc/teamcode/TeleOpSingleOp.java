@@ -186,6 +186,10 @@ public class TeleOpSingleOp extends OpMode {
             // Stop intake only if neither bumper is pressed
             robot.stopIntake();
         }
+
+        if (gamepad1.startWasPressed()){
+            robot.toggleAutoIntaking();
+        }
     }
 
     /**
@@ -209,7 +213,7 @@ public class TeleOpSingleOp extends OpMode {
     private void handleOtherControls() {
         if (gamepad1.backWasPressed()) {
             robot.resetHighLowColors();
-            robot.toggleLimelightPipeline();
+            robot.toggleLimelightTarget();
         }
     }
 

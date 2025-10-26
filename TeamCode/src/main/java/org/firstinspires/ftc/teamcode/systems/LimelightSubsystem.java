@@ -85,10 +85,10 @@ public class LimelightSubsystem {
      */
     public void update() {
         LLResult result = this.getLastResult();
-        if (result != null && result.isValid() && result.getStaleness() < 50) {
-            telemetryM.addData("Pipeline", this.getCurrentPipeline());
+        telemetryM.addData("Pipeline", this.getCurrentPipeline());
+        if (result != null && result.isValid() && result.getStaleness() < 100) {
             telemetryM.addData("AprilTag ID", this.getAprilTagId());
-            Pose targetPose = this.getAvgTargetPose(20);
+            Pose targetPose = this.getAvgTargetPose(50);
             if (targetPose != null) {
                 telemetryM.addData("Target Distance Ty: ", calcGoalDistanceByTy(targetPose.getY()));
             }
@@ -185,10 +185,23 @@ public class LimelightSubsystem {
         return Pipeline.values()[limelight.getStatus().getPipelineIndex()];
     }
 
+    public void toggleTargetPileline() {
+        Pipeline cur = getCurrentPipeline();
+        switch (cur) {
+            case APRILTAG_TARGET_BLUE:
+                setPipeline(APRILTAG_TARGET_RED);
+                break;
+            case APRILTAG_TARGET_RED:
+            default:
+                setPipeline(APRILTAG_TARGET_BLUE);
+                break;
+        }
+    }
+
     /**
      * Switches the pipeline to the next one in a predefined sequence.
      */
-    public void togglePipeline() {
+    public void toggleFullPipeline() {
         Pipeline cur = getCurrentPipeline();
         switch (cur) {
             case APRILTAG_TARGET_BLUE:
@@ -201,10 +214,8 @@ public class LimelightSubsystem {
                 setPipeline(Pipeline.APRILTAG_MOTIF);
                 break;
             case APRILTAG_MOTIF:
-                setPipeline(Pipeline.APRILTAG_TARGET_BLUE);
-                break;
             default:
-                // Optional: handle other pipelines or do nothing
+                setPipeline(Pipeline.APRILTAG_TARGET_BLUE);
                 break;
         }
     }
@@ -404,10 +415,19 @@ public class LimelightSubsystem {
      * @return The distance to the goal in inches
      */
     public static double calcGoalDistanceByTy(double ty) {
-        double angleToObjectDegrees = LIMELIGHT_MOUNT_ANGLE_DEGREES + APRIL_TAG_CENTER_HEIGHT_INCHES;
-        double angleToGoalRadians = Math.toRadians(angleToObjectDegrees); //  (3.14159 / 180.0);
-        return (APRIL_TAG_CENTER_HEIGHT_INCHES - LIMELIGHT_FLOOR_HEIGHT_INCHES) / Math.tan(angleToGoalRadians);
-    }
+        // This is the total angle from the camera to the target, relative to a horizontal line from the camera.
+        double totalAngleDegrees = LIMELIGHT_MOUNT_ANGLE_DEGREES + ty;
+
+        // Convert the total angle to radians for use in Math.tan()
+        double totalAngleRadians = Math.toRadians(totalAngleDegrees);
+
+        // Calculate the height difference between the AprilTag and the Limelight
+        double heightDifference = APRIL_TAG_CENTER_HEIGHT_INCHES - LIMELIGHT_FLOOR_HEIGHT_INCHES;
+
+        // Using trigonometry (tangent) to find the horizontal distance
+        // distance = opposite / tan(angle)
+
+        return heightDifference / Math.tan(totalAngleRadians);    }
 
     /**
      * Calculates the arithmetic mean of a list of numbers.
