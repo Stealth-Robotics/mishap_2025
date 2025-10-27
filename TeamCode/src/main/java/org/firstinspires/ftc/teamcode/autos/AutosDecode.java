@@ -26,6 +26,8 @@ public abstract class AutosDecode extends OpMode {
 
     public static final double MOTIF_TIMEOUT = 2000;
     public static final double AIM_TIMEOUT = 1500;
+
+    protected static final double PIPELINE_SWITCH_DELAY = 1000;
     protected final ElapsedTime actionTimer = new ElapsedTime();
     protected static final long INTAKE_DELAY = 5000; // delay to keep hood open
     protected final HashSet<Integer> shootIndexes = new HashSet<>();
@@ -41,6 +43,8 @@ public abstract class AutosDecode extends OpMode {
     private final ElapsedTime stateTimer = new ElapsedTime();
 
     private boolean isSpindexerReady = false;
+
+    private boolean hasCheckedArtifacts = false;
 
 
     // --- Abstract Methods to be Implemented by Child Classes ---
@@ -63,12 +67,18 @@ public abstract class AutosDecode extends OpMode {
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
         robot = new RobotSystem(hardwareMap, telemetry);
         follower = robot.getFollower();
-
+        setSpindexerInitState();
         telemetryM.debug("Status", "Initialized");
-        // TODO: TEMP CODE
-        robot.initSpindxerSlotsEmpty();
-        //robot.initSpindxerSlotsAuto();
         robot.update();
+    }
+
+    /**
+     * override if you want to manually setup the spindexer slot
+     * to prevent the rotation of the spindexer during init
+     */
+    protected void setSpindexerInitState()
+    {
+        robot.initSpindxerSlotsEmpty();
     }
 
     /**
@@ -79,19 +89,16 @@ public abstract class AutosDecode extends OpMode {
         robot.update();
         if (!isSpindexerReady) {
             isSpindexerReady = robot.doInitSpindexer();
+        } else if (!hasCheckedArtifacts) {
+            hasCheckedArtifacts = robot.doArtifactSort();
         }
+
 
         // TODO: Use this to get robot position from limelight while waiting
         Pose curPose = robot.getPedroPoseFromLimelight(800);
         if (curPose != null) {
             this.lastPose = curPose;
-            // TODO: TEMP CODE
-            telemetryM.addData("Got Pose",
-                    (curPose.getY() > (Constants.FIELD_SIZE_X_INCHES / 2)) ? "RED" : "BLUE");
-            telemetryM.addData("X", curPose.getX());
-            telemetryM.addData("Y", curPose.getY());
         }
-
     }
 
     /**
@@ -223,13 +230,16 @@ public abstract class AutosDecode extends OpMode {
                     }
                     return PathState.WAIT;
                 case 2:
-                    if (robot.getShootReady()) {
-                        // TODO: change this to a shoot all artifacts
-                        if (robot.tryShoot()) {
-                            return PathState.CONTINUE;
-                        }
-                    } else {
-                        robot.tryReadyShoot();
+                    // Ready for Motif shot if false there is nothing to shoot
+                    if (robot.startShootMotif()) {
+                        subActionStep++;
+                        return PathState.WAIT;
+                    }
+
+                    break;
+                case 3:
+                    // Try to shoot the artifact
+                    if (!robot.continueShootMotif()) {
                         return PathState.WAIT;
                     }
 
@@ -276,7 +286,7 @@ public abstract class AutosDecode extends OpMode {
     protected boolean doMotifOrTimeout() {
         // If we timout set the mofif to the loaded pattern of GPP
         if (stateTimer.milliseconds() > MOTIF_TIMEOUT) {
-            robot.setMotifPattern(Motif.GPP);
+            robot.setMotifPattern(Motif.PPG);
             return true;
         }
 
@@ -302,7 +312,7 @@ public abstract class AutosDecode extends OpMode {
             return true;
         }
 
-        return robot.doAimAtTarget(1, 500);
+        return robot.doAimAtTarget(.2, 500);
     }
 
     /**

@@ -34,7 +34,7 @@ public class PathFarAuto1 extends PathManager{
                         .addPath(
                                 new BezierLine(new Pose(56.000, 9), new Pose(61.000, 20.000))
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(115))
+                        .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(100))
                         // spin up early
                         .addParametricCallback(0.1, robot::tryReadyShoot)
                         .build());
@@ -50,7 +50,7 @@ public class PathFarAuto1 extends PathManager{
                                 )
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(115), Math.toRadians(0))
-                        .addParametricCallback(.9, ()-> follower.setMaxPower(.2))
+                        .addParametricCallback(.9, ()-> follower.setMaxPower(.3))
                         .build());
         // Move to CHOMP POS
         addBluePath(
@@ -107,7 +107,6 @@ public class PathFarAuto1 extends PathManager{
                         .addParametricCallback(0, robot::stopIntake)
                         // get the shooter motors spinning early
                         .addParametricCallback(0.5, robot::tryReadyShoot)
-                        //.setTimeoutConstraint(1000)
                         .build()
         );
         //TODO: CONINUE TO ROW 2 or the side area
@@ -125,7 +124,20 @@ public class PathFarAuto1 extends PathManager{
 
     private void buildRedPath()
     {
-        //TODO: IMPLEMENT
+        Follower follower = robot.getFollower();
+        // Start against wall in far shoot zone
+        // Move to Shoot 1
+        addRedPath(
+                follower.pathBuilder()
+                        .addPath(
+                                // Move to shooting
+                                new BezierLine(new Pose(96.000, 8.500), new Pose(84.685, 20.471))
+                        )
+                        .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(65))
+
+                        // spin up early
+                        .addParametricCallback(0.1, robot::tryReadyShoot)
+                        .build());
     }
 
 }

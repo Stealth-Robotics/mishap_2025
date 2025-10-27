@@ -23,6 +23,8 @@ public class SweeperSubsystem {
     /** The right CR servo for the sweeper mechanism. */
     private final CRServo rightSweeper;
 
+    private final CRServo eggbeater;
+
     /**
      * Constructs a new SweeperSubsystem.
      *
@@ -31,6 +33,11 @@ public class SweeperSubsystem {
     public SweeperSubsystem(HardwareMap hardwareMap) {
         leftSweeper = hardwareMap.get(CRServo.class, "left_sweeper_servo");
         rightSweeper = hardwareMap.get(CRServo.class, "right_sweeper_servo");
+        eggbeater = hardwareMap.get(CRServo.class, "eggbeater_servo");
+
+        eggbeater.setDirection(DcMotorSimple.Direction.REVERSE);
+
+
 
         // Reverse the direction of the right sweeper so that both sweepers rotate inwards or outwards together.
         rightSweeper.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -42,6 +49,7 @@ public class SweeperSubsystem {
     public void startIntake() {
         leftSweeper.setPower(currentPower);
         rightSweeper.setPower(currentPower);
+        eggbeater.setPower(currentPower);
     }
 
     /**
@@ -50,6 +58,7 @@ public class SweeperSubsystem {
     public void stopIntake() {
         leftSweeper.setPower(0.0);
         rightSweeper.setPower(0.0);
+        eggbeater.setPower(0.0);
     }
 
     /**
@@ -58,6 +67,7 @@ public class SweeperSubsystem {
     public void reverseIntake() {
         leftSweeper.setPower(-currentPower);
         rightSweeper.setPower(-currentPower);
+        eggbeater.setPower(-currentPower);
     }
 
     /**

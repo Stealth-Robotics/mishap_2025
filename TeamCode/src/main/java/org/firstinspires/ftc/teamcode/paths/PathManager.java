@@ -99,7 +99,7 @@ public class PathManager implements Path {
     public static void setAlianceFromPose(Pose startPose) {
         // Determine alliance based on which side of the field the robot starts on.
         // Assumes Red is on the positive X side.
-        if (startPose.getX() > (Constants.FIELD_SIZE_X_INCHES / 2)) {
+        if (startPose.getY() > (Constants.FIELD_SIZE_X_INCHES / 2)) {
             Alliance.set(Alliance.RED);
         } else {
             Alliance.set(Alliance.BLUE);

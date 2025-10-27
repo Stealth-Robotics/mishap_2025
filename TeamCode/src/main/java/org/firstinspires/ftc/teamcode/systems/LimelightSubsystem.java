@@ -93,8 +93,9 @@ public class LimelightSubsystem {
                 telemetryM.addData("Target Distance Ty: ", calcGoalDistanceByTy(targetPose.getY()));
             }
 
-/*  NOTE Uncomment the below to show bot position on field
-            Pose3D botPose = this.getAvgBotPose(20);
+            // NOTE Uncomment the below to show bot position on field
+/*
+            Pose3D botPose = this.getAvgBotPose(50);
             if (botPose != null) {
                 Pose convertedPose = limelightToPedroPose(botPose);
                 telemetryM.addData("Bot Pose Fixed X:", convertedPose.getX());

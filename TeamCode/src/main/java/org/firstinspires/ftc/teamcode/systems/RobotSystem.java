@@ -22,8 +22,6 @@ import org.firstinspires.ftc.teamcode.common.Pipeline;
 import org.firstinspires.ftc.teamcode.common.SlotState;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.Map;
 
 /**
@@ -53,6 +51,8 @@ public class RobotSystem {
 
     public static final int MAX_OVER_CURRENT_COUNT = 4;
 
+    private static final double MAX_UNJAM_TIME = 1000;
+
 
     /** PIDF coefficients for the heading controller used in auto-aim. */
     private static final PIDFCoefficients HEADING_COEFFICIENTS
@@ -63,6 +63,14 @@ public class RobotSystem {
 
     /** Delay in milliseconds to wait before advancing the spindexer to the next slot after shooting. */
     private static final long SHOOT_SPINDEXER_ADVANCE_DELAY_MS = SHOOT_KICKER_RESET_DELAY_MS * 2;
+
+    /** Maps the current motif pattern to a list of slot states. */
+    private static final Map<Motif, List<SlotState>> motifSlots = Map.of(
+            Motif.GPP, List.of(SlotState.ARTIFACT_GREEN, SlotState.ARTIFACT_PURPLE, SlotState.ARTIFACT_PURPLE),
+            Motif.PGP, List.of(SlotState.ARTIFACT_PURPLE, SlotState.ARTIFACT_GREEN, SlotState.ARTIFACT_PURPLE),
+            Motif.PPG, List.of(SlotState.ARTIFACT_PURPLE, SlotState.ARTIFACT_PURPLE, SlotState.ARTIFACT_GREEN),
+            Motif.UNKNOWN, List.of(SlotState.UNKNOWN, SlotState.UNKNOWN, SlotState.UNKNOWN)
+    );
 
     //==================================================================================================
     // State Machine
@@ -77,7 +85,7 @@ public class RobotSystem {
         REVERSING_INTAKE,   // Reversing the intake to clear jams.
         STOPPING_INTAKE,    // A transitional state to properly stop the intake sequence.
         PREPPING_SHOOT,     // Spinning up the shooter and positioning the hood.
-        SHOOTING,            // A transitional state to fire a projectile and advance the spindexer.
+        SHOOTING,            // A transitional state to shoot one artifact and advance the spindexer.
         SPINDEXING           // A requst to move the spindexer
     }
 
@@ -114,16 +122,13 @@ public class RobotSystem {
     /** Current index into the motif patter */
     private int curMotifIndex = 0;
 
-    /** Maps the current motif pattern to a list of slot states. */
-    private final Map<Motif, List<SlotState>> motifSlots = Map.of(
-            Motif.GPP, List.of(SlotState.ARTIFACT_GREEN, SlotState.ARTIFACT_PURPLE, SlotState.ARTIFACT_PURPLE),
-            Motif.PGP, List.of(SlotState.ARTIFACT_PURPLE, SlotState.ARTIFACT_GREEN, SlotState.ARTIFACT_PURPLE),
-            Motif.PPG, List.of(SlotState.ARTIFACT_PURPLE, SlotState.ARTIFACT_PURPLE, SlotState.ARTIFACT_GREEN),
-            Motif.UNKNOWN, List.of(SlotState.UNKNOWN, SlotState.UNKNOWN, SlotState.UNKNOWN)
-    );
-
     /** This keeps the shooter motors spinning */
     private boolean isBurstFire = false;
+
+    private boolean isMotifShot = false;
+
+    private boolean isMotifAvailable = false;
+
 
     /** tracks if the robot will handle intaking */
     private boolean isAutoIntaking = false;
@@ -170,6 +175,8 @@ public class RobotSystem {
         return spindexerSys.doInitPosition();
     }
 
+
+
     //==================================================================================================
     // Core Logic
     //==================================================================================================
@@ -209,11 +216,12 @@ public class RobotSystem {
         // Exit early if the motor is not jammed. Reset the counter.
         if (!spindexerSys.isJammed()) {
             if (overCurrentCount > 0){
-
-                if (jamTimer.milliseconds() > 1000){
+                if (jamTimer.milliseconds() > MAX_UNJAM_TIME){
                     if (currentState == SystemState.INTAKING) {
                         sweeperSys.startIntake();
                     }
+                    // If jam free for over MAX_UNJAM_TIME then reset the counter
+                    overCurrentCount = 0;
                 }
             }
 
@@ -231,7 +239,7 @@ public class RobotSystem {
         }
 
         // Only execute the anti-jam maneuver if enough time has passed.
-        if (jamTimer.milliseconds() > 1000) {
+        if (jamTimer.milliseconds() > MAX_UNJAM_TIME) {
             // The logic inside this block is your anti-jam maneuver.
             // It toggles between two actions based on whether the number of attempts is odd or even.
 
@@ -260,21 +268,22 @@ public class RobotSystem {
      * @param z            Rotational power (-1 to 1).
      * @param robotCentric If true, drive directions are relative to the robot's front. If false, they are field-centric.
      * @param slowMo       If true, applies the SLOW_MODE_MULTIPLIER to reduce drive speed.
-     * @param autoAim      If true, uses the Limelight camera to automatically aim at a target, overriding the z input.
+     * @param isAutoAim      If true, uses the Limelight camera to automatically aim at a target, overriding the z input.
      */
-    public void drive(double y, double x, double z, boolean robotCentric, boolean slowMo, boolean autoAim) {
+    public void drive(double y, double x, double z, boolean robotCentric, boolean slowMo, boolean isAutoAim) {
         double slowMoFactor = slowMo ? SLOW_MODE_MULTIPLIER : 1;
         double turn = z * slowMoFactor;
 
-        if (autoAim) {
+        if (isAutoAim) {
             limelightSys.getLastResult(); // Force an update of the Limelight data.
-            Pose llPose = limelightSys.getAvgTargetPose(10); // Get averaged target position.
-
+            Pose llPose = limelightSys.getAvgTargetPose(50); // Get averaged target position.
             if (llPose != null) {
                 // Calculate the turn power needed to center the target.
                 double output = getScaledTxOutput(llPose.getX(), AUTO_AIM_TOLERANCE);
+                shooterSys.setTargetRpmFromDisance(LimelightSubsystem.calcGoalDistanceByTy(llPose.getY()));
                 // The output is applied to the rotation power (note: may need to be inverted).
                 turn = -output;
+
             } else {
                 // If the target is lost, reset the PID controller to prevent integral windup.
                 headingController.reset();
@@ -294,6 +303,7 @@ public class RobotSystem {
         if (llPose != null) {
             // Calculate the turn power needed to center the target.
             double output = getScaledTxOutput(llPose.getX(), tolerance);
+            shooterSys.setTargetRpmFromDisance(LimelightSubsystem.calcGoalDistanceByTy(llPose.getY()));
             // The output is applied to the rotation power (note: may need to be inverted).
             turn = -output;
         } else {
@@ -332,6 +342,7 @@ public class RobotSystem {
         if (detectedMotif != Motif.UNKNOWN) {
             // A valid motif (GPP, PGP, or PPG) was found.
             this.motifPattern = detectedMotif;
+            Motif.set(detectedMotif);
             return true;
         } else if (id.id == AprilTagIds.TAG_ID_NONE.id) {
             // No tag is visible, update state to UNKNOWN.
@@ -343,6 +354,11 @@ public class RobotSystem {
         return false;
     }
 
+    public Motif getDetectedMotif() {
+        return this.motifPattern;
+    }
+
+
     //==================================================================================================
     // State Control Methods
     //==================================================================================================
@@ -352,13 +368,19 @@ public class RobotSystem {
      * and runs the sweeper and spindexer.
      */
     public void startIntake() {
-        currentState = SystemState.INTAKING;
         shooterSys.stop();
         kickerSys.setReady();
-        hoodSys.setIntakePose();
-        sweeperSys.startIntake();
-        if (!isAutoIntaking) {
+        if (spindexerSys.getIntakeSlotState() == SlotState.EMPTY) {
+            hoodSys.setIntakePose();
+            sweeperSys.startIntake();
             spindexerSys.setFloat();
+            currentState = SystemState.INTAKING;
+        }
+        else if (spindexerSys.getShootSlotState() == SlotState.EMPTY ) {
+            incrementSpindexerSlot();
+        }
+        else if (!isSpindexerFull()){
+            decrementSpindexerSlot();
         }
     }
 
@@ -388,11 +410,12 @@ public class RobotSystem {
 
     /**
      * Prepares the robot to shoot by spinning up the shooter wheels and setting the hood angle.
+     * @return true if the shooter can be readied ortherwise false.
      */
     public boolean tryReadyShoot() {
         if (currentState == SystemState.IDLE) {
             currentState = SystemState.PREPPING_SHOOT;
-            kickerSys.isReady();
+            kickerSys.setReady();
             hoodSys.setShootPose();
             shooterSys.runShooter();
             return true;
@@ -421,13 +444,104 @@ public class RobotSystem {
         return false;
     }
 
+    /**
+     * Resets the Motif state machine back to the initial state.
+     */
+    public void resetMotifState() {
+        isMotifShot = false;
+        curMotifIndex = 0;
+        setBurstFire(false);
+        stopShooter();
+    }
+    /**
+     * Attempts to get ready for a motif shot
+     * @return returns false until the robot can be readied or the spindexer is empty
+     */
     public boolean startShootMotif() {
+        // Spindexer empty no need to continue
+        if (spindexerSys.isEmpty()) {
+            resetMotifState();
+            return false;
+        }
+
+        isMotifAvailable = spindexerSys.isMotifAvailable();
+
+        // keep the shooter spinning
+        setBurstFire(true);
+        isMotifShot = true;
+        curMotifIndex = 0;
+
+        // start preping our shots
+        tryReadyShoot();
+
         return true;
     }
+
+    /**
+     * Call after startShootMotif() to continue shooting the motif
+     *
+     * @return returns false until done shooting the motif
+     */
     public boolean continueShootMotif() {
 
+        // must wait for the spindexer to finish
+        if (this.isSpindexerBusy()) {
+            return false;
+        }
 
-        return spindexerSys.isEmpty();
+        // Can't shoot anymore
+        if (spindexerSys.isEmpty()) {
+            resetMotifState();
+            return true;
+        }
+
+        // If we don't have a Motif then just shoot it all
+        if (!isMotifAvailable) {
+            if (spindexerSys.getShootSlotState() == SlotState.EMPTY) {
+                if (!spindexerSys.moveToNextAvailableSlot())
+                {
+                    // unable to move to the next slot
+                    resetMotifState();
+                    return !this.isSpindexerBusy();
+                }
+            }
+            else {
+                // just incase we are not ready
+                if (!tryReadyShoot()) {
+                    return false;
+                }
+
+                tryShoot();
+            }
+
+            return false;
+        }
+
+        //noinspection DataFlowIssue
+        if (curMotifIndex >= motifSlots.get(motifPattern).size()) {
+            resetMotifState();
+            return this.isSpindexerBusy();
+        }
+
+        // OK we can shoot the motif
+
+        //noinspection DataFlowIssue
+        SlotState slotState = motifSlots.get(motifPattern).get(curMotifIndex);
+        if (spindexerSys.getShootSlotState() != slotState) {
+            if(!spindexerSys.rotateToArtifact(slotState)){
+                resetMotifState();
+                return true;
+            }
+        }
+
+        if(tryReadyShoot()) {
+            if (tryShoot()) {
+                curMotifIndex++;
+                return false;
+            }
+        }
+
+        return false;
     }
 
     //==================================================================================================
@@ -443,7 +557,8 @@ public class RobotSystem {
         return currentState == SystemState.INTAKING
                 || currentState == SystemState.REVERSING_INTAKE
                 || currentState == SystemState.STOPPING_INTAKE
-                || !spindexerSys.isReady();
+                || !spindexerSys.isReady()
+                || !kickerSys.isReady();
     }
 
     /**
@@ -474,6 +589,22 @@ public class RobotSystem {
     //==================================================================================================
     // Passthrough and Utility Methods
     //==================================================================================================
+
+    public void stopShooter() {
+        if (shooterSys.isRunning()){
+            kickerSys.setReady();
+            shooterSys.stop();
+        }
+    }
+
+    public boolean doArtifactSort() {
+        if (!hoodSys.isReadyToShoot()) {
+            hoodSys.setShootPose();
+            return false;
+        }
+
+        return spindexerSys.doCheckForArtifacts();
+    }
 
     /**
      * Gets the path-following controller instance.
@@ -518,11 +649,15 @@ public class RobotSystem {
         return spindexerSys.isFull();
     }
 
-    /** Sets the LED motif pattern. */
+    /** Sets the Obelisk motif pattern. */
     public void setMotifPattern(Motif motifPattern) { this.motifPattern = motifPattern; }
 
     /** Manually advances the spindexer by one slot. */
-    public void incrementSpindexerSlot() { spindexerSys.advanceOneSlot(); }
+    public void incrementSpindexerSlot() {
+        if (kickerSys.isReady()) {
+            spindexerSys.advanceOneSlot();
+        }
+    }
 
     /** Manually moves the spindexer back by one slot. */
     public void decrementSpindexerSlot() { spindexerSys.decreaseOneSlot(); }
@@ -531,10 +666,10 @@ public class RobotSystem {
     public void setSpindexerSlot(int index) { spindexerSys.rotateToSlot(index); }
 
     /** Increases the target shooter RPM for far shots. */
-    public void increaseShooterRpmFar() { shooterSys.increaseRpmFar(); }
+    public void increaseShooterRpmFar() { shooterSys.increaseCurrentRpmRange(); }
 
     /** Decreases the target shooter RPM for far shots. */
-    public void decreaseShooterRpmFar() { shooterSys.decreaseRpmFar(); }
+    public void decreaseShooterRpmFar() { shooterSys.decreaseCurrentRpmRange(); }
 
     /** Nudges the spindexer's raw position by a small positive amount. */
     public void increaseSpindexer() { spindexerSys.nudgePosition(5); }
@@ -609,7 +744,7 @@ public class RobotSystem {
                 break;
 
             case SHOOTING:
-                // After a short delay, reset the kicker to its ready position.
+                // Need to wait for the kicker to kick before retracting it.
                 if (stateTimer.milliseconds() >= SHOOT_KICKER_RESET_DELAY_MS) {
                     // Stop the shooter unless burst fire is active.
                     if (!isBurstFire) {
@@ -619,24 +754,32 @@ public class RobotSystem {
                     kickerSys.setReady();
                 }
 
-                // After a longer delay, advance the spindexer to the next slot and return to IDLE.
-                if (stateTimer.milliseconds() >= SHOOT_SPINDEXER_ADVANCE_DELAY_MS) {
+                // We will auto handle the rotation
+                if (isMotifShot && kickerSys.isReady()) {
+                    currentState = SystemState.IDLE;
+                    break;
+                }
+
+                // wait for the kicker to come back before we can advance the spindexer.
+                if (kickerSys.isReady()) {
                     spindexerSys.advanceOneSlot();
                     currentState = SystemState.SPINDEXING;
                 }
 
                 break;
-
                 case SPINDEXING:
                     if (spindexerSys.isReady()){
                         currentState = SystemState.IDLE;
                     }
+
                     break;
             case IDLE:
                 // IDLE state keep an eye on the intaking slot
                 // if there is a change update the state
                 SlotState detectedState = colorSensorSys.getLastDetection();
-                if (detectedState != SlotState.TRANSITIONING && hoodSys.isReadyToShoot()) {
+                if (detectedState != SlotState.TRANSITIONING
+                        && hoodSys.isReadyToShoot()
+                        && spindexerSys.isReady()) {
                     SlotState currentSlotState = spindexerSys.getIntakeSlotState();
                     if ((detectedState != SlotState.UNKNOWN
                             && detectedState != currentSlotState)
@@ -647,6 +790,11 @@ public class RobotSystem {
                 }
             case INTAKING:
                 if (isAutoIntaking) {
+                    // Just incase make sure we move the kicker
+                    if (!kickerSys.isReady()) {
+                        kickerSys.setReady();
+                    }
+
                     SlotState itemDetected = colorSensorSys.getLastDetection();
 
                     // Condition 1: An artifact is detected.
@@ -663,7 +811,7 @@ public class RobotSystem {
                         spindexerSys.setBrake();
 
                         // Condition 2: The spindexer is ready to move.
-                        if (spindexerSys.isReady()) {
+                        if (spindexerSys.isReady() && kickerSys.isReady()) {
 
                             // If the shooter slot is empty, proceed to advance the spindexer.
                             spindexerSys.setIntakeSlotState(itemDetected);
@@ -690,14 +838,16 @@ public class RobotSystem {
         //telemetryM.addData("Target RPM", shooterSys.getTargetRpm());
 //        telemetryM.addData("Robot State", currentState.name());
 //        telemetryM.addData("Shoot Slot Index", spindexerSys.getCurShootSlot());
-//        telemetryM.addData("Shoot Slot State:", spindexerSys.getShootSlotState());
-//        telemetryM.addData("Intake Slot State:", spindexerSys.getIntakeSlotState());
+        telemetryM.addData("Shoot Slot State:", spindexerSys.getShootSlotState());
+        telemetryM.addData("Intake Slot State:", spindexerSys.getIntakeSlotState());
+        telemetryM.addData("Standbby Slot State:", spindexerSys.getStandbySlotState());
+        telemetryM.addData("Shoot Slot Number:", spindexerSys.getCurShootSlot());
+        telemetryM.addData("IsMotif available", spindexerSys.isMotifAvailable());
 //        telemetryM.addData("Is Auto Intaking:", isAutoIntaking);
 //        telemetryM.addData("Hood State:", hoodSys.getHoodState());
 
         //telemetryM.addData("Shooter Ready:", shooterSys.isReadyToShoot());
         //telemetryM.addData("Spindexer Raw Position", spindexerSys.getCurrentPosition());
-        //telemetryM.addData("Spindexer Slot", spindexerSys.getCurrentSlot());
         //telemetryM.addData("Shoot Ready:", isShootReady);
         telemetryM.update(telemetry);
     }

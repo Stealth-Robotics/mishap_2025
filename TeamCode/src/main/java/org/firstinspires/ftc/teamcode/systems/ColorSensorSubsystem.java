@@ -21,11 +21,11 @@ public class ColorSensorSubsystem {
 
     public static double[] greenArtifactColors =
 //          redHigh, redLow, greenHigh, GreenLow, blueHigh, BlueLow
-            {1.9,       0.6,    6.0,       2.5,    3.5,      2.0};
+            {1.4,       0.2,    6.0,       2.0,    2.7,      .5};
 
     public static double[] purpleArtifactColors =
 //          redHigh, redLow, greenHigh, GreenLow, blueHigh, BlueLow
-            {2.5,       1.1,    3.3,        1.7,    6.0,       2.7};
+            {2.5,       .4,    2.8,        1.0,    5.0,       2.4};
 
     public static double[] paddleWhiteIgnore =
 //          redHigh, redLow, greenHigh, GreenLow, blueHigh, BlueLow
@@ -41,7 +41,8 @@ public class ColorSensorSubsystem {
     private double
             redMaxHigh = -1, redMinLow = 10,
             greenMaxHigh = -1, greenMinLow = 10,
-            blueMaxHigh = -1, blueMinLow = 10;
+            blueMaxHigh = -1, blueMinLow = 10,
+            distanceMin = 5000, distanceMax = -1;
 
 
     public ColorSensorSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
@@ -58,6 +59,8 @@ public class ColorSensorSubsystem {
         greenMinLow = 10;
         blueMaxHigh = -1;
         blueMinLow = 10;
+        distanceMin = 5000;
+        distanceMax = -1;
     }
 
     public void update(){
@@ -66,10 +69,10 @@ public class ColorSensorSubsystem {
         telemetryM.addData("Detected color: ", lastDetection);
 //        // TEST CODE
 //        telemetryM.addData("Distance: ", colorSensor.getDistance(DistanceUnit.MM));
-////        NormalizedRGBA colors = colorSensor.getNormalizedColors();
-////        telemetryM.addData("Color red: ", colors.red / colors.alpha);
-////        telemetryM.addData("color green: ", colors.green / colors.alpha);
-////        telemetryM.addData("color blue: ", colors.blue / colors.alpha);
+//        NormalizedRGBA colors = colorSensor.getNormalizedColors();
+//        telemetryM.addData("Color red: ", colors.red / colors.alpha);
+//        telemetryM.addData("color green: ", colors.green / colors.alpha);
+//        telemetryM.addData("color blue: ", colors.blue / colors.alpha);
 //        // TODO: this should be deleted once this is tested
 //        telemetryM.addData("Red High: ", redMaxHigh);
 //        telemetryM.addData("Red Low: ", redMinLow);
@@ -77,12 +80,20 @@ public class ColorSensorSubsystem {
 //        telemetryM.addData("Green Low: ", greenMinLow);
 //        telemetryM.addData("Blue High: ", blueMaxHigh);
 //        telemetryM.addData("Blue Low: ", blueMinLow);
+//        double dis = colorSensor.getDistance(DistanceUnit.MM);
+//        if (dis > distanceMax)
+//            distanceMax = dis;
+//        if (dis < distanceMin)
+//            distanceMin = dis;
+//        telemetryM.addData("Distance Max: ", distanceMax);
+//        telemetryM.addData("Distance Min: ", distanceMin);
+
     }
 
     private  SlotState getDetectedColor() {
         NormalizedRGBA colors = colorSensor.getNormalizedColors();
         double distance = colorSensor.getDistance(DistanceUnit.MM);
-        if (!(distance >= MIN_DISTANCE) || !(distance <= MAX_DISTANCE)) {
+        if (distance < MIN_DISTANCE || distance > MAX_DISTANCE) {
             return SlotState.EMPTY;
         }
 
@@ -140,19 +151,19 @@ public class ColorSensorSubsystem {
         float g = colors.green / colors.alpha;
         float b = colors.blue / colors.alpha;
 
-        //TODO: temp code
-        if (r > this.redMaxHigh)
-            this.redMaxHigh = r;
-        if (r < this.redMinLow)
-            this.redMinLow = r;
-        if (g > this.greenMaxHigh)
-            this.greenMaxHigh = g;
-        if (g < this.greenMinLow)
-            this.greenMinLow = g;
-        if (b > this.blueMaxHigh)
-            this.blueMaxHigh = b;
-        if (b < this.blueMinLow)
-            this.blueMinLow = b;
+        //TODO: Test code for when the color sensor isn't reading well
+//        if (r > this.redMaxHigh)
+//            this.redMaxHigh = r;
+//        if (r < this.redMinLow)
+//            this.redMinLow = r;
+//        if (g > this.greenMaxHigh)
+//            this.greenMaxHigh = g;
+//        if (g < this.greenMinLow)
+//            this.greenMinLow = g;
+//        if (b > this.blueMaxHigh)
+//            this.blueMaxHigh = b;
+//        if (b < this.blueMinLow)
+//            this.blueMinLow = b;
 
         // END TEMP CODE
 

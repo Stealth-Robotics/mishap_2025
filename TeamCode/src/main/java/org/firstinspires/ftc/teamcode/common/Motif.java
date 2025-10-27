@@ -22,6 +22,8 @@ public enum Motif {
      */
     PPG(23);
 
+    private static volatile Motif motif = UNKNOWN;
+
     /**
      * The unique integer identifier for the motif.
      */
@@ -34,6 +36,18 @@ public enum Motif {
      */
     Motif(int id) {
         this.id = id;
+    }
+
+    public static void set(Motif m) {
+        motif = m;
+    }
+
+    public static Motif get() {
+        return motif;
+    }
+
+    public boolean equals(Motif m) {
+        return motif.id == m.id;
     }
 
     /**

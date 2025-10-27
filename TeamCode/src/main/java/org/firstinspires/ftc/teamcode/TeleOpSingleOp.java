@@ -110,7 +110,11 @@ public class TeleOpSingleOp extends OpMode {
         }
 
         // Auto-aim is active only while the X button is held down
-        autoAim = gamepad1.x;
+        if (gamepad1.xWasPressed()) {
+            autoAim = true;
+        } else if (gamepad1.xWasReleased()) {
+            autoAim = false;
+        }
 
         robot.drive(
                 -gamepad1.left_stick_y,

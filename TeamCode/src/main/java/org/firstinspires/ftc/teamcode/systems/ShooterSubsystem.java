@@ -7,6 +7,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.common.MotorVelocityReader;
 
+import java.util.Map;
+
 /**
  * Manages the dual-motor shooter mechanism of the robot.
  * This subsystem handles spinning the motors to a target velocity (RPM),
@@ -20,16 +22,22 @@ public class ShooterSubsystem {
     private final MotorVelocityReader leftVelocityReader;
 
     private final ElapsedTime minShootTimer = new ElapsedTime();
+
+    private static final double SHOOT_RANGE_NEAR = 60;
+    private static final double SHOOT_RANGE_FAR = 90;
+
     private static final double MIN_SHOOT_TIME_MS = 500;
     private static final double MAX_SHOOT_TIME_MS = 3000;
 
     // --- Constants ---
     public static final double MAX_RPM = 5200;
     public static final double MIN_RPM = 0;
-    public static final double DEFAULT_RPM_FAR = 4800;
+    public static final double DEFAULT_RPM_FAR = 4850;
     public static final double DEFAULT_RPM_NEAR = 4200;
+
+    public static final double DEFFAULT_RPM_MID = 4400;
     public static final double RPM_CHANGE_AMOUNT = 100;
-    private static final double VELOCITY_TOLERANCE = 100; // The allowed RPM error in which the shooter is considered "ready".
+    private static final double VELOCITY_TOLERANCE = 500; // The allowed RPM error in which the shooter is considered "ready".
 
     // Encoder ticks per revolution for a GoBILDA Yellow Jacket motor.
     private static final double TICKS_PER_REV = 28;
@@ -46,8 +54,24 @@ public class ShooterSubsystem {
     // --- State Variables ---
     private double targetRpmFar = DEFAULT_RPM_FAR;
     private double targetRpmNear = DEFAULT_RPM_NEAR;
+    private double targetRpmMid = DEFFAULT_RPM_MID;
     private boolean isNear = false;
     private double currentRpm = 0;
+
+    private RpmRange currentRpmRange = RpmRange.FAR;
+
+    private enum RpmRange{
+        FAR,
+        MID,
+        NEAR
+    }
+
+    private final Map<RpmRange, Double> rangeMap = Map.of(
+            RpmRange.NEAR, targetRpmNear,
+            RpmRange.MID, targetRpmMid,
+            RpmRange.FAR, targetRpmFar
+    );
+
 
     public ShooterSubsystem(HardwareMap hardwareMap) {
         rightShooter = hardwareMap.get(DcMotorEx.class, "right_shoot_motor");
@@ -69,6 +93,16 @@ public class ShooterSubsystem {
         leftVelocityReader = new MotorVelocityReader(leftShooter, TICKS_PER_REV);
     }
 
+    public void setTargetRpmFromDisance(double distanceInch){
+
+        if (distanceInch < SHOOT_RANGE_NEAR){
+            currentRpmRange = RpmRange.NEAR;
+        }else if (distanceInch < SHOOT_RANGE_FAR) {
+            currentRpmRange = RpmRange.MID;
+        }else {
+            currentRpmRange = RpmRange.FAR;
+        }
+    }
     /**
      * This method should be called in the main robot loop to update the shooter's state,
      * such as the current average RPM.
@@ -90,6 +124,8 @@ public class ShooterSubsystem {
             rpm = MIN_RPM;
         }
 
+        currentRpm = rpm;
+
         // Convert desired RPM to encoder ticks per second, which is the unit required by DcMotorEx.setVelocity().
         double ticksPerSecond = rpm * TICKS_PER_REV / 60;
         rightShooter.setVelocity(ticksPerSecond);
@@ -101,7 +137,8 @@ public class ShooterSubsystem {
      */
     public void runShooter() {
 
-        setRpm(isNear ? targetRpmNear : targetRpmFar);
+        //noinspection DataFlowIssue
+        setRpm(rangeMap.get(currentRpmRange));
         minShootTimer.reset();
     }
 
@@ -109,66 +146,44 @@ public class ShooterSubsystem {
      * Stops the shooter motors.
      */
     public void stop(){
-
         setRpm(0); // Setting RPM to 0 is the correct way to stop motors in velocity control mode.
-    }
-
-    /**
-     * Increases the target RPM for the 'near' shot distance.
-     * The change only applies immediately if the shooter is already running.
-     */
-    public void increaseRpmNear() {
-        if(targetRpmNear >= MAX_RPM){
-            return;
-        }
-
-        targetRpmNear += RPM_CHANGE_AMOUNT;
-        // If the shooter is already running and set to near, update the speed instantly.
-        if(isRunning() && isNear) {
-            setRpm(targetRpmNear);
-        }
-    }
-
-    /**
-     * Decreases the target RPM for the 'near' shot distance.
-     */
-    public void decreaseRpmNear() {
-        if(targetRpmNear <= MIN_RPM){
-            return;
-        }
-
-        targetRpmNear -= RPM_CHANGE_AMOUNT;
-        if(isRunning() && isNear) {
-            setRpm(targetRpmNear);
-        }
     }
 
     /**
      * Increases the target RPM for the 'far' shot distance.
      */
-    public void increaseRpmFar() {
-        if (targetRpmFar >= MAX_RPM) {
+    public void increaseCurrentRpmRange() {
+        //noinspection DataFlowIssue
+        double curRpm = rangeMap.get(currentRpmRange);
+
+        if (curRpm >= MAX_RPM) {
             return;
         }
 
-        targetRpmFar += RPM_CHANGE_AMOUNT;
-        // If the shooter is already running and set to far, update the speed instantly.
-        if (isRunning() && !isNear) {
-            setRpm(targetRpmFar);
+        curRpm += RPM_CHANGE_AMOUNT;
+        rangeMap.put(currentRpmRange, curRpm);
+        if (isRunning()){
+            setRpm(curRpm);
         }
+
     }
 
     /**
      * Decreases the target RPM for the 'far' shot distance.
      */
-    public void decreaseRpmFar() {
-        if (targetRpmFar <= MIN_RPM) {
+    public void decreaseCurrentRpmRange() {
+        //noinspection DataFlowIssue
+        double curRpm = rangeMap.get(currentRpmRange);
+
+        if (curRpm <= MIN_RPM) {
             return;
         }
 
-        targetRpmFar -= RPM_CHANGE_AMOUNT;
-        if (isRunning() && !isNear) {
-            setRpm(targetRpmFar);
+        curRpm -= RPM_CHANGE_AMOUNT;
+        rangeMap.put(currentRpmRange, curRpm);
+
+        if (isRunning()) {
+            setRpm(curRpm);
         }
     }
 
@@ -177,7 +192,8 @@ public class ShooterSubsystem {
      * @return The active target RPM.
      */
     public double getTargetRpm(){
-        return isNear ? targetRpmNear : targetRpmFar;
+        //noinspection DataFlowIssue
+        return rangeMap.get(currentRpmRange);
     }
 
     /**
@@ -222,22 +238,6 @@ public class ShooterSubsystem {
      */
     public double getCurrentRpm() {
         return currentRpm;
-    }
-
-    /**
-     * Gets the configured target RPM for far shots.
-     * @return The target RPM for the far distance.
-     */
-    public double getTargetRpmFar() {
-        return targetRpmFar;
-    }
-
-    /**
-     * Gets the configured target RPM for near shots.
-     * @return The target RPM for the near distance.
-     */
-    public double getTargetRpmNear() {
-        return targetRpmNear;
     }
 
     /**

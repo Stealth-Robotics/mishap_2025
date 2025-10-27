@@ -6,11 +6,13 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.TouchSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.common.SlotState;
 
 import java.util.Arrays;
+
 /**
  * Manages the spindexer mechanism, which is a rotating drum that holds and positions artifacts for shooting.
  * This subsystem handles homing, rotating to specific slots, and finding artifacts by color.
@@ -29,7 +31,7 @@ public class SpindexerSubsystem {
     public static int INDEX_OFFSET_TICKS = 225;
 
     /** This value protects the spindexer from jamming and or crushing the world */
-    private static final double OVERLOAD_AMPS = 7.0;
+    private static final double OVERLOAD_AMPS = 8.0;
 
     /** Ticks per revolution for the GoBilda 43 RPM motor (3895.9) geared up. */
     private static final double TICKS_PER_REV = 3895.9;
@@ -69,21 +71,31 @@ public class SpindexerSubsystem {
     private int lastTargetPosition;
 
     /** The current state of the homing/initialization process. */
-    private IndexingState indexingState = IndexingState.START;
+    private HomingState homingState = HomingState.START;
     private boolean isEmergencyStop = false;
 
+    private SortingState sortingState = SortingState.START;
 
+    private ElapsedTime sortingTimer = new ElapsedTime();
+
+    private static final double MAX_SORT_TIME_SECOND = 20;
 
     /**
      * State machine enum to manage the multi-step homing process.
      */
-    private enum IndexingState {
+    private enum HomingState {
         START,
         SEARCHING_FORWARD,  // Moving forward to find the un-pressed edge of the switch
         SEARCHING_BACKWARD, // Moving backward to find the pressed edge again
         MOVING_TO_OFFSET,   // Moving to the final calculated zero position
         HOMED,              // Homing is complete and successful
         DONE                // Intermediate state before HOMED to finalize motor settings
+    }
+
+    private enum SortingState {
+        START,
+        SEARCHING,
+        DONE
     }
 
     //==================================================================================================
@@ -112,18 +124,18 @@ public class SpindexerSubsystem {
      * @return True when the entire homing process is complete; otherwise false.
      */
     public boolean doInitPosition() {
-        switch (indexingState) {
+        switch (homingState) {
             case START:
                 // If not pressed, reverse until the switch is triggered.
                 if (!isIndexSwitchPressed()) {
                     spindexer.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     spindexer.setVelocity(-SPINDEXER_VELOCITY_LIMIT / 8); // Very slow reverse
-                    indexingState = IndexingState.SEARCHING_BACKWARD;
+                    homingState = HomingState.SEARCHING_BACKWARD;
                 } else {
                     // If already pressed, move forward to find the edge where it releases.
                     spindexer.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     spindexer.setVelocity(SPINDEXER_VELOCITY_LIMIT / 4); // Slow forward search
-                    indexingState = IndexingState.SEARCHING_FORWARD;
+                    homingState = HomingState.SEARCHING_FORWARD;
                 }
                 return false; // Process has just begun
 
@@ -132,7 +144,7 @@ public class SpindexerSubsystem {
                 if (!isIndexSwitchPressed()) {
                     // Switch released. Now, slowly reverse to find the precise trigger point.
                     spindexer.setVelocity(-SPINDEXER_VELOCITY_LIMIT / 8);
-                    indexingState = IndexingState.SEARCHING_BACKWARD;
+                    homingState = HomingState.SEARCHING_BACKWARD;
                 }
                 return false;
 
@@ -148,7 +160,7 @@ public class SpindexerSubsystem {
                     spindexer.setTargetPosition(targetPosition);
                     spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     spindexer.setVelocity(SPINDEXER_VELOCITY_LIMIT / 2);
-                    indexingState = IndexingState.MOVING_TO_OFFSET;
+                    homingState = HomingState.MOVING_TO_OFFSET;
                 }
                 return false;
 
@@ -156,14 +168,14 @@ public class SpindexerSubsystem {
                 // Wait until the motor reaches the final offset position.
                 if (isReady()) {
                     // We've arrived. Transition to DONE to finalize the state on the next loop.
-                    indexingState = IndexingState.DONE;
+                    homingState = HomingState.DONE;
                 }
                 return false;
 
             case DONE:
                 // Finalize the homing process.
                 resetEncoder(); // The current position is now our absolute zero.
-                indexingState = IndexingState.HOMED;
+                homingState = HomingState.HOMED;
                 return true; // Return true on this loop to signal completion.
 
             case HOMED:
@@ -171,6 +183,41 @@ public class SpindexerSubsystem {
                 return true;
         }
         return false; // Should not be reached
+    }
+
+    public boolean doCheckForArtifacts() {
+        if (spindexer.isBusy()) {
+            return false;
+        }
+
+        // if all artifacts are found to be not empty nore UNKNOWN we can stop spinning.
+        if(Arrays.stream(slotStates)
+                .allMatch(state ->  state != SlotState.EMPTY && state != SlotState.UNKNOWN)){
+            return true;
+        }
+
+        // Assume the spindexer is empty to shortcut a spin cycle
+        if (getIntakeSlotState() == SlotState.EMPTY) {
+            return true;
+        }
+
+        switch (sortingState) {
+            case START:
+                sortingTimer.reset();
+                sortingState = SortingState.SEARCHING;
+                return false;
+            case SEARCHING:
+                if (sortingTimer.seconds() > MAX_SORT_TIME_SECOND) {
+                    sortingState = SortingState.DONE;
+                }
+
+                break;
+            case DONE:
+                return true;
+        }
+
+        this.advanceOneSlot();
+        return false;
     }
 
     //==================================================================================================
@@ -220,6 +267,30 @@ public class SpindexerSubsystem {
 
         // If the loop completes, no matching artifact was found.
         return false;
+    }
+
+    /**
+     * see if the Motif is available
+     * @return true for available otherwise false
+     */
+    public boolean isMotifAvailable()
+    {
+        if (!isFull()) {
+            return false;
+        }
+
+        int greenCnt = 0;
+        int purpleCnt = 0;
+
+        for (SlotState state : slotStates) {
+            if (state == SlotState.ARTIFACT_GREEN) {
+                greenCnt++;
+            } else if (state == SlotState.ARTIFACT_PURPLE) {
+                purpleCnt++;
+            }
+        }
+
+        return greenCnt == 1 && purpleCnt == 2;
     }
 
     /**
@@ -284,6 +355,24 @@ public class SpindexerSubsystem {
         curShootSlot = (curShootSlot - 1 + NUMBER_OF_SLOTS) % NUMBER_OF_SLOTS;
     }
 
+    /**
+     * Move the spindexer to the next slot that isn't empty
+     * @return true if slot is found otherwise false
+     */
+    public boolean moveToNextAvailableSlot() {
+        if (isEmergencyStop) {
+            return false;
+        }
+
+        for (int i = 0; i < NUMBER_OF_SLOTS; i++) {
+            if (slotStates[(curShootSlot + i) % NUMBER_OF_SLOTS] != SlotState.EMPTY) {
+                rotateToSlot((curShootSlot + i) % NUMBER_OF_SLOTS);
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     /**
      * Adjusts the spindexer's target position by a small number of ticks for fine-tuning.
@@ -326,7 +415,7 @@ public class SpindexerSubsystem {
      * @return The {@link SlotState} of the newly intaked artifact.
      */
     public SlotState getIntakeSlotState() {
-        return getShootSlotState(curShootSlot - 1);
+        return getStateBySlotNum(curShootSlot - 1);
     }
 
     /**
@@ -383,15 +472,22 @@ public class SpindexerSubsystem {
      * @param slotNumber The slot index to query.
      * @return The {@link SlotState} of the specified slot.
      */
-    public SlotState getShootSlotState(int slotNumber) {
+    public SlotState getStateBySlotNum(int slotNumber) {
         int wrappedSlotNumber = ((slotNumber % NUMBER_OF_SLOTS) + NUMBER_OF_SLOTS) % NUMBER_OF_SLOTS;
         return slotStates[wrappedSlotNumber];
     }
 
+    /**
+     * gets the current artifact in the shooter slot
+     * @return the current artifact in the shooter slot
+     */
     public SlotState getShootSlotState() {
-        return slotStates[curShootSlot];
+        return getStateBySlotNum(curShootSlot);
     }
 
+    public SlotState getStandbySlotState() {
+        return getStateBySlotNum(curShootSlot - 1);
+    }
 
     /** Returns a copy of the array representing the state of all slots. */
     public SlotState[] getSlotStates() {

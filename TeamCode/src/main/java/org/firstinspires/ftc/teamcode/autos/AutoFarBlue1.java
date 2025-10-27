@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 import java.util.Arrays;
 import java.util.HashSet;
 
-@Autonomous(name = "Far Blue 1", group = "Autonomous", preselectTeleOp = "_TeleOp Driver Only")
+@Autonomous(name = "Shoot Far either Side", group = "Autonomous", preselectTeleOp = "_TeleOp Driver Only")
 @Configurable
 public class AutoFarBlue1 extends AutosDecode {
 
