@@ -86,24 +86,24 @@ public class LimelightSubsystem {
     public void update() {
         LLResult result = this.getLastResult();
         telemetryM.addData("Pipeline", this.getCurrentPipeline());
-        if (result != null && result.isValid() && result.getStaleness() < 100) {
-            telemetryM.addData("AprilTag ID", this.getAprilTagId());
-            Pose targetPose = this.getAvgTargetPose(50);
-            if (targetPose != null) {
-                telemetryM.addData("Target Distance Ty: ", calcGoalDistanceByTy(targetPose.getY()));
-            }
-
-            // NOTE Uncomment the below to show bot position on field
-/*
-            Pose3D botPose = this.getAvgBotPose(50);
-            if (botPose != null) {
-                Pose convertedPose = limelightToPedroPose(botPose);
-                telemetryM.addData("Bot Pose Fixed X:", convertedPose.getX());
-                telemetryM.addData("Bot Pose Fixed Y:", convertedPose.getY());
-                telemetryM.addData("Bot Heading Fixed: ", Math.toDegrees(convertedPose.getHeading()));
-            }
- */
-        }
+//        if (result != null && result.isValid() && result.getStaleness() < 100) {
+//            //telemetryM.addData("AprilTag ID", this.getAprilTagId());
+//            Pose targetPose = this.getAvgTargetPose(50);
+//            if (targetPose != null) {
+//                telemetryM.addData("Target Distance Ty: ", calcGoalDistanceByTy(targetPose.getY()));
+//            }
+//
+//            // NOTE Uncomment the below to show bot position on field
+///*
+//            Pose3D botPose = this.getAvgBotPose(50);
+//            if (botPose != null) {
+//                Pose convertedPose = limelightToPedroPose(botPose);
+//                telemetryM.addData("Bot Pose Fixed X:", convertedPose.getX());
+//                telemetryM.addData("Bot Pose Fixed Y:", convertedPose.getY());
+//                telemetryM.addData("Bot Heading Fixed: ", Math.toDegrees(convertedPose.getHeading()));
+//            }
+// */
+//        }
     }
 
     /**

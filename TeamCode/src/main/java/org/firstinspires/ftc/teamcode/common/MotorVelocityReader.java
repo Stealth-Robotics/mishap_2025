@@ -65,20 +65,29 @@ public class MotorVelocityReader {
      * Calculates the motor's current raw RPM based on encoder ticks and time elapsed.
      * This should be called periodically in a loop.
      * Consider using getFilteredRpm() for a more stable reading.
-     * @return The current, measured, unfiltered RPM of the motor.
+     * @return The current, measured, unfiltered RPM of the motor. Can be negative for reverse.
      */
     public double getRpm() {
         double currentTime = timer.seconds();
-        int currentPosition = motor.getCurrentPosition();
         double deltaTime = currentTime - lastTime;
 
-        // If not enough time has passed, return the previously calculated RPM.
-        // This prevents division by zero and noisy readings from small time deltas.
-        if (deltaTime < 0.025) { // Increased threshold for more reliable readings
+        // --- PROTECTION ---
+        // If an insignificant amount of time has passed, return the last calculated RPM
+        // to prevent division by zero or by a very small number, which would cause an erroneous spike.
+        if (deltaTime < 0.0001) {
             return lastRpm;
         }
 
+        int currentPosition = motor.getCurrentPosition();
         int deltaTicks = currentPosition - lastPosition;
+
+        // If not enough time has passed for a reliable reading, return the previous RPM.
+        // This prevents noisy readings from small time deltas.
+        if (deltaTime < 0.02) {
+            return lastRpm;
+        }
+
+
         double ticksPerSecond = deltaTicks / deltaTime;
         double revolutionsPerSecond = ticksPerSecond / ticksPerRev;
         double currentRpm = revolutionsPerSecond * 60;
@@ -86,6 +95,13 @@ public class MotorVelocityReader {
         // Update state for the next calculation
         lastTime = currentTime;
         lastPosition = currentPosition;
+
+        // Clamping negative RPM to 0, as per the original logic.
+        // For shooter motors that should only spin one way, this is a reasonable safety net.
+        if (currentRpm < 0) {
+            currentRpm = 0;
+        }
+
         lastRpm = currentRpm; // Store the newly calculated raw RPM
 
         rpmFilter.add(currentRpm);
@@ -94,15 +110,33 @@ public class MotorVelocityReader {
     }
 
     /**
+     * Gets the absolute (non-negative) value of the motor's current RPM.
+     * This is useful when you only care about the speed, not the direction.
+     * @return The absolute value of the current, unfiltered RPM.
+     */
+    public double getAbsoluteRpm() {
+        return Math.abs(getRpm());
+    }
+
+    /**
      * Calculates and returns the filtered RPM of the motor.
      * This method is preferred over getRpm() for smoother, more stable velocity readings,
-     * which are ideal for control loops.
+     * which are ideal for control loops. The value will be non-negative due to the logic in getRpm().
      * @return The filtered (averaged) RPM of the motor.
      */
     public double getFilteredRpm() {
         // Ensure getRpm() is called to update the filter with the latest value
         getRpm();
         return rpmFilter.getAverage();
+    }
+
+    /**
+     * Gets the absolute (non-negative) value of the filtered RPM.
+     * This provides a smooth, stable reading of the motor's speed without direction.
+     * @return The absolute value of the filtered (averaged) RPM.
+     */
+    public double getFilteredAbsoluteRpm() {
+        return Math.abs(getFilteredRpm());
     }
 
     /**

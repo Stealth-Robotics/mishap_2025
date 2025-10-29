@@ -9,12 +9,12 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.common.Alliance;
+import org.firstinspires.ftc.teamcode.common.FinalPose;
 import org.firstinspires.ftc.teamcode.common.Motif;
 import org.firstinspires.ftc.teamcode.common.Pipeline;
 import org.firstinspires.ftc.teamcode.paths.Path;
 import org.firstinspires.ftc.teamcode.paths.PathManager;
 import org.firstinspires.ftc.teamcode.paths.PathState;
-import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 
 import java.util.HashSet;
@@ -44,7 +44,9 @@ public abstract class AutosDecode extends OpMode {
 
     private boolean isSpindexerReady = false;
 
-    private boolean hasCheckedArtifacts = false;
+    private boolean areArtifactsSorted = false;
+
+    private boolean isPathPaused = false;
 
 
     // --- Abstract Methods to be Implemented by Child Classes ---
@@ -79,6 +81,7 @@ public abstract class AutosDecode extends OpMode {
     protected void setSpindexerInitState()
     {
         robot.initSpindxerSlotsEmpty();
+        //robot.initSpindxerSlotsAuto();
     }
 
     /**
@@ -89,8 +92,8 @@ public abstract class AutosDecode extends OpMode {
         robot.update();
         if (!isSpindexerReady) {
             isSpindexerReady = robot.doInitSpindexer();
-        } else if (!hasCheckedArtifacts) {
-            hasCheckedArtifacts = robot.doArtifactSort();
+        } else if (!areArtifactsSorted) {
+            areArtifactsSorted = robot.doArtifactSort();
         }
 
 
@@ -98,6 +101,11 @@ public abstract class AutosDecode extends OpMode {
         Pose curPose = robot.getPedroPoseFromLimelight(800);
         if (curPose != null) {
             this.lastPose = curPose;
+            telemetryM.addData("Alliance: ", PathManager.getAllianceFromPose(curPose) == Alliance.RED ? "RED" : "BLUE");
+            telemetryM.addData("Last Pose X", curPose.getX());
+            telemetryM.addData("Last Pose Y", curPose.getY());
+            telemetryM.addData("Last Pose Heading:", Math.toDegrees(curPose.getHeading()));
+
         }
     }
 
@@ -111,6 +119,8 @@ public abstract class AutosDecode extends OpMode {
             PathManager.setAlianceFromPose(lastPose);
         }
     }
+
+    protected abstract void setSpindexerSlots();
 
     /**
      * Allows for overriding the start Pose of the follower.
@@ -140,7 +150,7 @@ public abstract class AutosDecode extends OpMode {
         // must be called after initPaths.
         setStartingPose();
 
-        telemetryM.addData("Paths Count", paths.getSegmentCount());
+        //telemetryM.addData("Paths Count", paths.getSegmentCount());
 
         // this means the hood will stay open during intaking
         robot.setAutoIntaking(true);
@@ -152,12 +162,18 @@ public abstract class AutosDecode extends OpMode {
      */
     @Override
     public void loop() {
+        // robot.update calls follower.update
         robot.update();
 
         // Protect the robot from early start
         if (!isSpindexerReady) {
             telemetryM.addLine("Waiting for Spindexer JJ!!!");
             isSpindexerReady = robot.doInitSpindexer();
+            return;
+        }
+
+        if (!robot.isSpindexerFull() && !this.areArtifactsSorted) {
+            areArtifactsSorted = robot.doArtifactSort();
             return;
         }
 
@@ -194,6 +210,8 @@ public abstract class AutosDecode extends OpMode {
                 pathState = checkIndexForAction();
                 break;
             case STOP:
+                follower.breakFollowing();
+                FinalPose.setPose(follower.getPose());
                 requestOpModeStop();
                 return;
             case CONTINUE:
@@ -201,9 +219,9 @@ public abstract class AutosDecode extends OpMode {
                 break;
         }
 
-        telemetryM.addData("Path State", pathState);
-        telemetryM.addData("Follower State:", follower.isBusy());
-        telemetryM.addData("Path Index", paths.getSegmentIndex());
+        //telemetryM.addData("Path State", pathState);
+        //telemetryM.addData("Follower State:", follower.isBusy());
+        //telemetryM.addData("Path Index", paths.getSegmentIndex());
     }
 
     /**
@@ -218,11 +236,11 @@ public abstract class AutosDecode extends OpMode {
         }
 
         if (shootIndexes.contains(curIndex)) {
-
+            telemetryM.addData("SubAction State", subActionStep);
             switch (subActionStep) {
                 case 0:
                     // set the subindex to the correct next step
-                    subActionStep = startAiming() ? 2 : 1;
+                    subActionStep = startAiming() ? 1 : 2;
                     return PathState.WAIT;
                 case 1:
                     if (doAimingOrTimeout()) {
@@ -231,10 +249,10 @@ public abstract class AutosDecode extends OpMode {
                     return PathState.WAIT;
                 case 2:
                     // Ready for Motif shot if false there is nothing to shoot
-                    if (robot.startShootMotif()) {
-                        subActionStep++;
-                        return PathState.WAIT;
-                    }
+                        if (robot.startShootMotif()) {
+                            subActionStep++;
+                            return PathState.WAIT;
+                        }
 
                     break;
                 case 3:
@@ -289,8 +307,13 @@ public abstract class AutosDecode extends OpMode {
             robot.setMotifPattern(Motif.PPG);
             return true;
         }
+        boolean ret = robot.doReadMotif();
+        if (ret) {
+            // update the static motif variable
+            Motif.set(robot.getDetectedMotif());
+        }
 
-        return robot.doReadMotif();
+        return ret;
     }
 
     /**
@@ -299,8 +322,14 @@ public abstract class AutosDecode extends OpMode {
      * @return true if done aiming otherwise false
      */
     public boolean startAiming() {
+        if (robot.isSpindexerEmpty()) {
+            return false;
+        }
+
         stateTimer.reset();
-        return robot.doAimAtTarget(1, 500);
+
+        robot.doAimAtTarget(.2, 50);
+        return true;
     }
 
     /**
@@ -308,11 +337,17 @@ public abstract class AutosDecode extends OpMode {
      * @return true for done aiming otherwise false
      */
     protected boolean doAimingOrTimeout() {
+        boolean done = false;
         if (stateTimer.milliseconds() > AIM_TIMEOUT) {
-            return true;
+            // stop the robot if timed out.
+            follower.setTeleOpDrive(0, 0, 0, true);
+            done = true;
+        }
+       else {
+            done = robot.doAimAtTarget(.1, 100);
         }
 
-        return robot.doAimAtTarget(.2, 500);
+        return done;
     }
 
     /**

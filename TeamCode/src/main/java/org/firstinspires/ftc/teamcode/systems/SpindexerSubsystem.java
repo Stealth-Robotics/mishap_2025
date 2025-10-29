@@ -52,6 +52,13 @@ public class SpindexerSubsystem {
     // TODO: More tuning needed
     public static PIDFCoefficients SPINDEXER_PIDF = new PIDFCoefficients(6, 4,0.2, 1);
 
+    private final ElapsedTime currentSpikeTimer = new ElapsedTime();
+
+    /** allows brief spikes in the current to be ignored */
+    private static final long CURRENT_SPIKE_TIMEOUT_MS = 100;
+
+
+
     //==================================================================================================
     //  P R I V A T E   M E M B E R   V A R I A B L E S
     //==================================================================================================
@@ -182,6 +189,7 @@ public class SpindexerSubsystem {
                 // The spindexer is successfully homed and holding position.
                 return true;
         }
+
         return false; // Should not be reached
     }
 
@@ -198,6 +206,13 @@ public class SpindexerSubsystem {
 
         // Assume the spindexer is empty to shortcut a spin cycle
         if (getIntakeSlotState() == SlotState.EMPTY) {
+            return true;
+        }
+
+        // use this as a shortcut to set the other two artifacts
+        if (getIntakeSlotState() == SlotState.ARTIFACT_GREEN) {
+            setShootSlotState(SlotState.ARTIFACT_PURPLE);
+            setStandbySlotState(SlotState.ARTIFACT_PURPLE);
             return true;
         }
 
@@ -231,7 +246,12 @@ public class SpindexerSubsystem {
      * @return true if something is jamming the spindexer
      */
     public boolean isJammed() {
-        return spindexer.isOverCurrent();
+        if(spindexer.isOverCurrent() && currentSpikeTimer.milliseconds() > CURRENT_SPIKE_TIMEOUT_MS){
+           return true;
+        }
+
+        currentSpikeTimer.reset();
+        return false;
     }
 
     /**
@@ -295,8 +315,8 @@ public class SpindexerSubsystem {
 
     /**
      * Rotates the spindexer to a specific slot number (0, 1, 2, etc.).
-     *
-     * @param slotNumber The destination slot number.
+     * This is now the primary method for all spindexer rotation.
+     ** @param slotNumber The destination slot number.
      */
     public void rotateToSlot(int slotNumber) {
         if (isEmergencyStop) {
@@ -307,52 +327,89 @@ public class SpindexerSubsystem {
             return; // Invalid slot, do nothing.
         }
 
-        int targetPosition = (int) Math.round(slotNumber * TICKS_PER_SLOT);
-        this.lastTargetPosition = targetPosition; // Store the new target
+        // The total number of ticks in one full revolution of the spindexer.
+        final double totalTicksInCircle = NUMBER_OF_SLOTS * TICKS_PER_SLOT;
+        double delta = getDelta(slotNumber, totalTicksInCircle);
+
+        // The new target is the last commanded position plus the shortest-path delta.
+        int targetPosition = (int) Math.round(this.lastTargetPosition + delta);
+
+        // This line where the caret was is correct.
+        this.lastTargetPosition = targetPosition;
 
         spindexer.setTargetPosition(targetPosition);
         spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         spindexer.setVelocity(SPINDEXER_VELOCITY_LIMIT);
+
+        // Updates the pointer to the new absolute slot.
         previousSlot = curShootSlot;
         curShootSlot = slotNumber;
     }
 
+    private double getDelta(int slotNumber, double totalTicksInCircle) {
+        final double halfCircle = totalTicksInCircle / 2.0;
+
+        // Get the current motor position, normalized to a single rotation (0 to totalTicksInCircle).
+        double currentPositionTicks = this.lastTargetPosition % totalTicksInCircle;
+        if (currentPositionTicks < 0) {
+            currentPositionTicks += totalTicksInCircle;
+        }
+
+        // Calculate the absolute destination position in ticks.
+        double destinationTicks = slotNumber * TICKS_PER_SLOT;
+
+        // Calculate the simple, direct difference between destination and current.
+        double delta = destinationTicks - currentPositionTicks;
+
+        // Correct the delta to find the shortest path by checking the distance in the opposite direction.
+        // If the absolute delta is greater than half a circle, going the other way is shorter.
+        if (delta > halfCircle) {
+            // It's shorter to go backward (negative).
+            delta -= totalTicksInCircle;
+        } else if (delta < -halfCircle) {
+            // It's shorter to go forward (positive).
+            delta += totalTicksInCircle;
+        }
+        return delta;
+    }
+
     /**
-     * Advances the spindexer by one slot from its current target position.
+     * Advances the spindexer by one slot from its current target position
+     * by updating the target slot index.
      */
     public void advanceOneSlot() {
         if (isEmergencyStop) {
             return;
         }
 
-        int newTarget = this.lastTargetPosition - (int)Math.round(TICKS_PER_SLOT);
-        this.lastTargetPosition = newTarget;
+        // DO NOT SHIFT THE ARRAY.
+        // shiftSlotStates(true); // REMOVE THIS.
 
-        spindexer.setTargetPosition(newTarget);
-        spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spindexer.setVelocity(SPINDEXER_VELOCITY_LIMIT);
-        previousSlot = curShootSlot;
-        curShootSlot = (curShootSlot + 1) % NUMBER_OF_SLOTS;
+        // Calculate the next slot number, wrapping around if necessary.
+        int nextSlot = ((curShootSlot - 1) + NUMBER_OF_SLOTS) % NUMBER_OF_SLOTS;
+
+        // Command the spindexer to move to the new absolute slot.
+        // This also updates previousSlot and curShootSlot inside rotateToSlot.
+        rotateToSlot(nextSlot);
     }
 
     /**
-     * Moves the spindexer back by one slot from its current target position.
+     * Moves the spindexer back by one slot from its current target position
+     * by updating the target slot index.
      */
     public void decreaseOneSlot() {
         if (isEmergencyStop) {
             return;
         }
 
-        int newTarget = this.lastTargetPosition + (int)Math.round(TICKS_PER_SLOT);
-        this.lastTargetPosition = newTarget;
+        // DO NOT SHIFT THE ARRAY.
+        // shiftSlotStates(false); // REMOVE THIS.
 
-        spindexer.setTargetPosition(newTarget);
-        spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spindexer.setVelocity(SPINDEXER_VELOCITY_LIMIT);
+        // Calculate the previous slot number, wrapping around correctly.
+        int previousSlotIndex = (curShootSlot + 1) % NUMBER_OF_SLOTS;
 
-        previousSlot = curShootSlot;
-        // This correctly handles wrapping for negative numbers (e.g., (0 - 1 + 3) % 3 = 2).
-        curShootSlot = (curShootSlot - 1 + NUMBER_OF_SLOTS) % NUMBER_OF_SLOTS;
+        // Command the spindexer to move to the new absolute slot.
+        rotateToSlot(previousSlotIndex);
     }
 
     /**
@@ -415,7 +472,7 @@ public class SpindexerSubsystem {
      * @return The {@link SlotState} of the newly intaked artifact.
      */
     public SlotState getIntakeSlotState() {
-        return getStateBySlotNum(curShootSlot - 1);
+        return getStateBySlotNum(curShootSlot + 1);
     }
 
     /**
@@ -433,8 +490,18 @@ public class SpindexerSubsystem {
      * @param state The state of the newly intaked artifact.
      */
     public void setIntakeSlotState(SlotState state) {
+        setSlotState(curShootSlot + 1, state);
+    }
+
+    private void setShootSlotState(SlotState state) {
+        setSlotState(curShootSlot, state);
+    }
+
+    private void setStandbySlotState(SlotState state) {
         setSlotState(curShootSlot - 1, state);
     }
+
+
 
     /**
      * Marks the intake slot as empty incase it gets ejected
@@ -486,8 +553,10 @@ public class SpindexerSubsystem {
     }
 
     public SlotState getStandbySlotState() {
+        // Corrected to point to the slot AFTER the shooter
         return getStateBySlotNum(curShootSlot - 1);
     }
+
 
     /** Returns a copy of the array representing the state of all slots. */
     public SlotState[] getSlotStates() {
@@ -572,6 +641,36 @@ public class SpindexerSubsystem {
 
     public boolean isEmpty() {
         return Arrays.stream(slotStates).allMatch(state -> state == SlotState.EMPTY);
+    }
+
+    /**
+     * Manually shifts all slot states in the array to simulate the physical rotation
+     * of the spindexer. This should be called in conjunction with any method that physically
+     * indexes the spindexer.
+     * @param isForward True if advancing one slot (e.g., via advanceOneSlot), false if decreasing.
+     */
+    private void shiftSlotStates(boolean isForward) {
+        // If the array is empty or has only one slot, there's nothing to shift.
+        if (slotStates.length < 2) {
+            return;
+        }
+
+        if (isForward) {
+            // Correct Logic for Advancing:
+            // The state from the first slot moves to the last slot, simulating
+            // the artifact at the intake moving towards the shooter.
+            // This is a LEFT shift of the array contents.
+            SlotState firstState = slotStates[0];
+            System.arraycopy(slotStates, 1, slotStates, 0, NUMBER_OF_SLOTS - 1);
+            slotStates[NUMBER_OF_SLOTS - 1] = firstState;
+        } else {
+            // Correct Logic for Decreasing:
+            // The state from the last slot moves to the first slot.
+            // This is a RIGHT shift of the array contents.
+            SlotState lastState = slotStates[NUMBER_OF_SLOTS - 1];
+            System.arraycopy(slotStates, 0, slotStates, 1, NUMBER_OF_SLOTS - 1);
+            slotStates[0] = lastState;
+        }
     }
 
     /**

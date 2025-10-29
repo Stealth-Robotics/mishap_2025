@@ -2,20 +2,17 @@ package org.firstinspires.ftc.teamcode.autos;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.common.Alliance;
 import org.firstinspires.ftc.teamcode.paths.Path;
 import org.firstinspires.ftc.teamcode.paths.PathFarAuto1;
 import org.firstinspires.ftc.teamcode.paths.PathState;
-import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 
 import java.util.Arrays;
-import java.util.HashSet;
 
-@Autonomous(name = "Shoot Far either Side", group = "Autonomous", preselectTeleOp = "_TeleOp Driver Only")
+@Autonomous(name = "Shoot Far either Side", group = "Autonomous", preselectTeleOp = "_TeleOp_Driver_Only")
 @Configurable
-public class AutoFarBlue1 extends AutosDecode {
+public class AutoFarOne extends AutosDecode {
 
     @Override
     protected Path initPaths() {
@@ -25,9 +22,14 @@ public class AutoFarBlue1 extends AutosDecode {
         return new PathFarAuto1(robot);
     }
 
+    @Override
+    protected void setSpindexerSlots(){
+        robot.initSpindxerSlotsEmpty();
+    }
+
     // TODO: uncomment if you don't want limelight to be used as aliance positioning
 //    @Override
-//    protected void setAliance() {
+//    protected void setAlliance() {
 //        // Set the specific alliance for this OpMode
 //        // can use limelight data if you want
 //        Alliance.set(Alliance.BLUE);

@@ -89,20 +89,23 @@ public class PathManager implements Path {
      * This method updates the path follower with the start pose and determines
      * the alliance based on the robot's starting X-coordinate on the field.
      *
-     * @param startPose The {@link Pose} to set as the robot's starting position.
+     * @param pose The {@link Pose} to set as the robot's starting position.
      */
-    public void setStartPose(Pose startPose) {
-        this.startPose = startPose;
+    public void setStartPose(Pose pose) {
+        this.startPose = pose;
         robot.getFollower().setStartingPose(this.startPose);
     }
 
-    public static void setAlianceFromPose(Pose startPose) {
+    public static void setAlianceFromPose(Pose pose) {
         // Determine alliance based on which side of the field the robot starts on.
-        // Assumes Red is on the positive X side.
-        if (startPose.getY() > (Constants.FIELD_SIZE_X_INCHES / 2)) {
-            Alliance.set(Alliance.RED);
+        Alliance.set(getAllianceFromPose(pose));
+    }
+
+    public static Alliance getAllianceFromPose(Pose pose) {
+        if (pose.getY() > (Constants.FIELD_SIZE_Y_INCHES / 2)) {
+            return Alliance.RED;
         } else {
-            Alliance.set(Alliance.BLUE);
+            return Alliance.BLUE;
         }
     }
 

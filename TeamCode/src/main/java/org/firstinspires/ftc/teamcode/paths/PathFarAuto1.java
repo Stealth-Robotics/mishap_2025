@@ -34,9 +34,10 @@ public class PathFarAuto1 extends PathManager{
                         .addPath(
                                 new BezierLine(new Pose(56.000, 9), new Pose(61.000, 20.000))
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(100))
+                        .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(114.5)) //114.5
                         // spin up early
-                        .addParametricCallback(0.1, robot::tryReadyShoot)
+                        .addParametricCallback(0.1, robot::setReadyShoot)
+
                         .build());
         // Move to line 1 intake area
         addBluePath(
@@ -50,7 +51,7 @@ public class PathFarAuto1 extends PathManager{
                                 )
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(115), Math.toRadians(0))
-                        .addParametricCallback(.9, ()-> follower.setMaxPower(.3))
+                        .addParametricCallback(1, ()-> follower.setMaxPower(.3))
                         .build());
         // Move to CHOMP POS
         addBluePath(
@@ -61,6 +62,7 @@ public class PathFarAuto1 extends PathManager{
                         .setTangentHeadingInterpolation()
                         .setReversed()
                         .addParametricCallback(0, robot::startIntake)
+                        .addParametricCallback(.9, ()->follower.setMaxPower(.2))
                         .build()
         );
 
@@ -102,11 +104,13 @@ public class PathFarAuto1 extends PathManager{
                         .addPath(
                                 new BezierLine(new Pose(10, 36.000), new Pose(61.000, 20.000))
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(115))
-                        .addParametricCallback(0, ()->follower.setMaxPower(1))
-                        .addParametricCallback(0, robot::stopIntake)
+                        .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(114.5))
+                        .addParametricCallback(0, ()-> {
+                            robot.stopIntake();
+                            follower.setMaxPower(1);
+                        })
                         // get the shooter motors spinning early
-                        .addParametricCallback(0.5, robot::tryReadyShoot)
+                        .addParametricCallback(0.8, robot::setReadyShoot)
                         .build()
         );
         //TODO: CONINUE TO ROW 2 or the side area
@@ -115,9 +119,9 @@ public class PathFarAuto1 extends PathManager{
                 follower.pathBuilder()
                         .addPath(
                                 // Path 8
-                                new BezierLine(new Pose(61.000, 20.000), new Pose(56.000, 10))
+                                new BezierLine(new Pose(61.000, 20.000), new Pose(48, 48))
                         )
-                        .setConstantHeadingInterpolation(Math.toRadians(90))
+                        .setConstantHeadingInterpolation(Math.toRadians(180))
                         .build()
         );
     }
@@ -136,7 +140,7 @@ public class PathFarAuto1 extends PathManager{
                         .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(65))
 
                         // spin up early
-                        .addParametricCallback(0.1, robot::tryReadyShoot)
+                        .addParametricCallback(0.1, robot::setReadyShoot)
                         .build());
     }
 

@@ -7,6 +7,9 @@ import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.common.Alliance;
+import org.firstinspires.ftc.teamcode.common.FinalPose;
+import org.firstinspires.ftc.teamcode.common.Motif;
 import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 
 @TeleOp (name = "_TeleOp_Driver_Only", group = "Main")
@@ -39,7 +42,18 @@ public class TeleOpSingleOp extends OpMode {
 
         follower = robot.getFollower();
         // Set the starting pose for odometry/pathing if needed
-        follower.setStartingPose(new Pose(0, 0, 0));
+
+        robot.setMotifPattern(Motif.get());
+
+        // TODO: Experemental code to see if this fixes robot drive orientation
+        // This is when auto completes and the robot is facing the correct direction
+        Pose finalPose = FinalPose.getPose();
+        if (Math.abs(Math.toDegrees(finalPose.getHeading()) -180) < 10
+            && Alliance.isBlue()){
+            robot.setControlsInverted();
+        }
+
+        follower.setStartingPose(finalPose);
 
         telemetryM.addData("Robot Initialized", "Waiting for start...");
     }
@@ -72,7 +86,7 @@ public class TeleOpSingleOp extends OpMode {
     @Override
     public void start() {
         // Reset any runtime timers or states if necessary
-        follower.startTeleopDrive();
+        follower.startTeleopDrive(true);
     }
 
     /**
@@ -138,7 +152,7 @@ public class TeleOpSingleOp extends OpMode {
         if (gamepad1.aWasPressed()) {
             if (shootState == ShootState.IDLE) {
                 shootState = ShootState.PREPARING;
-                robot.tryReadyShoot(); // Start preparing the shooter
+                robot.setReadyShoot(); // Start preparing the shooter
             } else {
                 // A quick double press will keep the shooter spinning
                 shootState = ShootState.IDLE;

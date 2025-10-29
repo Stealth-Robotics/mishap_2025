@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.common.MotorVelocityReader;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -23,21 +24,20 @@ public class ShooterSubsystem {
 
     private final ElapsedTime minShootTimer = new ElapsedTime();
 
-    private static final double SHOOT_RANGE_NEAR = 60;
-    private static final double SHOOT_RANGE_FAR = 90;
+    private static final double SHOOT_RANGE_NEAR = 50;
+    private static final double SHOOT_RANGE_FAR = 80;
 
     private static final double MIN_SHOOT_TIME_MS = 500;
     private static final double MAX_SHOOT_TIME_MS = 3000;
 
     // --- Constants ---
     public static final double MAX_RPM = 5200;
-    public static final double MIN_RPM = 0;
+    public static final double MIN_RPM = 3000;
     public static final double DEFAULT_RPM_FAR = 4850;
     public static final double DEFAULT_RPM_NEAR = 4200;
-
     public static final double DEFFAULT_RPM_MID = 4400;
     public static final double RPM_CHANGE_AMOUNT = 100;
-    private static final double VELOCITY_TOLERANCE = 500; // The allowed RPM error in which the shooter is considered "ready".
+    private static final double VELOCITY_TOLERANCE = 200; // The allowed RPM error in which the shooter is considered "ready".
 
     // Encoder ticks per revolution for a GoBILDA Yellow Jacket motor.
     private static final double TICKS_PER_REV = 28;
@@ -55,8 +55,9 @@ public class ShooterSubsystem {
     private double targetRpmFar = DEFAULT_RPM_FAR;
     private double targetRpmNear = DEFAULT_RPM_NEAR;
     private double targetRpmMid = DEFFAULT_RPM_MID;
-    private boolean isNear = false;
+    private boolean isShooterEnabled = false; // New state to track if the shooter is supposed to be running
     private double currentRpm = 0;
+    private boolean isNear = false; // Restored this state variable
 
     private RpmRange currentRpmRange = RpmRange.FAR;
 
@@ -66,14 +67,15 @@ public class ShooterSubsystem {
         NEAR
     }
 
-    private final Map<RpmRange, Double> rangeMap = Map.of(
-            RpmRange.NEAR, targetRpmNear,
-            RpmRange.MID, targetRpmMid,
-            RpmRange.FAR, targetRpmFar
-    );
-
+    private Map<RpmRange, Double> rangeMap;
 
     public ShooterSubsystem(HardwareMap hardwareMap) {
+        rangeMap = new HashMap<>();
+        rangeMap.put(RpmRange.FAR, targetRpmFar);
+        rangeMap.put(RpmRange.MID, targetRpmMid);
+        rangeMap.put(RpmRange.NEAR, targetRpmNear);
+
+        // Initialize the shooter motors from the hardware map.
         rightShooter = hardwareMap.get(DcMotorEx.class, "right_shoot_motor");
         leftShooter = hardwareMap.get(DcMotorEx.class, "left_shoot_motor");
 
@@ -93,6 +95,11 @@ public class ShooterSubsystem {
         leftVelocityReader = new MotorVelocityReader(leftShooter, TICKS_PER_REV);
     }
 
+    /**
+     * Sets the target RPM for the shooter based on the current shooting range.
+     * @param distanceInch distance in inches to target
+     * TODO: use a range Pid to control the target rpm based on distance
+     */
     public void setTargetRpmFromDisance(double distanceInch){
 
         if (distanceInch < SHOOT_RANGE_NEAR){
@@ -111,7 +118,7 @@ public class ShooterSubsystem {
         updateAverageRpm();
     }
 
-    /**<caret>
+    /**
      * Sets the internal target RPM for both shooter motors.
      * This method includes safety checks to ensure the RPM is within the valid range.
      * @param rpm The target revolutions per minute.
@@ -120,33 +127,36 @@ public class ShooterSubsystem {
         // Clamp the RPM to the allowable min/max range to prevent motor damage or unexpected behavior.
         if (rpm > MAX_RPM) {
             rpm = MAX_RPM;
-        } else if (rpm < MIN_RPM) {
+        } else if (rpm > 0 && rpm < MIN_RPM) {
+            // If setting a non-zero RPM, ensure it meets the minimum operational speed
             rpm = MIN_RPM;
         }
 
-        currentRpm = rpm;
 
         // Convert desired RPM to encoder ticks per second, which is the unit required by DcMotorEx.setVelocity().
         double ticksPerSecond = rpm * TICKS_PER_REV / 60;
         rightShooter.setVelocity(ticksPerSecond);
         leftShooter.setVelocity(ticksPerSecond);
+        resetVelocityReaders();
     }
 
     /**
      * Runs the shooter motors at the currently selected target RPM (near or far).
      */
     public void runShooter() {
-
+        isShooterEnabled = true; // Set the intended state to ON
+        minShootTimer.reset();
         //noinspection DataFlowIssue
         setRpm(rangeMap.get(currentRpmRange));
-        minShootTimer.reset();
     }
 
     /**
      * Stops the shooter motors.
      */
     public void stop(){
+        isShooterEnabled = false; // Set the intended state to OFF
         setRpm(0); // Setting RPM to 0 is the correct way to stop motors in velocity control mode.
+        minShootTimer.reset();
     }
 
     /**
@@ -162,7 +172,7 @@ public class ShooterSubsystem {
 
         curRpm += RPM_CHANGE_AMOUNT;
         rangeMap.put(currentRpmRange, curRpm);
-        if (isRunning()){
+        if (isShooterEnabled){
             setRpm(curRpm);
         }
 
@@ -182,7 +192,7 @@ public class ShooterSubsystem {
         curRpm -= RPM_CHANGE_AMOUNT;
         rangeMap.put(currentRpmRange, curRpm);
 
-        if (isRunning()) {
+        if (isShooterEnabled) {
             setRpm(curRpm);
         }
     }
@@ -203,7 +213,7 @@ public class ShooterSubsystem {
      */
     public boolean isReadyToShoot() {
         // Ensure the shooter is actually supposed to be running before checking if it's "ready".
-        if (!isRunning()) {
+        if (!isShooterEnabled) { // Use the new state variable for the primary check
             return false;
         }
 
@@ -213,23 +223,20 @@ public class ShooterSubsystem {
             return false;
         }
 
+        // The current RPM is updated periodically by the update() method
         double error = Math.abs(currentRpm - getTargetRpm());
-        // if for some reason the shooter cant reach requested RPM just shoot it
-        if (error <= VELOCITY_TOLERANCE || curMs > MAX_SHOOT_TIME_MS) {
-            minShootTimer.reset();
-            return true;
-        }
 
-        return false;
+        // if for some reason the shooter cant reach requested RPM just shoot it
+        return error <= VELOCITY_TOLERANCE || curMs > MAX_SHOOT_TIME_MS;
     }
 
     /**
-     * Checks if the shooter motors are currently running.
+     * Checks if the shooter motors are currently running (physically spinning).
      * @return True if the motors have a velocity greater than a minimum threshold.
      */
     public boolean isRunning() {
-        // A motor's velocity might not be exactly 0 due to physics, so check against a small threshold.
-        return rightShooter.getVelocity() > 100 || leftShooter.getVelocity() > 100;
+        // This method checks the actual motor velocity. It can differ from isShooterEnabled during spin-up/down.
+        return rightShooter.getVelocity() > 100 && leftShooter.getVelocity() > 100;
     }
 
     /**
@@ -246,13 +253,38 @@ public class ShooterSubsystem {
      */
     public void setTargetRange(boolean isNear) {
         this.isNear = isNear;
+        // Update the currentRpmRange based on the new isNear value
+        if (isNear) {
+            this.currentRpmRange = RpmRange.NEAR;
+        } else {
+            // You might want to decide if this defaults to FAR or MID. I'll assume FAR.
+            this.currentRpmRange = RpmRange.FAR;
+        }
+
+        // If the shooter is already running, update its speed to the new target
+        if (isShooterEnabled) {
+            runShooter();
+        }
     }
+
+    private void resetVelocityReaders(){
+        leftVelocityReader.reset();
+        rightVelocityReader.reset();
+    }
+
+    public double getRawVelocity() {
+        return (this.rightShooter.getVelocity() + leftShooter.getVelocity()) / 2.0;
+    }
+
 
     /**
      * Updates the current average RPM from the two motor velocity readers.
      * This should be called periodically in the main loop via update().
      */
     private void updateAverageRpm() {
-        this.currentRpm = (rightVelocityReader.getFilteredRpm() + leftVelocityReader.getFilteredRpm()) / 2.0;
+        // Use the absolute value to prevent issues with one motor reporting a negative value momentarily
+        double rightRpm = rightVelocityReader.getFilteredRpm();
+        double leftRpm = leftVelocityReader.getFilteredRpm();
+        this.currentRpm = (Math.abs(rightRpm) + Math.abs(leftRpm)) / 2.0;
     }
 }

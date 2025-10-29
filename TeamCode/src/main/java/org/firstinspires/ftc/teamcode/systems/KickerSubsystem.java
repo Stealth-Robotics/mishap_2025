@@ -23,7 +23,7 @@ public class KickerSubsystem {
 
 
     /** Number of Ms to wait for kicker transition*/
-    private static final long KICK_DELAY = 200;
+    public static final long KICK_DELAY = 250;
 
     private boolean isReady = false;
 

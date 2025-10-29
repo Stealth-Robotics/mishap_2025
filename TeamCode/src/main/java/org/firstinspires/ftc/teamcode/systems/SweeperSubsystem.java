@@ -12,9 +12,11 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 @Configurable
 public class SweeperSubsystem {
 
-    public static double MAX_SWEEPER_SPEED = 1.0;
+    public static double MAX_SWEEPER_SPEED = .5; // 1.0
 
-    public double currentPower = MAX_SWEEPER_SPEED;
+    public static double MAX_EGG_BEATER_SPEED = 1; // 1.0
+
+    public double curSweeperSpeed = MAX_SWEEPER_SPEED;
 
 
     /** The left CR servo for the sweeper mechanism. */
@@ -47,27 +49,27 @@ public class SweeperSubsystem {
      * Activates the intake by setting the power of the sweeper servos to their maximum forward speed.
      */
     public void startIntake() {
-        leftSweeper.setPower(currentPower);
-        rightSweeper.setPower(currentPower);
-        eggbeater.setPower(currentPower);
+        leftSweeper.setPower(curSweeperSpeed);
+        rightSweeper.setPower(curSweeperSpeed);
+        eggbeater.setPower(MAX_EGG_BEATER_SPEED);
     }
 
     /**
      * Stops the sweeper mechanism by setting the power of the servos to zero.
      */
     public void stopIntake() {
-        leftSweeper.setPower(0.0);
-        rightSweeper.setPower(0.0);
-        eggbeater.setPower(0.0);
+        leftSweeper.setPower(0);
+        rightSweeper.setPower(0);
+        eggbeater.setPower(0);
     }
 
     /**
      * Reverses the direction of the sweeper mechanism for outtake or to clear a jam.
      */
     public void reverseIntake() {
-        leftSweeper.setPower(-currentPower);
-        rightSweeper.setPower(-currentPower);
-        eggbeater.setPower(-currentPower);
+        leftSweeper.setPower(-curSweeperSpeed);
+        rightSweeper.setPower(-curSweeperSpeed);
+        eggbeater.setPower(-MAX_EGG_BEATER_SPEED);
     }
 
     /**
@@ -75,15 +77,15 @@ public class SweeperSubsystem {
      * @param power .01 to 1 power settings
      */
     public void setPower(double power) {
-        this.currentPower = power;
+        this.curSweeperSpeed = power;
     }
 
     /**
      * Increases the sweeper power by 10%
      */
     public void increasePercentPower() {
-        if (currentPower < MAX_SWEEPER_SPEED) {
-            currentPower += 0.1;
+        if (curSweeperSpeed < MAX_SWEEPER_SPEED) {
+            curSweeperSpeed += 0.1;
         }
     }
 
@@ -91,8 +93,8 @@ public class SweeperSubsystem {
      * Decreases the sweeper power by 10%
      */
     public void decreasePercentPower() {
-        if (currentPower > -1) {
-            currentPower -= 0.1;
+        if (curSweeperSpeed > -1) {
+            curSweeperSpeed -= 0.1;
         }
     }
 
@@ -100,7 +102,7 @@ public class SweeperSubsystem {
      * Gets the current sweeper power
      * @return the current sweeper power
      */
-    public double getCurrentPower() {
-        return currentPower;
+    public double getCurSweeperSpeed() {
+        return curSweeperSpeed;
     }
 }
