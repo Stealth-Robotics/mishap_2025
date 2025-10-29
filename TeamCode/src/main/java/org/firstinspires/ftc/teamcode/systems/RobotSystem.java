@@ -680,10 +680,10 @@ public class RobotSystem {
     public void setSpindexerSlot(int index) { spindexerSys.rotateToSlot(index); }
 
     /** Increases the target shooter RPM for far shots. */
-    public void increaseShooterRpmFar() { shooterSys.increaseCurrentRpmRange(); }
+    public void increaseShooterRpm() { shooterSys.increaseCurrentRpmRange(); }
 
     /** Decreases the target shooter RPM for far shots. */
-    public void decreaseShooterRpmFar() { shooterSys.decreaseCurrentRpmRange(); }
+    public void decreaseShooterRpm() { shooterSys.decreaseCurrentRpmRange(); }
 
     /** Nudges the spindexer's raw position by a small positive amount. */
     public void increaseSpindexer() { spindexerSys.nudgePosition(5); }
