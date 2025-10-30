@@ -781,7 +781,7 @@ public class RobotSystem {
             case AFTER_SHOT:
 
                 // hold the shooter for a short delay to allow the kicker to kick the ball
-                if (stateTimer.milliseconds() >= kickerSys.KICK_DELAY) {
+                if (stateTimer.milliseconds() >= KickerSubsystem.KICK_DELAY) {
                     kickerSys.setReady();
                     // Stop the shooter unless burst fire is active.
                     if (!isBurstFire) {
@@ -890,7 +890,9 @@ public class RobotSystem {
     private void displayTelemetry() {
         // TODO: remove unneeded output
         telemetryM.addData("Shooter RPM", shooterSys.getCurrentRpm());
+        telemetryM.addData("Motor RPM", shooterSys.getMotorRpms());
         telemetryM.addData("Target RPM", shooterSys.getTargetRpm());
+        telemetryM.addData("Is Spindexer Ready", spindexerSys.isReady());
 //        telemetryM.addData("Robot State", currentState.name());
 //        telemetryM.addData("Shoot Slot Index", spindexerSys.getCurShootSlot());
 //        telemetryM.addData("Shoot Slot State:", spindexerSys.getShootSlotState());
@@ -899,6 +901,7 @@ public class RobotSystem {
 //        telemetryM.addData("Shoot Slot Number:", spindexerSys.getCurShootSlot());
 //        telemetryM.addData("IsMotif available", spindexerSys.isMotifAvailable());
         telemetryM.addData("Is Auto Intaking:", isAutoIntaking);
+        telemetryM.addData("Is Burst MODE", isBurstFire);
 //        telemetryM.addData("Hood State:", hoodSys.getHoodState());
 //        telemetryM.addData("Raw Velecity:", shooterSys.getRawVelocity());
 //        telemetryM.addData("shooterSys Ready:", shooterSys.isReadyToShoot());

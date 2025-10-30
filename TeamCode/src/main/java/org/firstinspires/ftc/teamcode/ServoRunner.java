@@ -98,10 +98,10 @@ public class ServoRunner extends LinearOpMode {
 
             if (gamepad1.yWasPressed())
             {
-                servoFlipper.setPosition(.5);
+                servoFlipper.setPosition(.44);
             }
             if (gamepad1.yWasReleased()) {
-                servoFlipper.setPosition(.2);
+                servoFlipper.setPosition(.18);
             }
 
             if (gamepad1.dpadUpWasPressed())

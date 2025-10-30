@@ -185,10 +185,10 @@ public class TeleOpSingleOp extends OpMode {
         }
 
         // Target range selection using triggers
-        if (gamepad1.left_trigger > 0.2) {
-            robot.setShooterTargetRange(false); // e.g., Close Shot
-        } else if (gamepad1.right_trigger > 0.2) {
-            robot.setShooterTargetRange(true); // e.g., Far Shot
+        if (gamepad1.right_trigger > 0.2) {
+            robot.setBurstFire(true);
+        } else if(gamepad1.left_trigger > 0.2) {
+            robot.setBurstFire(false);
         }
     }
 

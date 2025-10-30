@@ -10,6 +10,9 @@ import java.util.Queue;
  * For calculating the TRUE RPM of a motor with filtering for smoother readings.
  */
 public class MotorVelocityReader {
+    private static final int DEFAULT_FILTER_SIZE = 20;
+
+
     private final DcMotorEx motor;
     private final double ticksPerRev;
     private final ElapsedTime timer;
@@ -38,7 +41,7 @@ public class MotorVelocityReader {
      * @param timer A shared ElapsedTime timer. Defaults filter size to 5.
      */
     public MotorVelocityReader(DcMotorEx motor, double ticksPerRev, ElapsedTime timer) {
-        this(motor, ticksPerRev, timer, 5); // Default filter size
+        this(motor, ticksPerRev, timer, DEFAULT_FILTER_SIZE); // Default filter size
     }
 
     /**
@@ -47,7 +50,7 @@ public class MotorVelocityReader {
      * @param ticksPerRev The number of encoder ticks per revolution for this motor.
      */
     public MotorVelocityReader(DcMotorEx motor, double ticksPerRev) {
-        this(motor, ticksPerRev, new ElapsedTime(), 5);
+        this(motor, ticksPerRev, new ElapsedTime(), DEFAULT_FILTER_SIZE);
     }
 
     /**
@@ -80,13 +83,11 @@ public class MotorVelocityReader {
 
         int currentPosition = motor.getCurrentPosition();
         int deltaTicks = currentPosition - lastPosition;
-
-        // If not enough time has passed for a reliable reading, return the previous RPM.
-        // This prevents noisy readings from small time deltas.
-        if (deltaTime < 0.02) {
-            return lastRpm;
+        if (deltaTicks <= 0) {
+            lastRpm = 0;
+            rpmFilter.clear();
+            return 0;
         }
-
 
         double ticksPerSecond = deltaTicks / deltaTime;
         double revolutionsPerSecond = ticksPerSecond / ticksPerRev;
@@ -103,7 +104,6 @@ public class MotorVelocityReader {
         }
 
         lastRpm = currentRpm; // Store the newly calculated raw RPM
-
         rpmFilter.add(currentRpm);
 
         return currentRpm;

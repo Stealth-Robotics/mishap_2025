@@ -22,12 +22,12 @@ public class ShooterSubsystem {
     private final MotorVelocityReader rightVelocityReader;
     private final MotorVelocityReader leftVelocityReader;
 
-    private final ElapsedTime minShootTimer = new ElapsedTime();
+    private final ElapsedTime shootTimer = new ElapsedTime();
 
     private static final double SHOOT_RANGE_NEAR = 50;
     private static final double SHOOT_RANGE_FAR = 80;
 
-    private static final double MIN_SHOOT_TIME_MS = 500;
+    private static final double MIN_SHOOT_TIME_MS = 400;
     private static final double MAX_SHOOT_TIME_MS = 3000;
 
     // --- Constants ---
@@ -37,7 +37,7 @@ public class ShooterSubsystem {
     public static final double DEFAULT_RPM_NEAR = 4200;
     public static final double DEFFAULT_RPM_MID = 4400;
     public static final double RPM_CHANGE_AMOUNT = 50;
-    private static final double VELOCITY_TOLERANCE = 200; // The allowed RPM error in which the shooter is considered "ready".
+    private static final double VELOCITY_TOLERANCE = 60; // The allowed RPM error in which the shooter is considered "ready".
 
     // Encoder ticks per revolution for a GoBILDA Yellow Jacket motor.
     private static final double TICKS_PER_REV = 28;
@@ -49,12 +49,10 @@ public class ShooterSubsystem {
     // D (Derivative): Prevents overshooting the target.
     // F (Feedforward): Proactively applies power based on the target velocity, which is crucial for velocity control.
     // TODO: more tuning needed
-    private static final PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(90, .5, 10, 13);
+ //   private static final PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(90, .5, 10, 13);
+    private static final PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(1.3, 0.15, 0, 12.1);
 
     // --- State Variables ---
-    private double targetRpmFar = DEFAULT_RPM_FAR;
-    private double targetRpmNear = DEFAULT_RPM_NEAR;
-    private double targetRpmMid = DEFFAULT_RPM_MID;
     private boolean isShooterEnabled = false; // New state to track if the shooter is supposed to be running
     private double currentRpm = 0;
     private boolean isNear = false; // Restored this state variable
@@ -67,13 +65,14 @@ public class ShooterSubsystem {
         NEAR
     }
 
-    private Map<RpmRange, Double> rangeMap;
+    // Holds the different set point for the shooter
+    private final Map<RpmRange, Double> rangeMap;
 
     public ShooterSubsystem(HardwareMap hardwareMap) {
         rangeMap = new HashMap<>();
-        rangeMap.put(RpmRange.FAR, targetRpmFar);
-        rangeMap.put(RpmRange.MID, targetRpmMid);
-        rangeMap.put(RpmRange.NEAR, targetRpmNear);
+        rangeMap.put(RpmRange.FAR, DEFAULT_RPM_FAR);
+        rangeMap.put(RpmRange.MID, DEFFAULT_RPM_MID);
+        rangeMap.put(RpmRange.NEAR, DEFAULT_RPM_NEAR);
 
         // Initialize the shooter motors from the hardware map.
         rightShooter = hardwareMap.get(DcMotorEx.class, "right_shoot_motor");
@@ -145,7 +144,8 @@ public class ShooterSubsystem {
      */
     public void runShooter() {
         isShooterEnabled = true; // Set the intended state to ON
-        minShootTimer.reset();
+        shootTimer.reset();
+
         //noinspection DataFlowIssue
         setRpm(rangeMap.get(currentRpmRange));
     }
@@ -156,7 +156,7 @@ public class ShooterSubsystem {
     public void stop(){
         isShooterEnabled = false; // Set the intended state to OFF
         setRpm(0); // Setting RPM to 0 is the correct way to stop motors in velocity control mode.
-        minShootTimer.reset();
+        shootTimer.reset();
     }
 
     /**
@@ -179,7 +179,6 @@ public class ShooterSubsystem {
     }
 
     public void resetRpmCounter() {
-        this.minShootTimer.reset();
         this.rightVelocityReader.reset();
         this.leftVelocityReader.reset();
     }
@@ -224,7 +223,7 @@ public class ShooterSubsystem {
         }
 
         // Check if the minimum shoot time has elapsed.
-        double curMs = minShootTimer.milliseconds();
+        double curMs = shootTimer.milliseconds();
         if (curMs < MIN_SHOOT_TIME_MS) {
             return false;
         }
@@ -276,11 +275,11 @@ public class ShooterSubsystem {
     private void resetVelocityReaders(){
         leftVelocityReader.reset();
         rightVelocityReader.reset();
-        minShootTimer.reset();
+        shootTimer.reset();
     }
 
-    public double getRawVelocity() {
-        return (this.rightShooter.getVelocity() + leftShooter.getVelocity()) / 2.0;
+    public double getMotorRpms() {
+        return (((this.rightShooter.getVelocity() + leftShooter.getVelocity()) / 2.0) / TICKS_PER_REV) * 60;
     }
 
 

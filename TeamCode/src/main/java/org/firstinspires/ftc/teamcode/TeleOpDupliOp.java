@@ -45,10 +45,11 @@ public class TeleOpDupliOp extends OpMode {
 
         robot.setMotifPattern(Motif.get());
 
-        // TODO: Experemental code to see if this fixes robot drive orientation
-        // This is when auto completes and the robot is facing the correct direction
+        // TODO: Experemental code to see if this fixes robot drive orientation for alliance
+        // If auto Op has run then we should have a decent ideal of the robots last heading
         Pose finalPose = FinalPose.getPose();
-        if (Math.abs(Math.toDegrees(finalPose.getHeading()) -180) < 10
+        if (finalPose.getX() > 0
+                && finalPose.getY() > 0
                 && Alliance.isBlue()){
             robot.setControlsInverted();
         }

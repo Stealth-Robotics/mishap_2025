@@ -28,10 +28,10 @@ public class SpindexerSubsystem {
 
     // NOTE: if you would like to adjust in FTC dashboard mark members as public static (Not final)
     /** The number of ticks to move backward after the index switch is released to center a slot. */
-    public static int INDEX_OFFSET_TICKS = 120;
+    public static int INDEX_OFFSET_TICKS = 160;
 
     /** This value protects the spindexer from jamming and or crushing the world */
-    private static final double OVERLOAD_AMPS = 8.0;
+    private static final double OVERLOAD_AMPS = 7.0;
 
     /** Ticks per revolution for the GoBilda 43 RPM motor (3895.9) geared up. */
     private static final double TICKS_PER_REV = 3895.9;
@@ -41,16 +41,16 @@ public class SpindexerSubsystem {
     private static final double TICKS_PER_SLOT = TICKS_PER_REV / NUMBER_OF_SLOTS;
 
     /** The tolerance, in ticks, for considering the motor to have reached its target position. */
-    private static final int POSITION_TOLERANCE = 2;
+    private static final int POSITION_TOLERANCE = 4;
 
     /** The maximum power limit for spindexer rotation. */
-    public static double SPINDEXER_POWER_LIMIT = .5;
+    public static double SPINDEXER_POWER_LIMIT = .6;
     /** The maximum velocity (in ticks/sec) for spindexer rotation in RUN_TO_POSITION mode. */
     public static double SPINDEXER_VELOCITY_LIMIT = 2600;
 
     /** PIDF coefficients for position control, tunable via FTC-Dashboard. */
     // TODO: More tuning needed
-    public static PIDFCoefficients SPINDEXER_PIDF = new PIDFCoefficients(6, 4,0.2, 1);
+    public static PIDFCoefficients SPINDEXER_PIDF = new PIDFCoefficients(.55, 3.5,.001, 10);  //10, 2,1.2, 1); 8, 4,0.2, 1
 
     private final ElapsedTime currentSpikeTimer = new ElapsedTime();
 
@@ -141,7 +141,7 @@ public class SpindexerSubsystem {
                 } else {
                     // If already pressed, move forward to find the edge where it releases.
                     spindexer.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    spindexer.setVelocity(SPINDEXER_VELOCITY_LIMIT / 4); // Slow forward search
+                    spindexer.setVelocity(SPINDEXER_VELOCITY_LIMIT / 8); // Slow forward search
                     homingState = HomingState.SEARCHING_FORWARD;
                 }
                 return false; // Process has just begun
@@ -166,7 +166,7 @@ public class SpindexerSubsystem {
                     // Command the motor to move to the final offset position.
                     spindexer.setTargetPosition(targetPosition);
                     spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    spindexer.setVelocity(SPINDEXER_VELOCITY_LIMIT / 2);
+                    spindexer.setVelocity(SPINDEXER_VELOCITY_LIMIT / 10);
                     homingState = HomingState.MOVING_TO_OFFSET;
                 }
                 return false;
