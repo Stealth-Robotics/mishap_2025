@@ -33,10 +33,10 @@ public class ShooterSubsystem {
     // --- Constants ---
     public static final double MAX_RPM = 5200;
     public static final double MIN_RPM = 3000;
-    public static final double DEFAULT_RPM_FAR = 4850;
+    public static final double DEFAULT_RPM_FAR = 4800;
     public static final double DEFAULT_RPM_NEAR = 4200;
     public static final double DEFFAULT_RPM_MID = 4400;
-    public static final double RPM_CHANGE_AMOUNT = 100;
+    public static final double RPM_CHANGE_AMOUNT = 50;
     private static final double VELOCITY_TOLERANCE = 200; // The allowed RPM error in which the shooter is considered "ready".
 
     // Encoder ticks per revolution for a GoBILDA Yellow Jacket motor.
@@ -178,6 +178,12 @@ public class ShooterSubsystem {
 
     }
 
+    public void resetRpmCounter() {
+        this.minShootTimer.reset();
+        this.rightVelocityReader.reset();
+        this.leftVelocityReader.reset();
+    }
+
     /**
      * Decreases the target RPM for the 'far' shot distance.
      */
@@ -270,6 +276,7 @@ public class ShooterSubsystem {
     private void resetVelocityReaders(){
         leftVelocityReader.reset();
         rightVelocityReader.reset();
+        minShootTimer.reset();
     }
 
     public double getRawVelocity() {

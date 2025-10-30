@@ -126,8 +126,7 @@ public class PathFarAuto1 extends PathManager{
         );
     }
 
-    private void buildRedPath()
-    {
+    private void buildRedPath() {
         Follower follower = robot.getFollower();
         // Start against wall in far shoot zone
         // Move to Shoot 1
@@ -142,6 +141,68 @@ public class PathFarAuto1 extends PathManager{
                         // spin up early
                         .addParametricCallback(0.1, robot::setReadyShoot)
                         .build());
-    }
+        // Move to row 1
+        addRedPath(
+                follower.pathBuilder()
+                        .addPath(
+                                // Move to get close to the balls
+                                new BezierCurve(
+                                        new Pose(84.685, 20.471),
+                                        new Pose(87.660, 37.443),
+                                        new Pose(103.700, 35.600)
+                                )
+                        )
+                        .setLinearHeadingInterpolation(Math.toRadians(65), Math.toRadians(180))
+                        .build());
 
+        addRedPath(
+                follower.pathBuilder()
+                        .addPath(
+                                new BezierCurve(
+                                        new Pose(84.685, 20.471),
+                                        new Pose(87.660, 37.443),
+                                        new Pose(103.700, 35.600)
+                                )
+                        )
+                        .setLinearHeadingInterpolation(Math.toRadians(65), Math.toRadians(180))
+                        .build());
+
+        addRedPath(
+                follower.pathBuilder()
+                        .addPath(
+                                // Move to the starting of ball 1
+                                new BezierLine(new Pose(103.700, 35.600), new Pose(112.300, 35.670))
+                        )
+                        .setConstantHeadingInterpolation(Math.toRadians(180))
+                        .build());
+        addRedPath(
+                follower.pathBuilder()
+                        .addPath(
+                        // Move to the end of ball 3
+                        new BezierLine(new Pose(112.300, 35.670), new Pose(129.300, 35.670))
+                        )
+                        .setTangentHeadingInterpolation()
+                        .setReversed()
+                        .build());
+        addRedPath(
+                follower.pathBuilder()
+                        .addPath(
+                                // Go back to the shooting position
+                                new BezierCurve(
+                                        new Pose(129.300, 35.670),
+                                        new Pose(108.300, 13.298),
+                                        new Pose(84.685, 20.067)
+                                )
+                        )
+                        .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(65))
+                        .build());
+        addRedPath(
+                follower.pathBuilder()
+                        .addPath(
+                                // Path 6
+                                new BezierLine(new Pose(84.700, 20.067), new Pose(99.900, 60.000))
+                        )
+                        .setLinearHeadingInterpolation(Math.toRadians(65), Math.toRadians(180))
+                        .build());
+    }
 }

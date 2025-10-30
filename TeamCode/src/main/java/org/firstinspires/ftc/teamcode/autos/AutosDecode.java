@@ -71,6 +71,7 @@ public abstract class AutosDecode extends OpMode {
         follower = robot.getFollower();
         setSpindexerInitState();
         telemetryM.debug("Status", "Initialized");
+        robot.setLimelightPipeline(Pipeline.APRILTAG_TARGET_BOTH);
         robot.update();
     }
 
@@ -98,6 +99,7 @@ public abstract class AutosDecode extends OpMode {
 
 
         // TODO: Use this to get robot position from limelight while waiting
+        telemetryM.addData("Limelight Pipeline:", robot.getLimelightPipeline());
         Pose curPose = robot.getPedroPoseFromLimelight(800);
         if (curPose != null) {
             this.lastPose = curPose;

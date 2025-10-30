@@ -138,7 +138,7 @@ public class TeleOpDupliOp extends OpMode {
                 isRobotCentric,
                 autoAim);
 
-        if (gamepad2.yWasPressed() || gamepad1.yWasPressed()) {
+        if (gamepad1.yWasPressed()) {
             // TODO: can use Pose offset to keep current pose
             robot.resetIMU();
         }
@@ -191,11 +191,11 @@ public class TeleOpDupliOp extends OpMode {
      * Manages intake controls. Logic is improved to handle overlapping presses.
      */
     private void handleIntakeControls() {
-        if (gamepad2.rightBumperWasPressed()) {
+        if (gamepad1.rightBumperWasPressed()) {
             robot.startIntake();
-        } else if (gamepad2.leftBumperWasPressed() || gamepad1.leftBumperWasPressed()) {
+        } else if (gamepad1.leftBumperWasPressed()) {
             robot.reverseIntake();
-        } else if (gamepad2.rightBumperWasReleased() || gamepad1.leftBumperWasReleased()) {
+        } else if (gamepad1.rightBumperWasReleased() || gamepad1.leftBumperWasReleased()) {
             // Stop intake only if neither bumper is pressed
             robot.stopIntake();
         }
@@ -209,8 +209,11 @@ public class TeleOpDupliOp extends OpMode {
      * Manages spindexer position controls.
      */
     private void handleSpindexerControls() {
-        if (gamepad2.bWasPressed() || gamepad1.bWasPressed()) {
+        if (gamepad2.rightBumperWasPressed() || gamepad1.bWasPressed()) {
             robot.incrementSpindexerSlot();
+        }
+        if (gamepad2.leftBumperWasPressed()) {
+            robot.decrementSpindexerSlot();
         }
         if (gamepad2.dpadLeftWasPressed() || gamepad1.dpadLeftWasPressed()) {
             robot.increaseSpindexer();
@@ -218,6 +221,7 @@ public class TeleOpDupliOp extends OpMode {
         if (gamepad2.dpadRightWasPressed() || gamepad1.dpadRightWasPressed()) {
             robot.decreaseSpindexer();
         }
+
     }
 
     /**

@@ -702,6 +702,9 @@ public class RobotSystem {
     // ** Sets the Limelight's active pipeline. */
     public void setLimelightPipeline(Pipeline pipeline) { limelightSys.setPipeline(pipeline); }
 
+    public Pipeline getLimelightPipeline() { return limelightSys.getCurrentPipeline(); }
+
+
     public void setControlsInverted() {
         this.controlInverter = -1;
     }
@@ -768,6 +771,7 @@ public class RobotSystem {
                 if (isShootReady)
                 {
                     kickerSys.kickIt();
+                    shooterSys.resetRpmCounter();
                     spindexerSys.setShootSlotEmpty();
                     currentState = SystemState.AFTER_SHOT;
                     stateTimer.reset();
@@ -885,8 +889,8 @@ public class RobotSystem {
      */
     private void displayTelemetry() {
         // TODO: remove unneeded output
-//        telemetryM.addData("Shooter RPM", shooterSys.getCurrentRpm());
-//        telemetryM.addData("Target RPM", shooterSys.getTargetRpm());
+        telemetryM.addData("Shooter RPM", shooterSys.getCurrentRpm());
+        telemetryM.addData("Target RPM", shooterSys.getTargetRpm());
 //        telemetryM.addData("Robot State", currentState.name());
 //        telemetryM.addData("Shoot Slot Index", spindexerSys.getCurShootSlot());
 //        telemetryM.addData("Shoot Slot State:", spindexerSys.getShootSlotState());
@@ -894,7 +898,7 @@ public class RobotSystem {
 //        telemetryM.addData("Standbby Slot State:", spindexerSys.getStandbySlotState());
 //        telemetryM.addData("Shoot Slot Number:", spindexerSys.getCurShootSlot());
 //        telemetryM.addData("IsMotif available", spindexerSys.isMotifAvailable());
-//        telemetryM.addData("Is Auto Intaking:", isAutoIntaking);
+        telemetryM.addData("Is Auto Intaking:", isAutoIntaking);
 //        telemetryM.addData("Hood State:", hoodSys.getHoodState());
 //        telemetryM.addData("Raw Velecity:", shooterSys.getRawVelocity());
 //        telemetryM.addData("shooterSys Ready:", shooterSys.isReadyToShoot());
