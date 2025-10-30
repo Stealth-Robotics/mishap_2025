@@ -116,29 +116,29 @@ public class TeleOpDupliOp extends OpMode {
      * Groups driving-related controls for clarity.
      */
     private void handleDriveControls() {
-        if (gamepad2.leftStickButtonWasPressed()) {
+        if (gamepad2.leftStickButtonWasPressed() || gamepad1.leftStickButtonWasPressed()) {
             isRobotCentric = !isRobotCentric;
         }
-        if (gamepad2.rightStickButtonWasPressed()) {
+        if (gamepad2.rightStickButtonWasPressed() || gamepad1.rightStickButtonWasPressed()) {
             isSlowMo = !isSlowMo;
         }
 
         // Auto-aim is active only while the X button is held down
-        if (gamepad2.xWasPressed()) {
+        if (gamepad2.xWasPressed() || gamepad1.xWasPressed()) {
             autoAim = true;
-        } else if (gamepad2.xWasReleased()) {
+        } else if (gamepad2.xWasReleased() || gamepad1.xWasReleased()) {
             autoAim = false;
         }
 
         robot.drive(
-                -gamepad2.left_stick_y,
-                -gamepad2.left_stick_x,
-                -gamepad2.right_stick_x,
+                -gamepad1.left_stick_y,
+                -gamepad1.left_stick_x,
+                -gamepad1.right_stick_x,
                 isSlowMo,
                 isRobotCentric,
                 autoAim);
 
-        if (gamepad2.yWasPressed()) {
+        if (gamepad2.yWasPressed() || gamepad1.yWasPressed()) {
             // TODO: can use Pose offset to keep current pose
             robot.resetIMU();
         }
@@ -149,7 +149,7 @@ public class TeleOpDupliOp extends OpMode {
      */
     private void handleShooterControls() {
         // 'A' button toggles the shooting sequence
-        if (gamepad2.aWasPressed()) {
+        if (gamepad1.aWasPressed()) {
             if (shootState == ShootState.IDLE) {
                 shootState = ShootState.PREPARING;
                 robot.setReadyShoot(); // Start preparing the shooter
@@ -177,19 +177,14 @@ public class TeleOpDupliOp extends OpMode {
         }
 
         // Manual RPM adjustments
-        if (gamepad2.dpadUpWasPressed()) {
+        if (gamepad2.dpadUpWasPressed() || gamepad1.dpadUpWasPressed()) {
             robot.increaseShooterRpm();
         }
-        if (gamepad2.dpadDownWasPressed()) {
+        if (gamepad2.dpadDownWasPressed() || gamepad1.dpadDownWasPressed()) {
             robot.decreaseShooterRpm();
         }
 
         // Target range selection using triggers
-        if (gamepad2.left_trigger > 0.2) {
-            robot.setShooterTargetRange(false); // e.g., Close Shot
-        } else if (gamepad2.right_trigger > 0.2) {
-            robot.setShooterTargetRange(true); // e.g., Far Shot
-        }
     }
 
     /**
@@ -198,14 +193,14 @@ public class TeleOpDupliOp extends OpMode {
     private void handleIntakeControls() {
         if (gamepad2.rightBumperWasPressed()) {
             robot.startIntake();
-        } else if (gamepad2.leftBumperWasPressed()) {
+        } else if (gamepad2.leftBumperWasPressed() || gamepad1.leftBumperWasPressed()) {
             robot.reverseIntake();
-        } else if (gamepad2.rightBumperWasReleased() || gamepad2.leftBumperWasReleased()){
+        } else if (gamepad2.rightBumperWasReleased() || gamepad1.leftBumperWasReleased()) {
             // Stop intake only if neither bumper is pressed
             robot.stopIntake();
         }
 
-        if (gamepad2.startWasPressed()){
+        if (gamepad2.startWasPressed() || gamepad1.startWasPressed()){
             robot.toggleAutoIntaking();
         }
     }
@@ -214,13 +209,13 @@ public class TeleOpDupliOp extends OpMode {
      * Manages spindexer position controls.
      */
     private void handleSpindexerControls() {
-        if (gamepad2.bWasPressed()) {
+        if (gamepad2.bWasPressed() || gamepad1.bWasPressed()) {
             robot.incrementSpindexerSlot();
         }
-        if (gamepad2.dpadLeftWasPressed()) {
+        if (gamepad2.dpadLeftWasPressed() || gamepad1.dpadLeftWasPressed()) {
             robot.increaseSpindexer();
         }
-        if (gamepad2.dpadRightWasPressed()) {
+        if (gamepad2.dpadRightWasPressed() || gamepad1.dpadRightWasPressed()) {
             robot.decreaseSpindexer();
         }
     }
@@ -229,7 +224,7 @@ public class TeleOpDupliOp extends OpMode {
      * Handles miscellaneous controls like pipeline toggling.
      */
     private void handleOtherControls() {
-        if (gamepad2.backWasPressed()) {
+        if (gamepad1.backWasPressed()) {
             robot.resetHighLowColors();
             robot.toggleLimelightTarget();
         }
