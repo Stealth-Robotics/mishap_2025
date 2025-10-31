@@ -24,8 +24,8 @@ import java.util.HashSet;
  */
 public abstract class AutosDecode extends OpMode {
 
-    public static final double MOTIF_TIMEOUT = 2000;
-    public static final double AIM_TIMEOUT = 1500;
+    public static final double READ_MOTIF_TIMEOUT_SECONDS = 15;
+    public static final double AIM_TIMEOUT_MS = 2000;
 
     protected static final double PIPELINE_SWITCH_DELAY = 1000;
     protected final ElapsedTime actionTimer = new ElapsedTime();
@@ -221,9 +221,9 @@ public abstract class AutosDecode extends OpMode {
                 break;
         }
 
-        //telemetryM.addData("Path State", pathState);
+        telemetryM.addData("Path State", pathState);
         //telemetryM.addData("Follower State:", follower.isBusy());
-        //telemetryM.addData("Path Index", paths.getSegmentIndex());
+        telemetryM.addData("Path Index", paths.getSegmentIndex());
     }
 
     /**
@@ -305,7 +305,7 @@ public abstract class AutosDecode extends OpMode {
      */
     protected boolean doMotifOrTimeout() {
         // If we timout set the mofif to the loaded pattern of GPP
-        if (stateTimer.milliseconds() > MOTIF_TIMEOUT) {
+        if (stateTimer.seconds() > READ_MOTIF_TIMEOUT_SECONDS) {
             robot.setMotifPattern(Motif.PPG);
             return true;
         }
@@ -340,7 +340,7 @@ public abstract class AutosDecode extends OpMode {
      */
     protected boolean doAimingOrTimeout() {
         boolean done = false;
-        if (stateTimer.milliseconds() > AIM_TIMEOUT) {
+        if (stateTimer.milliseconds() > AIM_TIMEOUT_MS) {
             // stop the robot if timed out.
             follower.setTeleOpDrive(0, 0, 0, true);
             done = true;

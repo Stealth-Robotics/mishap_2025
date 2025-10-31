@@ -28,7 +28,7 @@ public class SpindexerSubsystem {
 
     // NOTE: if you would like to adjust in FTC dashboard mark members as public static (Not final)
     /** The number of ticks to move backward after the index switch is released to center a slot. */
-    public static int INDEX_OFFSET_TICKS = 160;
+    public static int INDEX_OFFSET_TICKS = 140;
 
     /** This value protects the spindexer from jamming and or crushing the world */
     private static final double OVERLOAD_AMPS = 7.0;

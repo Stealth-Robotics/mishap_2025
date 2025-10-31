@@ -10,7 +10,7 @@ import java.util.Queue;
  * For calculating the TRUE RPM of a motor with filtering for smoother readings.
  */
 public class MotorVelocityReader {
-    private static final int DEFAULT_FILTER_SIZE = 20;
+    private static final int DEFAULT_FILTER_SIZE = 10;
 
 
     private final DcMotorEx motor;

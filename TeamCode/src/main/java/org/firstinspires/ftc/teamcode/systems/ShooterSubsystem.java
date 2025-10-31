@@ -24,7 +24,7 @@ public class ShooterSubsystem {
 
     private final ElapsedTime shootTimer = new ElapsedTime();
 
-    private static final double SHOOT_RANGE_NEAR = 50;
+    private static final double SHOOT_RANGE_NEAR = 55;
     private static final double SHOOT_RANGE_FAR = 80;
 
     private static final double MIN_SHOOT_TIME_MS = 400;
@@ -37,7 +37,7 @@ public class ShooterSubsystem {
     public static final double DEFAULT_RPM_NEAR = 4200;
     public static final double DEFFAULT_RPM_MID = 4400;
     public static final double RPM_CHANGE_AMOUNT = 50;
-    private static final double VELOCITY_TOLERANCE = 60; // The allowed RPM error in which the shooter is considered "ready".
+    private static final double VELOCITY_TOLERANCE = 80; // The allowed RPM error in which the shooter is considered "ready".
 
     // Encoder ticks per revolution for a GoBILDA Yellow Jacket motor.
     private static final double TICKS_PER_REV = 28;
@@ -50,7 +50,7 @@ public class ShooterSubsystem {
     // F (Feedforward): Proactively applies power based on the target velocity, which is crucial for velocity control.
     // TODO: more tuning needed
  //   private static final PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(90, .5, 10, 13);
-    private static final PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(1.3, 0.15, 0, 12.1);
+    private static final PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(1.3, 0.15, 0, 12.15);
 
     // --- State Variables ---
     private boolean isShooterEnabled = false; // New state to track if the shooter is supposed to be running

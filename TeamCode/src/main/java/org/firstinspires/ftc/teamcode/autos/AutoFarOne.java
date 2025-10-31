@@ -16,8 +16,8 @@ public class AutoFarOne extends AutosDecode {
 
     @Override
     protected Path initPaths() {
-        shootIndexes.addAll(Arrays.asList(1, 5));
-        intakeIndexes.addAll(Arrays.asList(4));
+        shootIndexes.addAll(Arrays.asList(1, 4));
+        intakeIndexes.addAll(Arrays.asList(3));
 
         return new PathFarAuto1(robot);
     }

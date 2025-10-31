@@ -102,7 +102,7 @@ public class PathManager implements Path {
     }
 
     public static Alliance getAllianceFromPose(Pose pose) {
-        if (pose.getY() > (Constants.FIELD_SIZE_Y_INCHES / 2)) {
+        if (pose.getX() > (Constants.FIELD_SIZE_X_INCHES / 2)) {
             return Alliance.RED;
         } else {
             return Alliance.BLUE;

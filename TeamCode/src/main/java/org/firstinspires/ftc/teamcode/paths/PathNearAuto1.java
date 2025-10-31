@@ -16,53 +16,74 @@ public class PathNearAuto1 extends PathManager {
      */
     public PathNearAuto1(RobotSystem robot) {
         super(robot);
+        addPaths();
     }
 
     public void addPaths ( ) {
+        addBluePaths();
 
     }
     public void addBluePaths ( ) {
         Follower follower = robot.getFollower();
         addBluePath(
                 follower.pathBuilder()
-                        .addPath(new BezierLine(new Pose(18.900, 118.200), new Pose(43.392, 107.256))
+                        .addPath(
+                                // To Shoot 1
+                                new BezierLine(new Pose(17.700, 114.100), new Pose(58.400, 104.600))
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(43), Math.toRadians(135))
-                        .addParametricCallback(0.2, robot::setReadyShoot)
+                        .setLinearHeadingInterpolation(Math.toRadians(22), Math.toRadians(143))
                         .build()
         );
         addBluePath(
                 follower.pathBuilder()
                         .addPath(
+                                // Path 2
                                 new BezierCurve(
-                                        new Pose(43.392, 107.256),
-                                        new Pose(57.915, 90.984),
-                                        new Pose(39.368, 84.335)
+                                        new Pose(58.400, 104.600),
+                                        new Pose(58.000, 91.000),
+                                        new Pose(47.700, 84.000)
                                 )
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(135), Math.toRadians(0))
-                        .addParametricCallback(1, robot::startIntake)
+                        .addParametricCallback(.9, robot::startIntake)
                         .build()
         );
         addBluePath(
                 follower.pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(39.368, 84.335), new Pose(13.500, 84.200))
+                                // Path 3
+                                new BezierLine(new Pose(47.700, 84.000), new Pose(24.000, 84.000))
                         )
                         .setTangentHeadingInterpolation()
                         .setReversed()
                         .addParametricCallback(0.02, () -> follower.setMaxPower(0.2))
+                        .addParametricCallback(0.5, () -> follower.setMaxPower(0.15))
+
                         .build()
         );
         addBluePath(
                 follower.pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(13.500, 84.200), new Pose(47.767, 115.655))
+                                // Path 4
+                                new BezierLine(new Pose(24.000, 84.000), new Pose(58.600, 104.600))
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(145))
+                        .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(140))
+                        .addParametricCallback(0, robot::stopIntake)
                         .addParametricCallback(0, () -> follower.setMaxPower(1))
-                        .addParametricCallback(0.9, robot::setReadyShoot)
                         .build()
         );
+        addBluePath(
+                follower.pathBuilder()
+                        .addPath(
+                                // Path 5
+                                new BezierCurve(
+                                        new Pose(58.600, 104.600),
+                                        new Pose(66.500, 59.900),
+                                        new Pose(45.600, 60.000)
+                                )
+                        )
+                        .setTangentHeadingInterpolation()
+                        .setReversed()
+                        .build());
     }
 }
