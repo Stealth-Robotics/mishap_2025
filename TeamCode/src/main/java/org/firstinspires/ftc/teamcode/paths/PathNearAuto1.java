@@ -57,8 +57,6 @@ public class PathNearAuto1 extends PathManager {
                         .setTangentHeadingInterpolation()
                         .setReversed()
                         .addParametricCallback(0.02, () -> follower.setMaxPower(0.2))
-                        .addParametricCallback(0.5, () -> follower.setMaxPower(0.15))
-
                         .build()
         );
         addBluePath(
@@ -85,5 +83,5 @@ public class PathNearAuto1 extends PathManager {
                         .setTangentHeadingInterpolation()
                         .setReversed()
                         .build());
-    }
+        }
 }

@@ -27,7 +27,7 @@ public class AutoNearOne extends AutosDecode {
 
 //    @Override
 //    protected void setStartingPose() {
-//        Pose startPose = paths.getPathStart();
+//        //Pose startPose = paths.getPathStart();
 //        follower.setStartingPose(paths.getPathStart());
 //    }
 
