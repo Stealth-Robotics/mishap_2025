@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.common.MotorVelocityReader;
+import org.firstinspires.ftc.teamcode.common.ZoneDistance;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,11 +25,8 @@ public class ShooterSubsystem {
 
     private final ElapsedTime shootTimer = new ElapsedTime();
 
-    private static final double SHOOT_RANGE_NEAR = 55;
-    private static final double SHOOT_RANGE_FAR = 80;
-
     private static final double MIN_SHOOT_TIME_MS = 400;
-    private static final double MAX_SHOOT_TIME_MS = 3000;
+    private static final double MAX_SHOOT_TIME_MS = 2000;
 
     // --- Constants ---
     public static final double MAX_RPM = 5200;
@@ -37,8 +35,8 @@ public class ShooterSubsystem {
     public static final double DEFAULT_RPM_NEAR = 4250;
     public static final double DEFFAULT_RPM_MID = 4400;
     public static final double RPM_CHANGE_AMOUNT = 50;
-    private static final double VELOCITY_TOLERANCE = 60; // The allowed RPM error in which the shooter is considered "ready".
-
+    private static final double VELOCITY_TOLERANCE_LOW = 25; // The allowed RPM error in which the shooter is considered "ready".
+    private static final double VELOCITY_TOLERANCE_HIGH = 100;
     // Encoder ticks per revolution for a GoBILDA Yellow Jacket motor.
     private static final double TICKS_PER_REV = 28;
 
@@ -50,29 +48,23 @@ public class ShooterSubsystem {
     // F (Feedforward): Proactively applies power based on the target velocity, which is crucial for velocity control.
     // TODO: more tuning needed
  //   private static final PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(90, .5, 10, 13);
-    private static final PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(1.3, 0.15, 0, 12.15);
+    private static final PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(1.26, 0.126, 0, 12.9); //1.3, 0.15, 0, 12.15);
 
     // --- State Variables ---
     private boolean isShooterEnabled = false; // New state to track if the shooter is supposed to be running
     private double currentRpm = 0;
     private boolean isNear = false; // Restored this state variable
 
-    private RpmRange currentRpmRange = RpmRange.FAR;
-
-    private enum RpmRange{
-        FAR,
-        MID,
-        NEAR
-    }
+    private ZoneDistance currentRpmZone = ZoneDistance.FAR;
 
     // Holds the different set point for the shooter
-    private final Map<RpmRange, Double> rangeMap;
+    private final Map<ZoneDistance, Double> zoneMap;
 
     public ShooterSubsystem(HardwareMap hardwareMap) {
-        rangeMap = new HashMap<>();
-        rangeMap.put(RpmRange.FAR, DEFAULT_RPM_FAR);
-        rangeMap.put(RpmRange.MID, DEFFAULT_RPM_MID);
-        rangeMap.put(RpmRange.NEAR, DEFAULT_RPM_NEAR);
+        zoneMap = new HashMap<>();
+        zoneMap.put(ZoneDistance.FAR, DEFAULT_RPM_FAR);
+        zoneMap.put(ZoneDistance.MID, DEFFAULT_RPM_MID);
+        zoneMap.put(ZoneDistance.NEAR, DEFAULT_RPM_NEAR);
 
         // Initialize the shooter motors from the hardware map.
         rightShooter = hardwareMap.get(DcMotorEx.class, "right_shoot_motor");
@@ -87,8 +79,9 @@ public class ShooterSubsystem {
 
         // Apply the tuned PIDF coefficients for velocity control.
         leftShooter.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, MOTOR_VELO_PID);
+        leftShooter.setPositionPIDFCoefficients(5.0);
         rightShooter.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, MOTOR_VELO_PID);
-
+        rightShooter.setPositionPIDFCoefficients(5.0);
         // Initialize velocity readers to get filtered RPM values from the motors.
         rightVelocityReader = new MotorVelocityReader(rightShooter, TICKS_PER_REV);
         leftVelocityReader = new MotorVelocityReader(leftShooter, TICKS_PER_REV);
@@ -101,14 +94,15 @@ public class ShooterSubsystem {
      */
     public void setTargetRpmFromDisance(double distanceInch){
 
-        if (distanceInch < SHOOT_RANGE_NEAR){
-            currentRpmRange = RpmRange.NEAR;
-        }else if (distanceInch < SHOOT_RANGE_FAR) {
-            currentRpmRange = RpmRange.MID;
+        if (distanceInch < ZoneDistance.MID.id){
+            currentRpmZone = ZoneDistance.NEAR;
+        }else if (distanceInch < ZoneDistance.FAR.id) {
+            currentRpmZone = ZoneDistance.MID;
         }else {
-            currentRpmRange = RpmRange.FAR;
+            currentRpmZone = ZoneDistance.FAR;
         }
     }
+
     /**
      * This method should be called in the main robot loop to update the shooter's state,
      * such as the current average RPM.
@@ -147,7 +141,7 @@ public class ShooterSubsystem {
         shootTimer.reset();
 
         //noinspection DataFlowIssue
-        setRpm(rangeMap.get(currentRpmRange));
+        setRpm(zoneMap.get(currentRpmZone));
     }
 
     /**
@@ -164,14 +158,14 @@ public class ShooterSubsystem {
      */
     public void increaseCurrentRpmRange() {
         //noinspection DataFlowIssue
-        double curRpm = rangeMap.get(currentRpmRange);
+        double curRpm = zoneMap.get(currentRpmZone);
 
         if (curRpm >= MAX_RPM) {
             return;
         }
 
         curRpm += RPM_CHANGE_AMOUNT;
-        rangeMap.put(currentRpmRange, curRpm);
+        zoneMap.put(currentRpmZone, curRpm);
         if (isShooterEnabled){
             setRpm(curRpm);
         }
@@ -188,14 +182,14 @@ public class ShooterSubsystem {
      */
     public void decreaseCurrentRpmRange() {
         //noinspection DataFlowIssue
-        double curRpm = rangeMap.get(currentRpmRange);
+        double curRpm = zoneMap.get(currentRpmZone);
 
         if (curRpm <= MIN_RPM) {
             return;
         }
 
         curRpm -= RPM_CHANGE_AMOUNT;
-        rangeMap.put(currentRpmRange, curRpm);
+        zoneMap.put(currentRpmZone, curRpm);
 
         if (isShooterEnabled) {
             setRpm(curRpm);
@@ -208,7 +202,7 @@ public class ShooterSubsystem {
      */
     public double getTargetRpm(){
         //noinspection DataFlowIssue
-        return rangeMap.get(currentRpmRange);
+        return zoneMap.get(currentRpmZone);
     }
 
     /**
@@ -229,10 +223,11 @@ public class ShooterSubsystem {
         }
 
         // The current RPM is updated periodically by the update() method
-        double error = Math.abs(currentRpm - getTargetRpm());
-
-        // if for some reason the shooter cant reach requested RPM just shoot it
-        return error <= VELOCITY_TOLERANCE || curMs > MAX_SHOOT_TIME_MS;
+        // Check if the current RPM is within the tolerance range.
+        double delta = currentRpm - getTargetRpm();
+        return (delta >= VELOCITY_TOLERANCE_LOW
+                && delta <= VELOCITY_TOLERANCE_HIGH)
+                || curMs > MAX_SHOOT_TIME_MS;
     }
 
     /**
@@ -260,10 +255,10 @@ public class ShooterSubsystem {
         this.isNear = isNear;
         // Update the currentRpmRange based on the new isNear value
         if (isNear) {
-            this.currentRpmRange = RpmRange.NEAR;
+            this.currentRpmZone = ZoneDistance.NEAR;
         } else {
             // You might want to decide if this defaults to FAR or MID. I'll assume FAR.
-            this.currentRpmRange = RpmRange.FAR;
+            this.currentRpmZone = ZoneDistance.FAR;
         }
 
         // If the shooter is already running, update its speed to the new target

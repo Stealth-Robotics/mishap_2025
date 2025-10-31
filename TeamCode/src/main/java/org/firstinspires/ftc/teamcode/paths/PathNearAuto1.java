@@ -4,8 +4,12 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.PathChain;
 
 import org.firstinspires.ftc.teamcode.systems.RobotSystem;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PathNearAuto1 extends PathManager {
 
@@ -23,6 +27,20 @@ public class PathNearAuto1 extends PathManager {
         addBluePaths();
 
     }
+
+    public void addRedPaths() {
+        Follower follower = robot.getFollower();
+        addRedPath(
+                follower.pathBuilder()
+                        .addPath(
+                                // Path 1
+                                new BezierLine(new Pose(125.652, 114.039), new Pose(90.900, 98.300))
+                        )
+                        .setLinearHeadingInterpolation(Math.toRadians(158), Math.toRadians(180))
+                        .build()
+        );
+    }
+
     public void addBluePaths ( ) {
         Follower follower = robot.getFollower();
         addBluePath(

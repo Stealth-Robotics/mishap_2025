@@ -10,8 +10,11 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.common.SlotState;
+import org.firstinspires.ftc.teamcode.common.ZoneDistance;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Manages the spindexer mechanism, which is a rotating drum that holds and positions artifacts for shooting.
@@ -29,6 +32,11 @@ public class SpindexerSubsystem {
     // NOTE: if you would like to adjust in FTC dashboard mark members as public static (Not final)
     /** The number of ticks to move backward after the index switch is released to center a slot. */
     public static int INDEX_OFFSET_TICKS = 140;
+
+    public static int NEAR_ZONE_OFFSET = 0;
+    public static int MID_ZONE_OFFSET = 0;
+    public static int FAR_ZONE_OFFSET = 0;
+
 
     /** This value protects the spindexer from jamming and or crushing the world */
     private static final double OVERLOAD_AMPS = 7.0;
@@ -87,6 +95,11 @@ public class SpindexerSubsystem {
 
     private static final double MAX_SORT_TIME_SECOND = 20;
 
+    private int nudgeOffset = 0;
+
+    private ZoneDistance currentZone = ZoneDistance.FAR;
+    private final Map<ZoneDistance, Integer> zoneMap;
+
     /**
      * State machine enum to manage the multi-step homing process.
      */
@@ -112,6 +125,10 @@ public class SpindexerSubsystem {
     public SpindexerSubsystem(HardwareMap hardwareMap) {
         spindexer = hardwareMap.get(DcMotorEx.class, "spindexer_motor");
         indexSwitch = hardwareMap.get(TouchSensor.class, "index_switch");
+        zoneMap = new HashMap<>();
+        zoneMap.put(ZoneDistance.NEAR, NEAR_ZONE_OFFSET);
+        zoneMap.put(ZoneDistance.MID, MID_ZONE_OFFSET);
+        zoneMap.put(ZoneDistance.FAR, FAR_ZONE_OFFSET);
 
         // The spindexer forward direction is reversed on the motor.
         spindexer.setDirection(DcMotorEx.Direction.REVERSE);
@@ -316,7 +333,7 @@ public class SpindexerSubsystem {
     /**
      * Rotates the spindexer to a specific slot number (0, 1, 2, etc.).
      * This is now the primary method for all spindexer rotation.
-     ** @param slotNumber The destination slot number.
+     * @param slotNumber The destination slot number.
      */
     public void rotateToSlot(int slotNumber) {
         if (isEmergencyStop) {
@@ -327,17 +344,20 @@ public class SpindexerSubsystem {
             return; // Invalid slot, do nothing.
         }
 
-        // The total number of ticks in one full revolution of the spindexer.
-        final double totalTicksInCircle = NUMBER_OF_SLOTS * TICKS_PER_SLOT;
-        double delta = getDelta(slotNumber, totalTicksInCircle);
+        // Calculate the shortest path from the current slot to the target slot.
+        double delta = getDelta(slotNumber);
 
         // The new target is the last commanded position plus the shortest-path delta.
+        // Since lastTargetPosition already includes nudges, this correctly calculates
+        // the next absolute motor position.
         int targetPosition = (int) Math.round(this.lastTargetPosition + delta);
 
-        // This line where the caret was is correct.
+        // Update the last commanded position.
         this.lastTargetPosition = targetPosition;
 
-        spindexer.setTargetPosition(targetPosition);
+        // Set motor pose based on current zone offset
+        //noinspection DataFlowIssue
+        spindexer.setTargetPosition(targetPosition + zoneMap.get(currentZone));
         spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         spindexer.setVelocity(SPINDEXER_VELOCITY_LIMIT);
 
@@ -346,31 +366,22 @@ public class SpindexerSubsystem {
         curShootSlot = slotNumber;
     }
 
-    private double getDelta(int slotNumber, double totalTicksInCircle) {
+    private double getDelta(int destinationSlot) {
+        double totalTicksInCircle = NUMBER_OF_SLOTS * TICKS_PER_SLOT;
         final double halfCircle = totalTicksInCircle / 2.0;
 
-        // Get the current motor position, normalized to a single rotation (0 to totalTicksInCircle).
-        double currentPositionTicks = this.lastTargetPosition % totalTicksInCircle;
-        if (currentPositionTicks < 0) {
-            currentPositionTicks += totalTicksInCircle;
+        // Calculate the difference in slots.
+        double deltaInSlots = destinationSlot - curShootSlot;
+
+        // Find the shortest path in terms of slots (e.g., is it shorter to go from slot 0 to 4, or 0 to -1?)
+        if (deltaInSlots > NUMBER_OF_SLOTS / 2.0) {
+            deltaInSlots -= NUMBER_OF_SLOTS;
+        } else if (deltaInSlots < -NUMBER_OF_SLOTS / 2.0) {
+            deltaInSlots += NUMBER_OF_SLOTS;
         }
 
-        // Calculate the absolute destination position in ticks.
-        double destinationTicks = slotNumber * TICKS_PER_SLOT;
-
-        // Calculate the simple, direct difference between destination and current.
-        double delta = destinationTicks - currentPositionTicks;
-
-        // Correct the delta to find the shortest path by checking the distance in the opposite direction.
-        // If the absolute delta is greater than half a circle, going the other way is shorter.
-        if (delta > halfCircle) {
-            // It's shorter to go backward (negative).
-            delta -= totalTicksInCircle;
-        } else if (delta < -halfCircle) {
-            // It's shorter to go forward (positive).
-            delta += totalTicksInCircle;
-        }
-        return delta;
+        // Convert the shortest path in slots to a delta in ticks.
+        return deltaInSlots * TICKS_PER_SLOT;
     }
 
     /**
@@ -412,6 +423,31 @@ public class SpindexerSubsystem {
         rotateToSlot(previousSlotIndex);
     }
 
+    public void setOffsetByDistance(double distance) {
+        if (isEmergencyStop) {
+            return;
+        }
+
+        ZoneDistance lastZone = currentZone;
+        if (distance < ZoneDistance.MID.id){
+            currentZone = ZoneDistance.NEAR;
+        }else if (distance < ZoneDistance.FAR.id){
+            currentZone = ZoneDistance.MID;
+        }else{
+            currentZone = ZoneDistance.FAR;
+        }
+
+        // Move the spindexer to the correct position if a change has happend
+        if (lastZone != currentZone) {
+            nudgePosition(0);
+        }
+    }
+
+    public int getCurrentOffset() {
+        //noinspection DataFlowIssue
+        return INDEX_OFFSET_TICKS - zoneMap.get(currentZone);
+    }
+
     /**
      * Move the spindexer to the next slot that isn't empty
      * @return true if slot is found otherwise false
@@ -441,10 +477,12 @@ public class SpindexerSubsystem {
             return;
         }
 
-        int newTarget = this.lastTargetPosition + ticksToNudge;
-        this.lastTargetPosition = newTarget;
+        // noinspection DataFlowIssue
+        int curZoneOffset = zoneMap.get(currentZone);
+        curZoneOffset += ticksToNudge;
+        zoneMap.put(currentZone, curZoneOffset);
 
-        spindexer.setTargetPosition(newTarget);
+        spindexer.setTargetPosition(this.lastTargetPosition + curZoneOffset);
         spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         spindexer.setVelocity(SPINDEXER_VELOCITY_LIMIT);
     }
@@ -644,36 +682,6 @@ public class SpindexerSubsystem {
     }
 
     /**
-     * Manually shifts all slot states in the array to simulate the physical rotation
-     * of the spindexer. This should be called in conjunction with any method that physically
-     * indexes the spindexer.
-     * @param isForward True if advancing one slot (e.g., via advanceOneSlot), false if decreasing.
-     */
-    private void shiftSlotStates(boolean isForward) {
-        // If the array is empty or has only one slot, there's nothing to shift.
-        if (slotStates.length < 2) {
-            return;
-        }
-
-        if (isForward) {
-            // Correct Logic for Advancing:
-            // The state from the first slot moves to the last slot, simulating
-            // the artifact at the intake moving towards the shooter.
-            // This is a LEFT shift of the array contents.
-            SlotState firstState = slotStates[0];
-            System.arraycopy(slotStates, 1, slotStates, 0, NUMBER_OF_SLOTS - 1);
-            slotStates[NUMBER_OF_SLOTS - 1] = firstState;
-        } else {
-            // Correct Logic for Decreasing:
-            // The state from the last slot moves to the first slot.
-            // This is a RIGHT shift of the array contents.
-            SlotState lastState = slotStates[NUMBER_OF_SLOTS - 1];
-            System.arraycopy(slotStates, 0, slotStates, 1, NUMBER_OF_SLOTS - 1);
-            slotStates[0] = lastState;
-        }
-    }
-
-    /**
      * Resets the motor's encoder count to zero and sets the current position as the new zero.
      */
     private void resetEncoder() {
@@ -683,7 +691,7 @@ public class SpindexerSubsystem {
 
         // Set a tolerance for how close to the target is "close enough" (in encoder ticks)
         // This can help prevent oscillations around the target.
-        spindexer.setTargetPositionTolerance(2);
+        spindexer.setTargetPositionTolerance(POSITION_TOLERANCE);
 
         // Default to BRAKE mode for holding position.
         spindexer.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);

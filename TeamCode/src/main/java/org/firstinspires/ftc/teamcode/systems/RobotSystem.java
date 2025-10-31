@@ -46,21 +46,18 @@ public class RobotSystem {
 
 
     /** The maximum rotational power applied during auto-aim. */
-    public static final double MAX_ROTATION_POWER = 0.80;
+    public static final double MAX_ROTATION_POWER = 0.90;
+
+    public static final double MIN_ROTATION_POWER = 0.068 ;
+
 
     public static final int MAX_OVER_CURRENT_COUNT = 4;
 
     private static final double MAX_UNJAM_TIME = 1000;
 
-
     /** PIDF coefficients for the heading controller used in auto-aim. */
     private static final PIDFCoefficients HEADING_COEFFICIENTS
-            = new PIDFCoefficients(0.018, 0.0, 0.001, 0.02);
-
-    /** Delay in milliseconds to wait before resetting the kicker to its ready position after shooting. */
-    private static final long SHOOT_KICKER_RESET_DELAY_MS = 200;
-
-    private static final long MIN_SHOOT_DELAY_MS = 500;
+            = new PIDFCoefficients(0.018, 0.0001, 0.001, .02); //0.018, 0.0001, 0.001, 0.02
 
     /** Maps the current motif pattern to a list of slot states. */
     private static final Map<Motif, List<SlotState>> motifSlots = Map.of(
@@ -286,9 +283,13 @@ public class RobotSystem {
             if (llPose != null) {
                 // Calculate the turn power needed to center the target.
                 double output = getScaledTxOutput(llPose.getX(), AUTO_AIM_TOLERANCE);
-                shooterSys.setTargetRpmFromDisance(LimelightSubsystem.calcGoalDistanceByTy(llPose.getY()));
+                double distance = LimelightSubsystem.calcGoalDistanceByTy(llPose.getY());
+                shooterSys.setTargetRpmFromDisance(distance);
+                spindexerSys.setOffsetByDistance(distance);
+                telemetryM.addData("Power OUT:", output);
+                telemetryM.addData("LimeLightTX:", llPose.getX());
                 // The output is applied to the rotation power (note: may need to be inverted).
-                turn = -output;
+                turn = output;
 
             } else {
                 // If the target is lost, reset the PID controller to prevent integral windup.
@@ -296,6 +297,7 @@ public class RobotSystem {
             }
         }
 
+        telemetryM.addData("TURN:", turn);
         // Set drive power to the follower.
         follower.setTeleOpDrive(
                 y * slowMoFactor * controlInverter,
@@ -324,9 +326,11 @@ public class RobotSystem {
         if (llPose != null) {
             // Calculate the turn power needed to center the target.
             double output = getScaledTxOutput(llPose.getX(), tolerance);
-            shooterSys.setTargetRpmFromDisance(LimelightSubsystem.calcGoalDistanceByTy(llPose.getY()));
+            double distance = LimelightSubsystem.calcGoalDistanceByTy(llPose.getY());
+            shooterSys.setTargetRpmFromDisance(distance);
+            spindexerSys.setOffsetByDistance(distance);
             // The output is applied to the rotation power (note: may need to be inverted).
-            turn = -output;
+            turn = output;
         } else {
             // If the target is lost, reset the PID controller to prevent integral windup.
             headingController.reset();
@@ -870,18 +874,28 @@ public class RobotSystem {
      * @return The calculated rotational power, or 0 if within tolerance.
      */
     private double getScaledTxOutput(double txDelta, double tolerance) {
+
+        if (Math.abs(txDelta) < tolerance) {
+            return 0;
+        }
+
         // Set the PID controller's target to 0 (no error).
         headingController.setTargetPosition(0);
         // Update the controller with the current error.
-        headingController.updateError(txDelta);
+        headingController.updateError(-txDelta);
         // Run the PID calculation.
         double pidOutput = headingController.run();
 
         // If the error is outside the tolerance, return the clamped PID output.
         // Otherwise, return 0 to stop turning.
-        return Math.abs(headingController.getError()) > tolerance
-                ? MathFunctions.clamp(pidOutput, -MAX_ROTATION_POWER, MAX_ROTATION_POWER)
-                : 0;
+        if (Math.abs(pidOutput) < MIN_ROTATION_POWER) {
+           if (pidOutput < 0) {
+               return -MIN_ROTATION_POWER;
+           } else {
+               return MIN_ROTATION_POWER;
+           }
+        }
+        return  MathFunctions.clamp(pidOutput, -MAX_ROTATION_POWER, MAX_ROTATION_POWER);
     }
 
     /**
@@ -908,6 +922,7 @@ public class RobotSystem {
 //        telemetryM.addData("Spindexer Raw Position", spindexerSys.getCurrentPosition());
 //        telemetryM.addData("isShootReady:", isShootReady);
 //        telemetryM.addData("CURRENT HEADING", follower.getHeading());
+        telemetryM.addData("Spindexer offset RAW:", spindexerSys.getCurrentOffset());
 
         // TODO: THIS SHOULD BE REMOVED BEFORE COMP
         this.draw();
