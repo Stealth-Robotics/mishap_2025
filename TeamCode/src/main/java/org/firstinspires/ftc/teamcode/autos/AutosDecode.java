@@ -37,6 +37,8 @@ public abstract class AutosDecode extends OpMode {
     protected int subActionStep = 0;
     protected int lastPathIndex = -1;
 
+    protected double startWaitTimeSeconds = 0;
+
     protected TelemetryManager telemetryM;
     protected Follower follower;
     protected RobotSystem robot;
@@ -49,6 +51,8 @@ public abstract class AutosDecode extends OpMode {
     private boolean areArtifactsSorted = false;
 
     protected double aimOffset = 0;
+
+    protected boolean waitTriggered = false;
 
 
     // --- Abstract Methods to be Implemented by Child Classes ---
@@ -178,6 +182,14 @@ public abstract class AutosDecode extends OpMode {
 
         if (!robot.isSpindexerFull() && !this.areArtifactsSorted) {
             areArtifactsSorted = robot.doArtifactSort();
+
+            return;
+        }
+
+        if (stateTimer.seconds() > startWaitTimeSeconds
+            && !waitTriggered) {
+            waitTriggered = true;
+            stateTimer.reset();
             return;
         }
 
