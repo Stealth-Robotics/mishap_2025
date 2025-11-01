@@ -921,7 +921,8 @@ public class RobotSystem {
         telemetryM.addData("Is Burst MODE", isBurstFire);
         telemetryM.addData("Is Spindexer Ready", spindexerSys.isReady());
         telemetryM.addData("Spindexer offset:", spindexerSys.getCurrentOffset());
-//        telemetryM.addData("Robot State", currentState.name());
+        telemetryM.addData("Current zone", spindexerSys.getCurrentZone());
+    //    telemetryM.addData("Robot State", currentState.name());
 //        telemetryM.addData("Shoot Slot Index", spindexerSys.getCurShootSlot());
 //        telemetryM.addData("Shoot Slot State:", spindexerSys.getShootSlotState());
 //        telemetryM.addData("Intake Slot State:", spindexerSys.getIntakeSlotState());
