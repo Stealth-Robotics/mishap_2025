@@ -34,11 +34,11 @@ public class SpindexerSubsystem {
     public static int INDEX_OFFSET_TICKS = 240;
 
     public static int NEAR_ZONE_OFFSET = -40;
-    public static int MID_ZONE_OFFSET = 20;
+    public static int MID_ZONE_OFFSET = 0;
     public static int FAR_ZONE_OFFSET = 0;
 
 
-    /** This value protects the spindexer from jamming and or crushing the world */
+    /** This value protects the spindexer from jamming and/or crushing the world */
     private static final double OVERLOAD_AMPS = 7.0;
 
     /** Ticks per revolution for the GoBilda 43 RPM motor (3895.9) geared up. */
