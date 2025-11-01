@@ -49,7 +49,7 @@ public class PathNearAuto1 extends PathManager {
                                         new Pose(96.300, 84.000)
                                 )
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(45), Math.toRadians(0))
+                        .setLinearHeadingInterpolation(Math.toRadians(45), Math.toRadians(180))
                         .addParametricCallback(.9, robot::startIntake)
                         .build()
         );

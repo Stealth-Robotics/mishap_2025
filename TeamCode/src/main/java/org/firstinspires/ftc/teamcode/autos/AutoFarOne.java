@@ -41,6 +41,7 @@ public class AutoFarOne extends AutosDecode {
      */
     @Override
     protected void setStartingPose() {
+
         follower.setStartingPose(paths.getPathStart());
     }
 

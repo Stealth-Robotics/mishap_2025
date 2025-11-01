@@ -331,7 +331,7 @@ public abstract class AutosDecode extends OpMode {
 
         stateTimer.reset();
 
-        robot.doAimAtTarget(.5, 50);
+        robot.doAimAtTarget(.4, 50);
         return true;
     }
 
@@ -347,7 +347,7 @@ public abstract class AutosDecode extends OpMode {
             done = true;
         }
        else {
-            done = robot.doAimAtTarget(.5, 100);
+            done = robot.doAimAtTarget(.3, 100);
         }
 
         return done;

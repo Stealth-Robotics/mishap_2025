@@ -48,7 +48,7 @@ public class RobotSystem {
     /** The maximum rotational power applied during auto-aim. */
     public static final double MAX_ROTATION_POWER = 0.90;
 
-    public static final double MIN_ROTATION_POWER = 0.068 ;
+    public static final double MIN_ROTATION_POWER = 0.065 ;
 
 
     public static final int MAX_OVER_CURRENT_COUNT = 4;

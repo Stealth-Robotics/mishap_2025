@@ -31,7 +31,7 @@ public class ShooterSubsystem {
     // --- Constants ---
     public static final double MAX_RPM = 5200;
     public static final double MIN_RPM = 3000;
-    public static final double DEFAULT_RPM_FAR = 4800;
+    public static final double DEFAULT_RPM_FAR = 4750;
     public static final double DEFAULT_RPM_NEAR = 4250;
     public static final double DEFFAULT_RPM_MID = 4400;
     public static final double RPM_CHANGE_AMOUNT = 50;
