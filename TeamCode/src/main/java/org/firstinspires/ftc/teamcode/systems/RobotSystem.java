@@ -42,13 +42,15 @@ public class RobotSystem {
     /** Multiplier to reduce drive speed for fine-tuned control. */
     public static double SLOW_MODE_MULTIPLIER = 0.3;
 
-    public static double AUTO_AIM_TOLERANCE = 0.3;
+    public static double AUTO_AIM_TOLERANCE = 0.1;
 
 
     /** The maximum rotational power applied during auto-aim. */
     public static final double MAX_ROTATION_POWER = 0.90;
 
-    public static final double MIN_ROTATION_POWER = 0.065 ;
+    public static final double MIN_ROTATION_POWER = .07;
+
+    public static final double ROTATION_SIGNUM_POWER = .06;
 
 
     public static final int MAX_OVER_CURRENT_COUNT = 4;
@@ -57,7 +59,7 @@ public class RobotSystem {
 
     /** PIDF coefficients for the heading controller used in auto-aim. */
     private static final PIDFCoefficients HEADING_COEFFICIENTS
-            = new PIDFCoefficients(0.018, 0.0001, 0.001, .02); //0.018, 0.0001, 0.001, 0.02
+            = new PIDFCoefficients(0.016, 0, 0, 0); //0.018, 0.0001, 0.001, 0.02
 
     /** Maps the current motif pattern to a list of slot states. */
     private static final Map<Motif, List<SlotState>> motifSlots = Map.of(
@@ -138,6 +140,8 @@ public class RobotSystem {
     private int overCurrentCount = 0;
 
     private double controlInverter = 1;
+
+    private boolean wasAutoAim = false;
 
     //==================================================================================================
     // Constructor
@@ -278,6 +282,7 @@ public class RobotSystem {
         double turn = z * slowMoFactor;
 
         if (isAutoAim) {
+            wasAutoAim = true;
             limelightSys.getLastResult(); // Force an update of the Limelight data.
             Pose llPose = limelightSys.getAvgTargetPose(50); // Get averaged target position.
             if (llPose != null) {
@@ -295,6 +300,9 @@ public class RobotSystem {
                 // If the target is lost, reset the PID controller to prevent integral windup.
                 headingController.reset();
             }
+        } else if (wasAutoAim) {
+            headingController.reset();
+            wasAutoAim = false;
         }
 
         telemetryM.addData("TURN:", turn);
@@ -315,7 +323,7 @@ public class RobotSystem {
      * @param latency number of milliseconds to sample the average pose
      * @return true if done aiming otherwise false
      */
-    public boolean doAimAtTarget(double tolerance, long latency) {
+    public boolean doAimAtTarget(double tolerance, double offset, long latency) {
         if (!follower.isTeleopDrive()) {
             follower.startTeleopDrive(true);
         }
@@ -325,7 +333,7 @@ public class RobotSystem {
         double turn = 0;
         if (llPose != null) {
             // Calculate the turn power needed to center the target.
-            double output = getScaledTxOutput(llPose.getX(), tolerance);
+            double output = getScaledTxOutput(llPose.getX() + offset, tolerance);
             double distance = LimelightSubsystem.calcGoalDistanceByTy(llPose.getY());
             shooterSys.setTargetRpmFromDisance(distance);
             spindexerSys.setOffsetByDistance(distance);
@@ -877,6 +885,7 @@ public class RobotSystem {
     private double getScaledTxOutput(double txDelta, double tolerance) {
 
         if (Math.abs(txDelta) < tolerance) {
+            headingController.reset();
             return 0;
         }
 
@@ -889,13 +898,16 @@ public class RobotSystem {
 
         // If the error is outside the tolerance, return the clamped PID output.
         // Otherwise, return 0 to stop turning.
-        if (Math.abs(pidOutput) < MIN_ROTATION_POWER) {
-           if (pidOutput < 0) {
-               return -MIN_ROTATION_POWER;
-           } else {
-               return MIN_ROTATION_POWER;
-           }
+        if (Math.abs(pidOutput) > 1e-4 && Math.abs(pidOutput) < MIN_ROTATION_POWER) {
+            pidOutput = pidOutput + (Math.signum(pidOutput) * ROTATION_SIGNUM_POWER);
+            if (Math.abs(pidOutput) > MIN_ROTATION_POWER){
+                pidOutput = Math.signum(pidOutput) * MIN_ROTATION_POWER;
+            }else
+            if (Math.abs(pidOutput) < MIN_ROTATION_POWER) {
+                pidOutput = 0;
+            }
         }
+
         return  MathFunctions.clamp(pidOutput, -MAX_ROTATION_POWER, MAX_ROTATION_POWER);
     }
 
@@ -905,25 +917,24 @@ public class RobotSystem {
     private void displayTelemetry() {
         // TODO: remove unneeded output
         telemetryM.addData("Shooter RPM", shooterSys.getCurrentRpm());
-        telemetryM.addData("Motor RPM", shooterSys.getMotorRpms());
         telemetryM.addData("Target RPM", shooterSys.getTargetRpm());
+        telemetryM.addData("Is Auto Intaking:", isAutoIntaking);
+        telemetryM.addData("Is Burst MODE", isBurstFire);
         telemetryM.addData("Is Spindexer Ready", spindexerSys.isReady());
+        telemetryM.addData("Spindexer offset:", spindexerSys.getCurrentOffset());
 //        telemetryM.addData("Robot State", currentState.name());
 //        telemetryM.addData("Shoot Slot Index", spindexerSys.getCurShootSlot());
 //        telemetryM.addData("Shoot Slot State:", spindexerSys.getShootSlotState());
 //        telemetryM.addData("Intake Slot State:", spindexerSys.getIntakeSlotState());
 //        telemetryM.addData("Standbby Slot State:", spindexerSys.getStandbySlotState());
 //        telemetryM.addData("Shoot Slot Number:", spindexerSys.getCurShootSlot());
-       telemetryM.addData("IsMotif available", spindexerSys.isMotifAvailable());
-        telemetryM.addData("Is Auto Intaking:", isAutoIntaking);
-        telemetryM.addData("Is Burst MODE", isBurstFire);
+    //   telemetryM.addData("IsMotif available", spindexerSys.isMotifAvailable());
 //        telemetryM.addData("Hood State:", hoodSys.getHoodState());
 //        telemetryM.addData("Raw Velecity:", shooterSys.getRawVelocity());
 //        telemetryM.addData("shooterSys Ready:", shooterSys.isReadyToShoot());
 //        telemetryM.addData("Spindexer Raw Position", spindexerSys.getCurrentPosition());
 //        telemetryM.addData("isShootReady:", isShootReady);
 //        telemetryM.addData("CURRENT HEADING", follower.getHeading());
-        telemetryM.addData("Spindexer offset RAW:", spindexerSys.getCurrentOffset());
 
         // TODO: THIS SHOULD BE REMOVED BEFORE COMP
         //this.draw();

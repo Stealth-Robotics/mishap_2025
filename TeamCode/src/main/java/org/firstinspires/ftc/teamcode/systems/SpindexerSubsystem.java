@@ -31,10 +31,10 @@ public class SpindexerSubsystem {
 
     // NOTE: if you would like to adjust in FTC dashboard mark members as public static (Not final)
     /** The number of ticks to move backward after the index switch is released to center a slot. */
-    public static int INDEX_OFFSET_TICKS = 165;
+    public static int INDEX_OFFSET_TICKS = 260;
 
-    public static int NEAR_ZONE_OFFSET = 65;
-    public static int MID_ZONE_OFFSET = 55;
+    public static int NEAR_ZONE_OFFSET = 70;
+    public static int MID_ZONE_OFFSET = 40;
     public static int FAR_ZONE_OFFSET = 0;
 
 
@@ -49,7 +49,7 @@ public class SpindexerSubsystem {
     private static final double TICKS_PER_SLOT = TICKS_PER_REV / NUMBER_OF_SLOTS;
 
     /** The tolerance, in ticks, for considering the motor to have reached its target position. */
-    private static final int POSITION_TOLERANCE = 4;
+    private static final int POSITION_TOLERANCE = 5;
 
     /** The maximum power limit for spindexer rotation. */
     public static double SPINDEXER_POWER_LIMIT = .6;
@@ -58,7 +58,7 @@ public class SpindexerSubsystem {
 
     /** PIDF coefficients for position control, tunable via FTC-Dashboard. */
     // TODO: More tuning needed
-    public static PIDFCoefficients SPINDEXER_PIDF = new PIDFCoefficients(.55, 3.5,.001, 10);  //10, 2,1.2, 1); 8, 4,0.2, 1
+    public static PIDFCoefficients SPINDEXER_PIDF = new PIDFCoefficients(.55, 3.6,.001, 10);  //10, 2,1.2, 1); 8, 4,0.2, 1
 
     private final ElapsedTime currentSpikeTimer = new ElapsedTime();
 
