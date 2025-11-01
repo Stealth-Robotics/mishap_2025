@@ -34,7 +34,7 @@ public class PathNearAuto1 extends PathManager {
                 follower.pathBuilder()
                         .addPath(
                                 new BezierCurve(
-                                        new Pose(125.700, 113.200),
+                                        new Pose(126.000, 112.200),
                                         new Pose(92.900, 119.800),
                                         new Pose(86.700, 108.000)
                                 )
@@ -94,12 +94,12 @@ public class PathNearAuto1 extends PathManager {
                 follower.pathBuilder()
                         .addPath(
                                 new BezierCurve(
-                                        new Pose(18.300, 113.200),
+                                        new Pose(18.000, 112.200),
                                         new Pose(51.100, 119.800),
                                         new Pose(57.300, 108.000)
                                 )
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(22), Math.toRadians(149))
+                        .setLinearHeadingInterpolation(Math.toRadians(28), Math.toRadians(149))
                         .addParametricCallback(.99, robot::setReadyShoot)
                         .build()
         );
