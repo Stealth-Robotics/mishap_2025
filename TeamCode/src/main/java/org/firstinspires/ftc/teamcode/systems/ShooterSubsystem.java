@@ -31,9 +31,10 @@ public class ShooterSubsystem {
     // --- Constants ---
     public static final double MAX_RPM = 5200;
     public static final double MIN_RPM = 3000;
+    public static final double DEFAULT_RPM_NEAR = 4200;
+    public static final double DEFAULT_RPM_MID = 4300;
     public static final double DEFAULT_RPM_FAR = 4750;
-    public static final double DEFAULT_RPM_NEAR = 4250;
-    public static final double DEFFAULT_RPM_MID = 4400;
+
     public static final double RPM_CHANGE_AMOUNT = 50;
     private static final double VELOCITY_TOLERANCE_LOW = 50; // The allowed RPM error in which the shooter is considered "ready".
     private static final double VELOCITY_TOLERANCE_HIGH = 100;
@@ -63,7 +64,7 @@ public class ShooterSubsystem {
     public ShooterSubsystem(HardwareMap hardwareMap) {
         zoneMap = new HashMap<>();
         zoneMap.put(ZoneDistance.FAR, DEFAULT_RPM_FAR);
-        zoneMap.put(ZoneDistance.MID, DEFFAULT_RPM_MID);
+        zoneMap.put(ZoneDistance.MID, DEFAULT_RPM_MID);
         zoneMap.put(ZoneDistance.NEAR, DEFAULT_RPM_NEAR);
 
         // Initialize the shooter motors from the hardware map.
