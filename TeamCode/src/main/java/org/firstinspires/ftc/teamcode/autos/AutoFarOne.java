@@ -41,7 +41,7 @@ public class AutoFarOne extends AutosDecode {
      */
     @Override
     protected void setStartingPose() {
-        
+
         // cahnge the angle of the far shots by a couple of degrees:
         // a negative number turns the bot more to the left positive more to the right
         if (Alliance.isBlue()) {
