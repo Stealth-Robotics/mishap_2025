@@ -485,7 +485,7 @@ public class RobotSystem {
      * Attempts to get ready for a motif shot
      * @return returns false until the robot can be readied or the spindexer is empty
      */
-    public boolean startShootMotif() {
+    public boolean startShootMotif(boolean useBurstFire) {
         // Spindexer empty no need to continue
         if (spindexerSys.isEmpty()) {
             resetMotifState();
@@ -495,7 +495,7 @@ public class RobotSystem {
         isMotifAvailable = spindexerSys.isMotifAvailable();
 
         // keep the shooter spinning
-        setBurstFire(true);
+        setBurstFire(useBurstFire);
         isMotifShot = true;
         curMotifIndex = 0;
 

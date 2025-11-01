@@ -33,7 +33,7 @@ public class AutoNearOne extends AutosDecode {
         if (Alliance.isBlue()) {
             this.aimOffset = 4;
         } else {
-            this.aimOffset = -4;
+            this.aimOffset = -2;
         }
 
         Pose startPose = paths.getPathStart();
