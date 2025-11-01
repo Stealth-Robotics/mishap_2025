@@ -265,7 +265,7 @@ public abstract class AutosDecode extends OpMode {
                     return PathState.WAIT;
                 case 2:
                     // Ready for Motif shot if false there is nothing to shoot
-                        if (robot.startShootMotif()) {
+                        if (robot.startShootMotif(true)) {
                             subActionStep++;
                             return PathState.WAIT;
                         }
@@ -347,7 +347,7 @@ public abstract class AutosDecode extends OpMode {
 
         stateTimer.reset();
 
-        robot.doAimAtTarget(.4,  aimOffset,50);
+        robot.doAimAtTarget(.1,  aimOffset,50);
         return true;
     }
 
@@ -363,7 +363,7 @@ public abstract class AutosDecode extends OpMode {
             done = true;
         }
        else {
-            done = robot.doAimAtTarget(.3, aimOffset, 100);
+            done = robot.doAimAtTarget(.1, aimOffset, 100);
         }
 
         return done;

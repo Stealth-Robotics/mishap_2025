@@ -10,9 +10,9 @@ import org.firstinspires.ftc.teamcode.paths.PathState;
 
 import java.util.Arrays;
 
-@Autonomous(name = "Shoot Far either Side", group = "Autonomous", preselectTeleOp = "_TeleOp_Driver_Operator")
+@Autonomous(name = "Shoot Far Red Side", group = "Red", preselectTeleOp = "_TeleOp_Driver_Operator")
 @Configurable
-public class AutoFarOne extends AutosDecode {
+public class AutoFarRed extends AutosDecode {
 
     @Override
     protected Path initPaths() {
@@ -28,12 +28,12 @@ public class AutoFarOne extends AutosDecode {
     }
 
     // TODO: uncomment if you don't want limelight to be used as aliance positioning
-//    @Override
-//    protected void setAlliance() {
-//        // Set the specific alliance for this OpMode
-//        // can use limelight data if you want
-//        Alliance.set(Alliance.BLUE);
-//    }
+    @Override
+    protected void setAlliance() {
+        // Set the specific alliance for this OpMode
+        // can use limelight data if you want
+        Alliance.set(Alliance.RED);
+    }
 
     /**
      * This is overriding using the limelight as the start Pose
@@ -47,7 +47,7 @@ public class AutoFarOne extends AutosDecode {
         if (Alliance.isBlue()) {
             this.aimOffset = -4;
         } else {
-            this.aimOffset = 4;
+            this.aimOffset = 2;
         }
 
         follower.setStartingPose(paths.getPathStart());

@@ -31,14 +31,13 @@ public class SpindexerSubsystem {
 
     // NOTE: if you would like to adjust in FTC dashboard mark members as public static (Not final)
     /** The number of ticks to move backward after the index switch is released to center a slot. */
-    public static int INDEX_OFFSET_TICKS = 260;
-
-    public static int NEAR_ZONE_OFFSET = 60;
-    public static int MID_ZONE_OFFSET = 30;
+    public static int INDEX_OFFSET_TICKS = 240;
+    public static int NEAR_ZONE_OFFSET = -40;
+    public static int MID_ZONE_OFFSET = -10;
     public static int FAR_ZONE_OFFSET = 0;
 
 
-    /** This value protects the spindexer from jamming and or crushing the world */
+    /** This value protects the spindexer from jamming and/or crushing the world */
     private static final double OVERLOAD_AMPS = 7.0;
 
     /** Ticks per revolution for the GoBilda 43 RPM motor (3895.9) geared up. */
@@ -485,6 +484,10 @@ public class SpindexerSubsystem {
         spindexer.setTargetPosition(this.lastTargetPosition + curZoneOffset);
         spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         spindexer.setVelocity(SPINDEXER_VELOCITY_LIMIT);
+    }
+
+    public ZoneDistance getCurrentZone() {
+        return currentZone;
     }
 
     /**

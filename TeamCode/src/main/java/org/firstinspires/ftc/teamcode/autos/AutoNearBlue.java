@@ -1,56 +1,53 @@
 package org.firstinspires.ftc.teamcode.autos;
 
 import com.bylazar.configurables.annotations.Configurable;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.common.Alliance;
 import org.firstinspires.ftc.teamcode.paths.Path;
-import org.firstinspires.ftc.teamcode.paths.PathFarAuto1;
+import org.firstinspires.ftc.teamcode.paths.PathNearAuto1;
 import org.firstinspires.ftc.teamcode.paths.PathState;
 
 import java.util.Arrays;
 
-@Autonomous(name = "Shoot Far either Side", group = "Autonomous", preselectTeleOp = "_TeleOp_Driver_Operator")
+@Autonomous(name = "Shoot Near blue Side", group = "Blue", preselectTeleOp = "_TeleOp_Driver_Operator")
 @Configurable
-public class AutoFarOne extends AutosDecode {
+public class AutoNearBlue extends AutosDecode {
 
     @Override
     protected Path initPaths() {
         shootIndexes.addAll(Arrays.asList(1, 4));
         intakeIndexes.addAll(Arrays.asList(3));
-
-        return new PathFarAuto1(robot);
+        return new PathNearAuto1(robot);
     }
 
     @Override
-    protected void setSpindexerSlots(){
+    protected void setSpindexerSlots() {
         robot.initSpindxerSlotsEmpty();
     }
 
-    // TODO: uncomment if you don't want limelight to be used as aliance positioning
-//    @Override
-//    protected void setAlliance() {
-//        // Set the specific alliance for this OpMode
-//        // can use limelight data if you want
-//        Alliance.set(Alliance.BLUE);
-//    }
-
-    /**
-     * This is overriding using the limelight as the start Pose
-     * this can be removed once limelight is tuned
-     */
+    @Override
+    protected void setAlliance() {
+        // Set the specific alliance for this OpMode
+        // can use limelight data if you want
+        Alliance.set(Alliance.BLUE);
+    }
     @Override
     protected void setStartingPose() {
-        
-        // cahnge the angle of the far shots by a couple of degrees:
+        // change the angle of the far shots by a couple of degrees:
         // a negative number turns the bot more to the left positive more to the right
         if (Alliance.isBlue()) {
-            this.aimOffset = -4;
-        } else {
             this.aimOffset = 4;
+        } else {
+            this.aimOffset = -2;
         }
 
-        follower.setStartingPose(paths.getPathStart());
+        Pose startPose = paths.getPathStart();
+        if (lastPose != null) {
+            startPose = startPose.setHeading(lastPose.getHeading());
+        }
+        follower.setStartingPose(startPose);
     }
 
     @Override
@@ -66,4 +63,5 @@ public class AutoFarOne extends AutosDecode {
 
         return PathState.IDLE;
     }
+
 }

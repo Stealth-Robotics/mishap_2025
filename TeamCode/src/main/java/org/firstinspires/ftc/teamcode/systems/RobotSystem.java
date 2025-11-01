@@ -134,7 +134,7 @@ public class RobotSystem {
 
 
     /** tracks if the robot will handle intaking */
-    private boolean isAutoIntaking = false;
+    private boolean isAutoIntaking = true;
 
     /** Number of times in a row we've hit over current*/
     private int overCurrentCount = 0;
@@ -485,7 +485,7 @@ public class RobotSystem {
      * Attempts to get ready for a motif shot
      * @return returns false until the robot can be readied or the spindexer is empty
      */
-    public boolean startShootMotif() {
+    public boolean startShootMotif(boolean useBurstFire) {
         // Spindexer empty no need to continue
         if (spindexerSys.isEmpty()) {
             resetMotifState();
@@ -495,7 +495,7 @@ public class RobotSystem {
         isMotifAvailable = spindexerSys.isMotifAvailable();
 
         // keep the shooter spinning
-        setBurstFire(true);
+        setBurstFire(useBurstFire);
         isMotifShot = true;
         curMotifIndex = 0;
 
@@ -921,7 +921,8 @@ public class RobotSystem {
         telemetryM.addData("Is Burst MODE", isBurstFire);
         telemetryM.addData("Is Spindexer Ready", spindexerSys.isReady());
         telemetryM.addData("Spindexer offset:", spindexerSys.getCurrentOffset());
-//        telemetryM.addData("Robot State", currentState.name());
+        telemetryM.addData("Current zone", spindexerSys.getCurrentZone());
+    //    telemetryM.addData("Robot State", currentState.name());
 //        telemetryM.addData("Shoot Slot Index", spindexerSys.getCurShootSlot());
 //        telemetryM.addData("Shoot Slot State:", spindexerSys.getShootSlotState());
 //        telemetryM.addData("Intake Slot State:", spindexerSys.getIntakeSlotState());
