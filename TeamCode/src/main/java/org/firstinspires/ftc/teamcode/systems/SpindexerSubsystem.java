@@ -33,8 +33,8 @@ public class SpindexerSubsystem {
     /** The number of ticks to move backward after the index switch is released to center a slot. */
     public static int INDEX_OFFSET_TICKS = 260;
 
-    public static int NEAR_ZONE_OFFSET = 70;
-    public static int MID_ZONE_OFFSET = 40;
+    public static int NEAR_ZONE_OFFSET = 60;
+    public static int MID_ZONE_OFFSET = 30;
     public static int FAR_ZONE_OFFSET = 0;
 
 
@@ -126,9 +126,9 @@ public class SpindexerSubsystem {
         spindexer = hardwareMap.get(DcMotorEx.class, "spindexer_motor");
         indexSwitch = hardwareMap.get(TouchSensor.class, "index_switch");
         zoneMap = new HashMap<>();
-        zoneMap.put(ZoneDistance.NEAR, NEAR_ZONE_OFFSET);
-        zoneMap.put(ZoneDistance.MID, MID_ZONE_OFFSET);
-        zoneMap.put(ZoneDistance.FAR, FAR_ZONE_OFFSET);
+        zoneMap.put(ZoneDistance.NEAR, -NEAR_ZONE_OFFSET);
+        zoneMap.put(ZoneDistance.MID, -MID_ZONE_OFFSET);
+        zoneMap.put(ZoneDistance.FAR, -FAR_ZONE_OFFSET);
 
         // The spindexer forward direction is reversed on the motor.
         spindexer.setDirection(DcMotorEx.Direction.REVERSE);
