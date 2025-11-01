@@ -35,7 +35,7 @@ public class ShooterSubsystem {
     public static final double DEFAULT_RPM_NEAR = 4250;
     public static final double DEFFAULT_RPM_MID = 4400;
     public static final double RPM_CHANGE_AMOUNT = 50;
-    private static final double VELOCITY_TOLERANCE_LOW = 25; // The allowed RPM error in which the shooter is considered "ready".
+    private static final double VELOCITY_TOLERANCE_LOW = 50; // The allowed RPM error in which the shooter is considered "ready".
     private static final double VELOCITY_TOLERANCE_HIGH = 100;
     // Encoder ticks per revolution for a GoBILDA Yellow Jacket motor.
     private static final double TICKS_PER_REV = 28;

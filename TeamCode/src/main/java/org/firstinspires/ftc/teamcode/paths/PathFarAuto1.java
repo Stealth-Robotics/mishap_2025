@@ -119,7 +119,7 @@ public class PathFarAuto1 extends PathManager{
                 follower.pathBuilder()
                         .addPath(
                                 // Move to shooting
-                                new BezierLine(new Pose(86.000, 8.400), new Pose(84.700, 20.500))
+                                new BezierLine(new Pose(86.000, 8.900), new Pose(84.700, 20.500))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(65))
                         // spin up early

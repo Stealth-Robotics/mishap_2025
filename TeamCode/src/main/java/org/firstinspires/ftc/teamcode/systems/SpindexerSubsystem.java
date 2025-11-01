@@ -31,9 +31,9 @@ public class SpindexerSubsystem {
 
     // NOTE: if you would like to adjust in FTC dashboard mark members as public static (Not final)
     /** The number of ticks to move backward after the index switch is released to center a slot. */
-    public static int INDEX_OFFSET_TICKS = 140;
+    public static int INDEX_OFFSET_TICKS = 220;
 
-    public static int NEAR_ZONE_OFFSET = 0;
+    public static int NEAR_ZONE_OFFSET = 10;
     public static int MID_ZONE_OFFSET = 0;
     public static int FAR_ZONE_OFFSET = 0;
 
