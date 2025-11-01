@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.paths.PathNearAuto1;
 import org.firstinspires.ftc.teamcode.paths.PathState;
 
 import java.util.Arrays;
-@Autonomous(name = "Shoot Near either Side", group = "Autonomous", preselectTeleOp = "_TeleOp_Driver_Only")
+@Autonomous(name = "Shoot Near either Side", group = "Autonomous", preselectTeleOp = "_TeleOp_Driver_Operator")
 @Configurable
 public class AutoNearOne extends AutosDecode {
 

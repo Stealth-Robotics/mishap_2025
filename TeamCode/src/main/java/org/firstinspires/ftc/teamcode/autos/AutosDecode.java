@@ -296,8 +296,12 @@ public abstract class AutosDecode extends OpMode {
             return false;
         }
 
+        if (!robot.isSpindexerBusy() || stateTimer.milliseconds() > INTAKE_DELAY) {
+            robot.stopIntake();
+            return true;
+        }
         // hold up if the spindexer is busy but not too long
-        return !robot.isSpindexerBusy() || stateTimer.milliseconds() > INTAKE_DELAY;
+        return false;
     }
 
     /**

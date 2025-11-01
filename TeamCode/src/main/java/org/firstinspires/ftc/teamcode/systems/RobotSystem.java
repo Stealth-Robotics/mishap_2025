@@ -42,7 +42,7 @@ public class RobotSystem {
     /** Multiplier to reduce drive speed for fine-tuned control. */
     public static double SLOW_MODE_MULTIPLIER = 0.3;
 
-    public static double AUTO_AIM_TOLERANCE = 0.1;
+    public static double AUTO_AIM_TOLERANCE = 0.3;
 
 
     /** The maximum rotational power applied during auto-aim. */
@@ -291,8 +291,8 @@ public class RobotSystem {
                 double distance = LimelightSubsystem.calcGoalDistanceByTy(llPose.getY());
                 shooterSys.setTargetRpmFromDisance(distance);
                 spindexerSys.setOffsetByDistance(distance);
-                telemetryM.addData("Power OUT:", output);
-                telemetryM.addData("LimeLightTX:", llPose.getX());
+                //telemetryM.addData("Power OUT:", output);
+                //telemetryM.addData("LimeLightTX:", llPose.getX());
                 // The output is applied to the rotation power (note: may need to be inverted).
                 turn = output;
 
@@ -305,7 +305,7 @@ public class RobotSystem {
             wasAutoAim = false;
         }
 
-        telemetryM.addData("TURN:", turn);
+        //telemetryM.addData("TURN:", turn);
         // Set drive power to the follower.
         follower.setTeleOpDrive(
                 y * slowMoFactor * controlInverter,
@@ -450,7 +450,6 @@ public class RobotSystem {
             shooterSys.runShooter();
         }
     }
-
 
     /**
      * Executes a shot if all subsystems are ready. Kicks a projectile and advances the spindexer.

@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.paths.PathState;
 
 import java.util.Arrays;
 
-@Autonomous(name = "Shoot Far either Side", group = "Autonomous", preselectTeleOp = "_TeleOp_Driver_Only")
+@Autonomous(name = "Shoot Far either Side", group = "Autonomous", preselectTeleOp = "_TeleOp_Driver_Operator")
 @Configurable
 public class AutoFarOne extends AutosDecode {
 
