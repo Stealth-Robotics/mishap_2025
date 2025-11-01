@@ -33,31 +33,28 @@ public class PathNearAuto1 extends PathManager {
         addRedPath(
                 follower.pathBuilder()
                         .addPath(
-                                // To Shoot 1
-                                new BezierLine(new Pose(126.300, 114.100), new Pose(85.600, 104.600))
+                                new BezierLine(new Pose(125.700, 113.200), new Pose(86.700, 85.400))
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(158), Math.toRadians(37))
+                        .setLinearHeadingInterpolation(Math.toRadians(158), Math.toRadians(45))
                         .build()
         );
         addRedPath(
                 follower.pathBuilder()
                         .addPath(
-                                // Path 2
                                 new BezierCurve(
-                                        new Pose(85.600, 104.600),
-                                        new Pose(86.000, 91.000),
+                                        new Pose(86.700, 85.400),
+                                        new Pose(84.600, 87.500),
                                         new Pose(96.300, 84.000)
                                 )
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(45), Math.toRadians(0))
+                        .setLinearHeadingInterpolation(Math.toRadians(45), Math.toRadians(180))
                         .addParametricCallback(.9, robot::startIntake)
                         .build()
         );
         addRedPath(
                 follower.pathBuilder()
                         .addPath(
-                                // Path 3
-                                new BezierLine(new Pose(96.300, 84.000), new Pose(120.000, 84.000))
+                                new BezierLine(new Pose(96.300, 84.000), new Pose(122.000, 84.000))
                         )
                         .setTangentHeadingInterpolation()
                         .setReversed()
@@ -67,10 +64,9 @@ public class PathNearAuto1 extends PathManager {
         addRedPath(
                 follower.pathBuilder()
                         .addPath(
-                                // Path 4
-                                new BezierLine(new Pose(120.000, 84.000), new Pose(85.400, 104.600))
+                                new BezierLine(new Pose(122.000, 84.000), new Pose(86.700, 85.400))
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(40))
+                        .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(45))
                         .addParametricCallback(0, robot::stopIntake)
                         .addParametricCallback(0, () -> follower.setMaxPower(1))
                         .build()
@@ -78,15 +74,13 @@ public class PathNearAuto1 extends PathManager {
         addRedPath(
                 follower.pathBuilder()
                         .addPath(
-                                // Path 5
                                 new BezierCurve(
-                                        new Pose(85.400, 104.600),
-                                        new Pose(77.500, 59.900),
-                                        new Pose(98.400, 60.000)
+                                        new Pose(86.700, 85.400),
+                                        new Pose(81.200, 71.600),
+                                        new Pose(96.100, 59.500)
                                 )
                         )
-                        .setTangentHeadingInterpolation()
-                        .setReversed()
+                        .setLinearHeadingInterpolation(Math.toRadians(45), Math.toRadians(180))
                         .build());
     }
 
