@@ -4,6 +4,7 @@ import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+import org.firstinspires.ftc.teamcode.common.Alliance;
 import org.firstinspires.ftc.teamcode.paths.Path;
 import org.firstinspires.ftc.teamcode.paths.PathNearAuto1;
 import org.firstinspires.ftc.teamcode.paths.PathState;
@@ -27,6 +28,14 @@ public class AutoNearOne extends AutosDecode {
 
     @Override
     protected void setStartingPose() {
+        // change the angle of the far shots by a couple of degrees:
+        // a negative number turns the bot more to the left positive more to the right
+        if (Alliance.isBlue()) {
+            this.aimOffset = 4;
+        } else {
+            this.aimOffset = -4;
+        }
+
         Pose startPose = paths.getPathStart();
         if (lastPose != null) {
             startPose = startPose.setHeading(lastPose.getHeading());

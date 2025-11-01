@@ -132,7 +132,6 @@ public class PathNearAuto1 extends PathManager {
                                 new BezierLine(new Pose(22.000, 84.000), new Pose(57.300, 108.000))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(149))
-                        .addParametricCallback(0, robot::stopIntake)
                         .addParametricCallback(0, () -> follower.setMaxPower(1))
                         .addParametricCallback(.99, robot::setReadyShoot)
                         .build()

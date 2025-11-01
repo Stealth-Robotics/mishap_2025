@@ -34,7 +34,7 @@ public class SpindexerSubsystem {
     public static int INDEX_OFFSET_TICKS = 240;
 
     public static int NEAR_ZONE_OFFSET = -40;
-    public static int MID_ZONE_OFFSET = 0;
+    public static int MID_ZONE_OFFSET = -10;
     public static int FAR_ZONE_OFFSET = 0;
 
 
