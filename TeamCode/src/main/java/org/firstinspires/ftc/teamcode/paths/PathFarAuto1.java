@@ -101,19 +101,17 @@ public class PathFarAuto1 extends PathManager{
         addRedPath(
                 follower.pathBuilder()
                         .addPath(
-                                // Move to shooting
-                                new BezierLine(new Pose(87.000, 9.000), new Pose(86.000, 20.000))
+                                new BezierLine(new Pose(87.000, 9.000), new Pose(86.000, 17.900))
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(67))
+                        .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(69))
                         .addParametricCallback(0.9, robot::setReadyShoot)
                         .build());
         // Move to line 1 intake area
         addRedPath(
                 follower.pathBuilder()
                         .addPath(
-                                // Move to get close to the balls
                                 new BezierCurve(
-                                        new Pose(86.000, 20.000),
+                                        new Pose(86.000, 17.900),
                                         new Pose(89.700, 32.100),
                                         new Pose(96.000, 36.000)
                                 )
@@ -125,8 +123,7 @@ public class PathFarAuto1 extends PathManager{
         addRedPath(
                 follower.pathBuilder()
                         .addPath(
-                                // Move to the end of ball 3
-                                new BezierLine(new Pose(96.000, 36.000), new Pose(130.000, 35.670))
+                                new BezierLine(new Pose(96.000, 36.000), new Pose(132.200, 36.100))
                         )
                         .setTangentHeadingInterpolation()
                         .setReversed()
@@ -137,14 +134,13 @@ public class PathFarAuto1 extends PathManager{
         addRedPath(
                 follower.pathBuilder()
                         .addPath(
-                                // Go back to the shooting position
                                 new BezierCurve(
-                                        new Pose(130.000, 35.670),
+                                        new Pose(132.200, 36.100),
                                         new Pose(108.300, 13.300),
-                                        new Pose(86.000, 20.000)
+                                        new Pose(86.000, 18.000)
                                 )
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(65))
+                        .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(69))
                         .addParametricCallback(0, robot::stopIntake)
                         .addParametricCallback(0, () -> follower.setMaxPower(1))
                         .addParametricCallback(.99, robot::setReadyShoot)
@@ -154,15 +150,13 @@ public class PathFarAuto1 extends PathManager{
         addRedPath(
                 follower.pathBuilder()
                         .addPath(
-                                // Path 6
                                 new BezierCurve(
-                                        new Pose(86.000, 20.000),
+                                        new Pose(86.000, 18.000),
                                         new Pose(87.700, 56.800),
-                                        new Pose(100.000, 60.000)
+                                        new Pose(98.683, 58.615)
                                 )
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(67), Math.toRadians(180))
-                        // get the shooter motors spinning early
+                        .setLinearHeadingInterpolation(Math.toRadians(69), Math.toRadians(180))                       // get the shooter motors spinning early
                         .build()
         );
 

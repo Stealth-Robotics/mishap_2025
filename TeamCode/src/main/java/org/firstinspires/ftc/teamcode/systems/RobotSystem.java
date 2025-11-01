@@ -134,7 +134,7 @@ public class RobotSystem {
 
 
     /** tracks if the robot will handle intaking */
-    private boolean isAutoIntaking = false;
+    private boolean isAutoIntaking = true;
 
     /** Number of times in a row we've hit over current*/
     private int overCurrentCount = 0;
