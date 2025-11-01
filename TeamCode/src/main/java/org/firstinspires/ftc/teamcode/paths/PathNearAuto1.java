@@ -33,10 +33,10 @@ public class PathNearAuto1 extends PathManager {
         addRedPath(
                 follower.pathBuilder()
                         .addPath(
-                                // Path 1
-                                new BezierLine(new Pose(125.652, 114.039), new Pose(90.900, 98.300))
+                                // To Shoot 1
+                                new BezierLine(new Pose(18.300, 113.200), new Pose(57.600, 86.600))
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(158), Math.toRadians(180))
+                        .setLinearHeadingInterpolation(Math.toRadians(22), Math.toRadians(135))
                         .build()
         );
     }
@@ -47,9 +47,14 @@ public class PathNearAuto1 extends PathManager {
                 follower.pathBuilder()
                         .addPath(
                                 // To Shoot 1
-                                new BezierLine(new Pose(17.700, 114.100), new Pose(58.400, 104.600))
+                                new BezierCurve(
+                                        new Pose(18.300, 113.200),
+                                        new Pose(51.312, 109.852),
+                                        new Pose(57.300, 85.400)
+                                )
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(22), Math.toRadians(143))
+                        .setLinearHeadingInterpolation(Math.toRadians(22), Math.toRadians(135))
+                        .addParametricCallback(.99, robot::setReadyShoot)
                         .build()
         );
         addBluePath(
@@ -57,8 +62,8 @@ public class PathNearAuto1 extends PathManager {
                         .addPath(
                                 // Path 2
                                 new BezierCurve(
-                                        new Pose(58.400, 104.600),
-                                        new Pose(58.000, 91.000),
+                                        new Pose(57.300, 85.400),
+                                        new Pose(59.400, 87.500),
                                         new Pose(47.700, 84.000)
                                 )
                         )
@@ -70,7 +75,7 @@ public class PathNearAuto1 extends PathManager {
                 follower.pathBuilder()
                         .addPath(
                                 // Path 3
-                                new BezierLine(new Pose(47.700, 84.000), new Pose(24.000, 84.000))
+                                new BezierLine(new Pose(47.700, 84.000), new Pose(22.000, 84.000))
                         )
                         .setTangentHeadingInterpolation()
                         .setReversed()
@@ -81,11 +86,12 @@ public class PathNearAuto1 extends PathManager {
                 follower.pathBuilder()
                         .addPath(
                                 // Path 4
-                                new BezierLine(new Pose(24.000, 84.000), new Pose(58.600, 104.600))
+                                new BezierLine(new Pose(22.000, 84.000), new Pose(57.300, 85.400))
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(140))
+                        .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(135))
                         .addParametricCallback(0, robot::stopIntake)
                         .addParametricCallback(0, () -> follower.setMaxPower(1))
+                        .addParametricCallback(.99, robot::setReadyShoot)
                         .build()
         );
         addBluePath(
@@ -93,13 +99,12 @@ public class PathNearAuto1 extends PathManager {
                         .addPath(
                                 // Path 5
                                 new BezierCurve(
-                                        new Pose(58.600, 104.600),
-                                        new Pose(66.500, 59.900),
-                                        new Pose(45.600, 60.000)
+                                        new Pose(57.300, 85.400),
+                                        new Pose(62.800, 71.600),
+                                        new Pose(47.900, 59.500)
                                 )
                         )
-                        .setTangentHeadingInterpolation()
-                        .setReversed()
+                        .setLinearHeadingInterpolation(Math.toRadians(135), Math.toRadians(0))
                         .build());
         }
 }

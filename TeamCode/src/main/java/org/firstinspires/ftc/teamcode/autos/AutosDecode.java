@@ -27,6 +27,8 @@ public abstract class AutosDecode extends OpMode {
     public static final double READ_MOTIF_TIMEOUT_SECONDS = 15;
     public static final double AIM_TIMEOUT_MS = 2000;
 
+    public static final double INTAKE_WAIT_MS = 1000;
+
     protected static final double PIPELINE_SWITCH_DELAY = 1000;
     protected final ElapsedTime actionTimer = new ElapsedTime();
     protected static final long INTAKE_DELAY = 5000; // delay to keep hood open
@@ -290,9 +292,8 @@ public abstract class AutosDecode extends OpMode {
      */
     protected boolean doIntakeAction()
     {
-        if (robot.isSpindexerFull()) {
-            robot.stopIntake();
-            return true;
+        if (stateTimer.milliseconds() < INTAKE_WAIT_MS) {
+            return false;
         }
 
         // hold up if the spindexer is busy but not too long
@@ -330,7 +331,7 @@ public abstract class AutosDecode extends OpMode {
 
         stateTimer.reset();
 
-        robot.doAimAtTarget(.2, 50);
+        robot.doAimAtTarget(.5, 50);
         return true;
     }
 
@@ -346,7 +347,7 @@ public abstract class AutosDecode extends OpMode {
             done = true;
         }
        else {
-            done = robot.doAimAtTarget(.1, 100);
+            done = robot.doAimAtTarget(.5, 100);
         }
 
         return done;

@@ -664,7 +664,8 @@ public class RobotSystem {
      * @return true if the spindexer is full, false otherwise
      */
     public boolean isSpindexerFull() {
-        return spindexerSys.isFull();
+        return spindexerSys.isFull()
+                && hoodSys.isReadyToShoot();
     }
 
     /** Sets the Obelisk motif pattern. */
@@ -913,7 +914,7 @@ public class RobotSystem {
 //        telemetryM.addData("Intake Slot State:", spindexerSys.getIntakeSlotState());
 //        telemetryM.addData("Standbby Slot State:", spindexerSys.getStandbySlotState());
 //        telemetryM.addData("Shoot Slot Number:", spindexerSys.getCurShootSlot());
-//        telemetryM.addData("IsMotif available", spindexerSys.isMotifAvailable());
+       telemetryM.addData("IsMotif available", spindexerSys.isMotifAvailable());
         telemetryM.addData("Is Auto Intaking:", isAutoIntaking);
         telemetryM.addData("Is Burst MODE", isBurstFire);
 //        telemetryM.addData("Hood State:", hoodSys.getHoodState());
@@ -925,7 +926,7 @@ public class RobotSystem {
         telemetryM.addData("Spindexer offset RAW:", spindexerSys.getCurrentOffset());
 
         // TODO: THIS SHOULD BE REMOVED BEFORE COMP
-        this.draw();
+        //this.draw();
         /* INPORTAINT This updates the telemetry for all systems here no need to duplicate anywhere else */
         telemetryM.update(telemetry);
     }

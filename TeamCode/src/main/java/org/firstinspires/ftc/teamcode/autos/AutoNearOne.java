@@ -25,11 +25,14 @@ public class AutoNearOne extends AutosDecode {
         robot.initSpindxerSlotsEmpty();
     }
 
-//    @Override
-//    protected void setStartingPose() {
-//        //Pose startPose = paths.getPathStart();
-//        follower.setStartingPose(paths.getPathStart());
-//    }
+    @Override
+    protected void setStartingPose() {
+        Pose startPose = paths.getPathStart();
+        if (lastPose != null) {
+            startPose = startPose.setHeading(lastPose.getHeading());
+        }
+        follower.setStartingPose(startPose);
+    }
 
     @Override
     protected PathState checkIndexForAction() {
