@@ -210,7 +210,7 @@ public class SpindexerSubsystem {
     }
 
     public boolean doCheckForArtifacts() {
-        if (spindexer.isBusy()) {
+        if (this.isReady()) {
             return false;
         }
 
@@ -366,8 +366,6 @@ public class SpindexerSubsystem {
     }
 
     private double getDelta(int destinationSlot) {
-        double totalTicksInCircle = NUMBER_OF_SLOTS * TICKS_PER_SLOT;
-        final double halfCircle = totalTicksInCircle / 2.0;
 
         // Calculate the difference in slots.
         double deltaInSlots = destinationSlot - curShootSlot;
@@ -633,7 +631,7 @@ public class SpindexerSubsystem {
         }
 
         int error = Math.abs(spindexer.getTargetPosition() - spindexer.getCurrentPosition());
-        return error <= POSITION_TOLERANCE;
+        return error <= POSITION_TOLERANCE && !spindexer.isBusy();
     }
 
     /**
