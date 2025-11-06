@@ -20,10 +20,10 @@ public class HoodSubsystem {
     private final Servo hoodServo;
 
     /** The default servo position when the hood is open for intake. */
-    private static final double HOOD_OPEN_POSITION = 0.565;
+    private static final double HOOD_OPEN_POSITION = 0.576;
 
     /** The default servo position when the hood is closed for shooting. */
-    private static final double HOOD_CLOSED_POSITION = 0.0;
+    private static final double HOOD_CLOSED_POSITION = 0.33;
 
     /** Needs to be adjusted based on hood transition time **/
     private static final long HOOD_TRANSITION_TIME = 800;

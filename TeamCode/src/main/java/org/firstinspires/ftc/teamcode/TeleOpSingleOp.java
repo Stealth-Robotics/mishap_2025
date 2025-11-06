@@ -18,6 +18,8 @@ public class TeleOpSingleOp extends OpMode {
     private boolean isRobotCentric = false;
     private boolean isSlowMo = false;
     private boolean autoAim = false;
+    private boolean isIntakeActive = false;
+
 
     // State machine for shooting process
     private enum ShootState { IDLE, PREPARING, READY, SHOOTING }
@@ -196,11 +198,21 @@ public class TeleOpSingleOp extends OpMode {
      * Manages intake controls. Logic is improved to handle overlapping presses.
      */
     private void handleIntakeControls() {
+        boolean lastIsIntakeActive = isIntakeActive;
+
         if (gamepad1.rightBumperWasPressed()) {
-            robot.startIntake();
-        } else if (gamepad1.leftBumperWasPressed()) {
+            isIntakeActive = !isIntakeActive;
+        }
+
+        if (isIntakeActive != lastIsIntakeActive) {
+            if (isIntakeActive) {
+                robot.startIntake();
+            } else {
+                robot.stopIntake();
+            }
+        }  else if (gamepad1.leftBumperWasPressed()) {
             robot.reverseIntake();
-        } else if (gamepad1.rightBumperWasReleased() || gamepad1.leftBumperWasReleased()){
+        } else if (gamepad1.leftBumperWasReleased()){
             // Stop intake only if neither bumper is pressed
             robot.stopIntake();
         }

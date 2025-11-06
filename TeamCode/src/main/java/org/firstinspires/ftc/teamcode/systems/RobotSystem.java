@@ -85,7 +85,6 @@ public class RobotSystem {
         INTAKING,           // Actively running the intake and spindexer.
         REVERSING_INTAKE,   // Reversing the intake to clear jams.
         STOPPING_INTAKE,    // A transitional state to properly stop the intake sequence.
-
         PREPPING_SHOOT,     // A transitional state to prepare the shooter for shooting.
         SHOOT_IT,     // Spinning up the shooter and positioning the hood.
         AFTER_SHOT,            // A transitional state to shoot one artifact and advance the spindexer.
@@ -179,6 +178,12 @@ public class RobotSystem {
      * @return true when the spindexer is successfully indexed and centered, otherwise false.
      */
     public boolean doInitSpindexer() {
+        if (!hoodSys.isReadyToShoot()
+                || !kickerSys.isReady()
+                || currentState != SystemState.IDLE) {
+            return false;
+        }
+
         return spindexerSys.doInitPosition();
     }
 
@@ -222,8 +227,8 @@ public class RobotSystem {
     private void handleOverCurrent() {
         // Exit early if the motor is not jammed. Reset the counter.
         if (!spindexerSys.isJammed()) {
-            if (overCurrentCount > 0){
-                if (jamTimer.milliseconds() > MAX_UNJAM_TIME){
+            if (overCurrentCount > 0) {
+                if (jamTimer.milliseconds() > MAX_UNJAM_TIME) {
                     if (currentState == SystemState.INTAKING) {
                         stopIntake();
                     }
@@ -442,12 +447,18 @@ public class RobotSystem {
      * Prepares the robot to shoot by spinning up the shooter wheels and setting the hood angle.
      */
     public void setReadyShoot() {
-        if (currentState != SystemState.PREPPING_SHOOT) {
-            currentState = SystemState.PREPPING_SHOOT;
-            //stateTimer.reset();
-            kickerSys.setReady();
-            hoodSys.setShootPose();
+        if (currentState != SystemState.PREPPING_SHOOT
+            && currentState != SystemState.STOPPING_INTAKE) {
+
+            if (currentState == SystemState.REVERSING_INTAKE
+                    || currentState == SystemState.INTAKING) {
+                this.stopIntake();
+                return;
+            }
+            
             shooterSys.runShooter();
+            // Important we set this after stop intake
+            currentState = SystemState.PREPPING_SHOOT;
         }
     }
 
@@ -461,8 +472,8 @@ public class RobotSystem {
         // Only allow a shot if we are in the PREPPING_SHOOT state
         // and the shooter subsystem reports it is at the correct speed.
         if (currentState == SystemState.PREPPING_SHOOT) {
-            currentState = SystemState.SHOOT_IT;
             stateTimer.reset();
+            currentState = SystemState.SHOOT_IT;
             return true;
         } else if (currentState == SystemState.IDLE) {
             setReadyShoot();
@@ -833,6 +844,8 @@ public class RobotSystem {
                         spindexerSys.setIntakeSlotState(detectedState);
                     }
                 }
+
+                break;
             case INTAKING:
                 if (isAutoIntaking) {
                     // Just incase make sure we move the kicker
@@ -922,11 +935,11 @@ public class RobotSystem {
         telemetryM.addData("Is Spindexer Ready", spindexerSys.isReady());
         telemetryM.addData("Spindexer offset:", spindexerSys.getCurrentOffset());
         telemetryM.addData("Current zone", spindexerSys.getCurrentZone());
-    //    telemetryM.addData("Robot State", currentState.name());
+//        telemetryM.addData("Robot State", currentState.name());
 //        telemetryM.addData("Shoot Slot Index", spindexerSys.getCurShootSlot());
-//        telemetryM.addData("Shoot Slot State:", spindexerSys.getShootSlotState());
-//        telemetryM.addData("Intake Slot State:", spindexerSys.getIntakeSlotState());
-//        telemetryM.addData("Standbby Slot State:", spindexerSys.getStandbySlotState());
+        telemetryM.addData("Shoot Slot State:", spindexerSys.getShootSlotState());
+        telemetryM.addData("Intake Slot State:", spindexerSys.getIntakeSlotState());
+        telemetryM.addData("Standbby Slot State:", spindexerSys.getStandbySlotState());
 //        telemetryM.addData("Shoot Slot Number:", spindexerSys.getCurShootSlot());
     //   telemetryM.addData("IsMotif available", spindexerSys.isMotifAvailable());
 //        telemetryM.addData("Hood State:", hoodSys.getHoodState());

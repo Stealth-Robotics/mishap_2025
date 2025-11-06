@@ -182,7 +182,7 @@ public abstract class AutosDecode extends OpMode {
 
         if (!robot.isSpindexerFull() && !this.areArtifactsSorted) {
             areArtifactsSorted = robot.doArtifactSort();
-
+            telemetryM.addLine("Waiting for Artifacts!!!");
             return;
         }
 
@@ -193,6 +193,7 @@ public abstract class AutosDecode extends OpMode {
             return;
         }
 
+        telemetryM.addData("Current State", pathState);
         switch (pathState) {
             case READ_MOTIF:
                 // wait till the last minute to read the obelisk to get the motif

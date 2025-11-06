@@ -58,7 +58,7 @@ public class PathNearAuto1 extends PathManager {
         addRedPath(
                 follower.pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(96.300, 84.000), new Pose(122.000, 84.000))
+                                new BezierLine(new Pose(96.300, 84.000), new Pose(128.000, 84.000))
                         )
                         .setTangentHeadingInterpolation()
                         .setReversed()
@@ -68,7 +68,7 @@ public class PathNearAuto1 extends PathManager {
         addRedPath(
                 follower.pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(122.000, 84.000), new Pose(86.700, 108.000))
+                                new BezierLine(new Pose(128.000, 84.000), new Pose(86.700, 108.000))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(31))
                         .addParametricCallback(0, robot::stopIntake)
@@ -119,7 +119,7 @@ public class PathNearAuto1 extends PathManager {
         addBluePath(
                 follower.pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(47.700, 84.000), new Pose(22.000, 84.000))
+                                new BezierLine(new Pose(47.700, 84.000), new Pose(20.000, 84.000))
                         )
                         .setTangentHeadingInterpolation()
                         .setReversed()
@@ -129,7 +129,7 @@ public class PathNearAuto1 extends PathManager {
         addBluePath(
                 follower.pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(22.000, 84.000), new Pose(57.300, 108.000))
+                                new BezierLine(new Pose(20.000, 84.000), new Pose(57.300, 108.000))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(149))
                         .addParametricCallback(0, () -> follower.setMaxPower(1))

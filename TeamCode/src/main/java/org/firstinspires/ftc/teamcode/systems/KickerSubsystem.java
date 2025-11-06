@@ -16,10 +16,10 @@ public class KickerSubsystem {
     private final Servo kickerServo;
 
     /** The servo position when the kicker is in the 'up' or 'kicked' state. */
-    private static final double KICKER_UP_POSITION = 0.49;
+    private static final double KICKER_UP_POSITION = 0.505;
 
     /** The servo position when the kicker is in the 'down' or 'ready' state. */
-    private static final double KICKER_DOWN_POSITION = 0.18;
+    private static final double KICKER_DOWN_POSITION = 0.15;
 
 
     /** Number of Ms to wait for kicker transition*/

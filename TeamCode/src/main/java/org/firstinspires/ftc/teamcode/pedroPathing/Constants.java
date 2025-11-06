@@ -34,7 +34,7 @@ public class Constants {
     // if not negative, then the robot thinks that its going to go faster under 0 power
     private static final double lateralZeroPowerAcceleration = -66.36; // 90.7 FULL
 
-    public static double mass = 10.3;
+    public static double mass = 11.0;
 
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(mass)

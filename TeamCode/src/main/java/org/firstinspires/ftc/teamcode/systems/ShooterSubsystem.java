@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.systems;
 
+import com.qualcomm.robotcore.hardware.DcMotorControllerEx;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
@@ -32,8 +33,8 @@ public class ShooterSubsystem {
     public static final double MAX_RPM = 5200;
     public static final double MIN_RPM = 3000;
     public static final double DEFAULT_RPM_NEAR = 4200;
-    public static final double DEFAULT_RPM_MID = 4300;
-    public static final double DEFAULT_RPM_FAR = 4650;
+    public static final double DEFAULT_RPM_MID = 4250;
+    public static final double DEFAULT_RPM_FAR = 4700;
 
     public static final double RPM_CHANGE_AMOUNT = 50;
     private static final double VELOCITY_TOLERANCE_LOW = 50; // The allowed RPM error in which the shooter is considered "ready".

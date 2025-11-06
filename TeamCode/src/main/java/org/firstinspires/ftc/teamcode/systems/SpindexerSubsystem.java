@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.systems;
 
 import com.bylazar.configurables.annotations.Configurable;
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -31,38 +33,37 @@ public class SpindexerSubsystem {
 
     // NOTE: if you would like to adjust in FTC dashboard mark members as public static (Not final)
     /** The number of ticks to move backward after the index switch is released to center a slot. */
-    public static int INDEX_OFFSET_TICKS = 240;
-    public static int NEAR_ZONE_OFFSET = -40;
-    public static int MID_ZONE_OFFSET = -10;
+    public static int INDEX_OFFSET_TICKS = 295;
+    public static int NEAR_ZONE_OFFSET = 0;
+    public static int MID_ZONE_OFFSET = 0;
     public static int FAR_ZONE_OFFSET = 0;
 
-
     /** This value protects the spindexer from jamming and/or crushing the world */
-    private static final double OVERLOAD_AMPS = 7.0;
+    private static final double OVERLOAD_AMPS = 8.0;
 
     /** Ticks per revolution for the GoBilda 43 RPM motor (3895.9) geared up. */
-    private static final double TICKS_PER_REV = 3895.9;
+    private static final double TICKS_PER_REV = 3896.0;
     /** The number of slots in the spindexer. */
     private static final int NUMBER_OF_SLOTS = 3;
     /** The number of encoder ticks needed to move one slot. */
     private static final double TICKS_PER_SLOT = TICKS_PER_REV / NUMBER_OF_SLOTS;
 
     /** The tolerance, in ticks, for considering the motor to have reached its target position. */
-    private static final int POSITION_TOLERANCE = 5;
+    private static final int POSITION_TOLERANCE = 2;
 
     /** The maximum power limit for spindexer rotation. */
-    public static double SPINDEXER_POWER_LIMIT = .6;
+    public static double SPINDEXER_POWER_LIMIT = .8;
     /** The maximum velocity (in ticks/sec) for spindexer rotation in RUN_TO_POSITION mode. */
     public static double SPINDEXER_VELOCITY_LIMIT = 2600;
 
     /** PIDF coefficients for position control, tunable via FTC-Dashboard. */
     // TODO: More tuning needed
-    public static PIDFCoefficients SPINDEXER_PIDF = new PIDFCoefficients(.55, 3.6,.001, 10);  //10, 2,1.2, 1); 8, 4,0.2, 1
+    public static PIDFCoefficients SPINDEXER_PIDF = new PIDFCoefficients(.55, 3.7,.001, 10);  //10, 2,1.2, 1); 8, 4,0.2, 1
 
     private final ElapsedTime currentSpikeTimer = new ElapsedTime();
 
     /** allows brief spikes in the current to be ignored */
-    private static final long CURRENT_SPIKE_TIMEOUT_MS = 100;
+    private static final long CURRENT_SPIKE_TIMEOUT_MS = 500;
 
 
 
@@ -94,8 +95,6 @@ public class SpindexerSubsystem {
 
     private static final double MAX_SORT_TIME_SECOND = 20;
 
-    private int nudgeOffset = 0;
-
     private ZoneDistance currentZone = ZoneDistance.FAR;
     private final Map<ZoneDistance, Integer> zoneMap;
 
@@ -117,11 +116,13 @@ public class SpindexerSubsystem {
         DONE
     }
 
+    TelemetryManager telemetryM;
     //==================================================================================================
     //  C O N S T R U C T O R
     //==================================================================================================
 
     public SpindexerSubsystem(HardwareMap hardwareMap) {
+        telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
         spindexer = hardwareMap.get(DcMotorEx.class, "spindexer_motor");
         indexSwitch = hardwareMap.get(TouchSensor.class, "index_switch");
         zoneMap = new HashMap<>();
@@ -147,18 +148,19 @@ public class SpindexerSubsystem {
      * @return True when the entire homing process is complete; otherwise false.
      */
     public boolean doInitPosition() {
+
+        double velocity = 500;
         switch (homingState) {
             case START:
                 // If not pressed, reverse until the switch is triggered.
-                if (!isIndexSwitchPressed()) {
-                    spindexer.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    spindexer.setVelocity(-SPINDEXER_VELOCITY_LIMIT / 8); // Very slow reverse
-                    homingState = HomingState.SEARCHING_BACKWARD;
-                } else {
+                spindexer.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                if (isIndexSwitchPressed()) {
                     // If already pressed, move forward to find the edge where it releases.
-                    spindexer.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    spindexer.setVelocity(SPINDEXER_VELOCITY_LIMIT / 8); // Slow forward search
+                    spindexer.setVelocity(velocity); // Slow forward search
                     homingState = HomingState.SEARCHING_FORWARD;
+                } else {
+                    spindexer.setVelocity(-velocity / 2); //  slow reverse
+                    homingState = HomingState.SEARCHING_BACKWARD;
                 }
                 return false; // Process has just begun
 
@@ -166,9 +168,11 @@ public class SpindexerSubsystem {
                 // Move forward until the switch is released.
                 if (!isIndexSwitchPressed()) {
                     // Switch released. Now, slowly reverse to find the precise trigger point.
-                    spindexer.setVelocity(-SPINDEXER_VELOCITY_LIMIT / 8);
+                    spindexer.setVelocity(-velocity / 2);
+                    spindexer.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     homingState = HomingState.SEARCHING_BACKWARD;
                 }
+
                 return false;
 
             case SEARCHING_BACKWARD:
@@ -182,7 +186,8 @@ public class SpindexerSubsystem {
                     // Command the motor to move to the final offset position.
                     spindexer.setTargetPosition(targetPosition);
                     spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    spindexer.setVelocity(SPINDEXER_VELOCITY_LIMIT / 10);
+                    spindexer.setPower(SPINDEXER_POWER_LIMIT);
+                    spindexer.setVelocity(velocity);
                     homingState = HomingState.MOVING_TO_OFFSET;
                 }
                 return false;
@@ -193,6 +198,7 @@ public class SpindexerSubsystem {
                     // We've arrived. Transition to DONE to finalize the state on the next loop.
                     homingState = HomingState.DONE;
                 }
+
                 return false;
 
             case DONE:
@@ -210,7 +216,7 @@ public class SpindexerSubsystem {
     }
 
     public boolean doCheckForArtifacts() {
-        if (this.isReady()) {
+        if (!this.isReady()) {
             return false;
         }
 
@@ -357,7 +363,7 @@ public class SpindexerSubsystem {
         // Set motor pose based on current zone offset
         //noinspection DataFlowIssue
         spindexer.setTargetPosition(targetPosition + zoneMap.get(currentZone));
-        spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         spindexer.setVelocity(SPINDEXER_VELOCITY_LIMIT);
 
         // Updates the pointer to the new absolute slot.
@@ -436,7 +442,7 @@ public class SpindexerSubsystem {
 
         // Move the spindexer to the correct position if a change has happend
         if (lastZone != currentZone) {
-            nudgePosition(0);
+            nudgePosition(zoneMap.get(currentZone));
         }
     }
 
@@ -480,7 +486,7 @@ public class SpindexerSubsystem {
         zoneMap.put(currentZone, curZoneOffset);
 
         spindexer.setTargetPosition(this.lastTargetPosition + curZoneOffset);
-        spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         spindexer.setVelocity(SPINDEXER_VELOCITY_LIMIT);
     }
 
@@ -631,7 +637,7 @@ public class SpindexerSubsystem {
         }
 
         int error = Math.abs(spindexer.getTargetPosition() - spindexer.getCurrentPosition());
-        return error <= POSITION_TOLERANCE && !spindexer.isBusy();
+        return error <= POSITION_TOLERANCE;
     }
 
     /**
