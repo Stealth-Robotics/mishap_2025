@@ -50,7 +50,7 @@ public class ShooterSubsystem {
     // F (Feedforward): Proactively applies power based on the target velocity, which is crucial for velocity control.
     // TODO: more tuning needed
  //   private static final PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(90, .5, 10, 13);
-    private static final PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(1.26, 0.126, 0, 12.9); //1.3, 0.15, 0, 12.15);
+    private static final PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(1.343, 0.134, 0, 12.6); //1.3, 0.15, 0, 12.15);
 
     // --- State Variables ---
     private boolean isShooterEnabled = false; // New state to track if the shooter is supposed to be running

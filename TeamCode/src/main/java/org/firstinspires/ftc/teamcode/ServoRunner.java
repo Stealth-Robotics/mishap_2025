@@ -26,7 +26,9 @@ public class ServoRunner extends LinearOpMode {
 
     private double intakeMaxRange = .58;
 
-    private double curShootPower = .80;
+    private double curShootPower = 1;
+    double currentVelocity;
+    double maxVelocity = 0.0;
 
     public static PIDFCoefficients SPINDEXER_PIDF = new PIDFCoefficients(.55, 3.6,.001, 10);  //10, 2,1.2, 1); 8, 4,0.2, 1
 
@@ -82,11 +84,11 @@ public class ServoRunner extends LinearOpMode {
         servoFlipper.setPosition(.2);
         while (opModeIsActive()) {
 
-            telemetry.addData("Spindexer Velocity", spindexer.getVelocity());
-            telemetry.addData("Spindixer Position", spindexer.getCurrentPosition());
-            telemetry.addData("Spindiexer Mode ", spindexer.getMode());
-            telemetry.addData("Spindixer power", spindexer.getPower());
-            telemetry.addData("Spindixer Busy", spindexer.isBusy());
+//            telemetry.addData("Spindexer Velocity", spindexer.getVelocity());
+//            telemetry.addData("Spindixer Position", spindexer.getCurrentPosition());
+//            telemetry.addData("Spindiexer Mode ", spindexer.getMode());
+//            telemetry.addData("Spindixer power", spindexer.getPower());
+//            telemetry.addData("Spindixer Busy", spindexer.isBusy());
 
 
             if (gamepad1.xWasPressed()) {
@@ -98,10 +100,20 @@ public class ServoRunner extends LinearOpMode {
                 spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             }
 
-            telemetry.addLine("Running");
-            telemetry.addData("Hood High:", intakeMaxRange);
-            telemetry.addData("Hood Low:", intakeMinRage);
+//            telemetry.addLine("Running");
+//            telemetry.addData("Hood High:", intakeMaxRange);
+//            telemetry.addData("Hood Low:", intakeMinRage);
             telemetry.addData("Shoot power:", gamepad1.right_trigger * curShootPower);
+
+            currentVelocity = rightShooter.getVelocity();
+
+            if (currentVelocity > maxVelocity) {
+                maxVelocity = currentVelocity;
+            }
+
+            telemetry.addData("current velocity", currentVelocity);
+            telemetry.addData("max Velocity", maxVelocity);
+
 
             if (gamepad1.right_trigger > 0.001) {
                 rightShooter.setPower(gamepad1.right_trigger * curShootPower);

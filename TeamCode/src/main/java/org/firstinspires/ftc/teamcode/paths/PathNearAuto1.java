@@ -4,12 +4,8 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.PathChain;
 
 import org.firstinspires.ftc.teamcode.systems.RobotSystem;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class PathNearAuto1 extends PathManager {
 
@@ -33,6 +29,7 @@ public class PathNearAuto1 extends PathManager {
         addRedPath(
                 follower.pathBuilder()
                         .addPath(
+                                // To Shoot 1
                                 new BezierCurve(
                                         new Pose(126.000, 112.200),
                                         new Pose(92.900, 119.800),
@@ -40,11 +37,16 @@ public class PathNearAuto1 extends PathManager {
                                 )
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(158), Math.toRadians(31))
+                        .addParametricCallback(.8, ()->{
+                            robot.setShooterTargetRange(true);
+                            robot.startShooter();
+                        })
                         .build()
         );
         addRedPath(
                 follower.pathBuilder()
                         .addPath(
+                                // Move Line PPG
                                 new BezierCurve(
                                         new Pose(86.700, 108.000),
                                         new Pose(87.500, 90.100),
@@ -58,6 +60,7 @@ public class PathNearAuto1 extends PathManager {
         addRedPath(
                 follower.pathBuilder()
                         .addPath(
+                                // Intake PPG
                                 new BezierLine(new Pose(96.300, 84.000), new Pose(128.000, 84.000))
                         )
                         .setTangentHeadingInterpolation()
@@ -68,16 +71,19 @@ public class PathNearAuto1 extends PathManager {
         addRedPath(
                 follower.pathBuilder()
                         .addPath(
+                                // To Shoot 2
                                 new BezierLine(new Pose(128.000, 84.000), new Pose(86.700, 108.000))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(31))
-                        .addParametricCallback(0, robot::stopIntake)
                         .addParametricCallback(0, () -> follower.setMaxPower(1))
+                        .addParametricCallback(.3, robot::incrementSpindexerSlot)
+                        .addParametricCallback(.8, robot::startShooter)
                         .build()
         );
         addRedPath(
                 follower.pathBuilder()
                         .addPath(
+                                // Move PGP
                                 new BezierCurve(
                                         new Pose(86.700, 108.000),
                                         new Pose(76.100, 71.700),
@@ -93,6 +99,7 @@ public class PathNearAuto1 extends PathManager {
         addBluePath(
                 follower.pathBuilder()
                         .addPath(
+                                // To Shoot 1
                                 new BezierCurve(
                                         new Pose(18.000, 112.200),
                                         new Pose(51.100, 119.800),
@@ -100,12 +107,16 @@ public class PathNearAuto1 extends PathManager {
                                 )
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(28), Math.toRadians(149))
-                        .addParametricCallback(.99, robot::setReadyShoot)
+                        .addParametricCallback(.8, ()->{
+                            robot.setShooterTargetRange(true);
+                            robot.startShooter();
+                        })
                         .build()
         );
         addBluePath(
                 follower.pathBuilder()
                         .addPath(
+                                // Move Line PPG
                                 new BezierCurve(
                                         new Pose(57.300, 108.000),
                                         new Pose(56.500, 90.100),
@@ -119,7 +130,8 @@ public class PathNearAuto1 extends PathManager {
         addBluePath(
                 follower.pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(47.700, 84.000), new Pose(20.000, 84.000))
+                                // Intake PPG
+                                new BezierLine(new Pose(47.700, 84.000), new Pose(18, 84.000))
                         )
                         .setTangentHeadingInterpolation()
                         .setReversed()
@@ -129,15 +141,18 @@ public class PathNearAuto1 extends PathManager {
         addBluePath(
                 follower.pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(20.000, 84.000), new Pose(57.300, 108.000))
+                                // To Shoot 2
+                                new BezierLine(new Pose(18, 84.000), new Pose(57.300, 108.000))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(149))
                         .addParametricCallback(0, () -> follower.setMaxPower(1))
-                        .addParametricCallback(.99, robot::setReadyShoot)
+                        .addParametricCallback(.3, robot::incrementSpindexerSlot)
+                        .addParametricCallback(.8, robot::startShooter)
                         .build()
         );
         addBluePath(
                 follower.pathBuilder()
+                        // Move PGP
                         .addPath(
                                 new BezierCurve(
                                         new Pose(57.300, 108.000),

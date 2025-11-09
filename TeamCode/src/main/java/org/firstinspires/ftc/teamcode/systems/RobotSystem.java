@@ -455,7 +455,7 @@ public class RobotSystem {
                 this.stopIntake();
                 return;
             }
-            
+
             shooterSys.runShooter();
             // Important we set this after stop intake
             currentState = SystemState.PREPPING_SHOOT;
@@ -522,14 +522,14 @@ public class RobotSystem {
      * @return returns false until done shooting the motif
      */
     public boolean continueShootMotif() {
-
+        telemetry.addData("Motif index", curMotifIndex);
         // must wait for the spindexer or shot cycle to finish
         if (this.isSpindexerBusy() || currentState == SystemState.SHOOT_IT) {
             return false;
         }
 
         // Can't shoot anymore
-        if (spindexerSys.isEmpty()) {
+        if (spindexerSys.isEmpty() && curMotifIndex >= 3) {
             resetMotifState();
             return true;
         }
@@ -626,6 +626,12 @@ public class RobotSystem {
         if (shooterSys.isRunning()){
             kickerSys.setReady();
             shooterSys.stop();
+        }
+    }
+
+    public void startShooter() {
+        if(!shooterSys.isRunning()){
+            shooterSys.runShooter();
         }
     }
 

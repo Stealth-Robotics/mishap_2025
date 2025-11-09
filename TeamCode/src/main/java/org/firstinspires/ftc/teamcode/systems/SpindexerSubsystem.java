@@ -33,7 +33,7 @@ public class SpindexerSubsystem {
 
     // NOTE: if you would like to adjust in FTC dashboard mark members as public static (Not final)
     /** The number of ticks to move backward after the index switch is released to center a slot. */
-    public static int INDEX_OFFSET_TICKS = 295;
+    public static int INDEX_OFFSET_TICKS = 625;
     public static int NEAR_ZONE_OFFSET = 0;
     public static int MID_ZONE_OFFSET = 0;
     public static int FAR_ZONE_OFFSET = 0;
@@ -644,10 +644,10 @@ public class SpindexerSubsystem {
      * Puts the motor into BRAKE mode, causing it to actively hold its last commanded position.
      */
     public void setBrake() {
-        spindexer.setTargetPosition(this.lastTargetPosition);
-        spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spindexer.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        spindexer.setVelocity(SPINDEXER_VELOCITY_LIMIT);
+            spindexer.setTargetPosition(this.lastTargetPosition);
+            spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            spindexer.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            spindexer.setVelocity(SPINDEXER_VELOCITY_LIMIT);
     }
 
     /**

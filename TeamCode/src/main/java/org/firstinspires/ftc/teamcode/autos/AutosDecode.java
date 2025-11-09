@@ -24,8 +24,9 @@ import java.util.HashSet;
  */
 public abstract class AutosDecode extends OpMode {
 
-    public static final double READ_MOTIF_TIMEOUT_SECONDS = 15;
-    public static final double AIM_TIMEOUT_MS = 2000;
+    public static final double READ_MOTIF_TIMEOUT_SECONDS = 25;
+    public static final double AIM_TIMEOUT_MS = 4000;
+    public static final double AIM_MIN_MS = 2000;
 
     public static final double INTAKE_WAIT_MS = 1000;
 
@@ -358,16 +359,17 @@ public abstract class AutosDecode extends OpMode {
      */
     protected boolean doAimingOrTimeout() {
         boolean done = false;
-        if (stateTimer.milliseconds() > AIM_TIMEOUT_MS) {
+        double curTimeMs = stateTimer.milliseconds();
+        if (curTimeMs > AIM_TIMEOUT_MS) {
             // stop the robot if timed out.
             follower.setTeleOpDrive(0, 0, 0, true);
             done = true;
         }
        else {
-            done = robot.doAimAtTarget(.1, aimOffset, 100);
+            done = robot.doAimAtTarget(.2, aimOffset, 100);
         }
 
-        return done;
+        return done && curTimeMs > AIM_MIN_MS;
     }
 
     /**
