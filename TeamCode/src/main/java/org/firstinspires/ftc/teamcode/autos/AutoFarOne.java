@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.autos;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.common.Alliance;
 import org.firstinspires.ftc.teamcode.paths.Path;
@@ -12,6 +13,7 @@ import java.util.Arrays;
 
 @Autonomous(name = "Shoot Far either Side", group = "Autonomous", preselectTeleOp = "_TeleOp_Driver_Operator")
 @Configurable
+@Disabled
 public class AutoFarOne extends AutosDecode {
 
     @Override

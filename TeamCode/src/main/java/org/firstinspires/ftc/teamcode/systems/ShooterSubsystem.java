@@ -37,8 +37,8 @@ public class ShooterSubsystem {
     public static final double DEFAULT_RPM_FAR = 4700;
 
     public static final double RPM_CHANGE_AMOUNT = 50;
-    private static final double VELOCITY_TOLERANCE_LOW = 50; // The allowed RPM error in which the shooter is considered "ready".
-    private static final double VELOCITY_TOLERANCE_HIGH = 100;
+    private static final double VELOCITY_TOLERANCE_LOW = 10; // The allowed RPM error in which the shooter is considered "ready".
+    private static final double VELOCITY_TOLERANCE_HIGH = 75;
     // Encoder ticks per revolution for a GoBILDA Yellow Jacket motor.
     private static final double TICKS_PER_REV = 28;
 
@@ -50,7 +50,7 @@ public class ShooterSubsystem {
     // F (Feedforward): Proactively applies power based on the target velocity, which is crucial for velocity control.
     // TODO: more tuning needed
  //   private static final PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(90, .5, 10, 13);
-    private static final PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(1.343, 0.134, 0, 12.6); //1.3, 0.15, 0, 12.15);
+    private static final PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(50, 0.05, 0, 12.7); //1.3, 0.15, 0, 12.15);
 
     // --- State Variables ---
     private boolean isShooterEnabled = false; // New state to track if the shooter is supposed to be running
@@ -139,6 +139,10 @@ public class ShooterSubsystem {
      * Runs the shooter motors at the currently selected target RPM (near or far).
      */
     public void runShooter() {
+        if (isShooterEnabled) {
+            return;
+        }
+
         isShooterEnabled = true; // Set the intended state to ON
         shootTimer.reset();
 
@@ -251,17 +255,10 @@ public class ShooterSubsystem {
 
     /**
      * Sets the target shooting range.
-     * @param isNear True to select the near target RPM, false for the far target RPM.
+     * @param zoneDistance ZoneDistance enum representing the desired target RPM.
      */
-    public void setTargetRange(boolean isNear) {
-        this.isNear = isNear;
-        // Update the currentRpmRange based on the new isNear value
-        if (isNear) {
-            this.currentRpmZone = ZoneDistance.NEAR;
-        } else {
-            // You might want to decide if this defaults to FAR or MID. I'll assume FAR.
-            this.currentRpmZone = ZoneDistance.FAR;
-        }
+    public void setTargetRange(ZoneDistance zoneDistance) {
+        this.currentRpmZone = zoneDistance;
 
         // If the shooter is already running, update its speed to the new target
         if (isShooterEnabled) {

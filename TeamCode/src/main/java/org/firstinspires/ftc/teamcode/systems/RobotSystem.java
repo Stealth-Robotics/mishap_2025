@@ -292,14 +292,13 @@ public class RobotSystem {
             Pose llPose = limelightSys.getAvgTargetPose(50); // Get averaged target position.
             if (llPose != null) {
                 // Calculate the turn power needed to center the target.
-                double output = getScaledTxOutput(llPose.getX(), AUTO_AIM_TOLERANCE);
                 double distance = LimelightSubsystem.calcGoalDistanceByTy(llPose.getY());
                 shooterSys.setTargetRpmFromDisance(distance);
                 spindexerSys.setOffsetByDistance(distance);
                 //telemetryM.addData("Power OUT:", output);
                 //telemetryM.addData("LimeLightTX:", llPose.getX());
                 // The output is applied to the rotation power (note: may need to be inverted).
-                turn = output;
+                turn = getScaledTxOutput(llPose.getX(), AUTO_AIM_TOLERANCE);
 
             } else {
                 // If the target is lost, reset the PID controller to prevent integral windup.
@@ -394,6 +393,14 @@ public class RobotSystem {
     // State Control Methods
     //==================================================================================================
 
+    public void setAutoIntaking(boolean autoIntaking) {
+        isAutoIntaking = autoIntaking;
+    }
+
+    public void toggleAutoIntaking() {
+        isAutoIntaking = !isAutoIntaking;
+    }
+
     /**
      * Starts the intake process. Stops the shooter, sets hood to intake position,
      * and runs the sweeper and spindexer.
@@ -440,6 +447,15 @@ public class RobotSystem {
             stateTimer.reset();
             spindexerSys.setFloat();
             hoodSys.setShootPose(); // Start moving hood to shoot position immediately.
+        }
+    }
+
+    public void toggleIntake() {
+        if (currentState == SystemState.INTAKING
+                || currentState == SystemState.REVERSING_INTAKE) {
+            stopIntake();
+        } else {
+            startIntake();
         }
     }
 
@@ -563,16 +579,40 @@ public class RobotSystem {
 
         //noinspection DataFlowIssue
         SlotState slotState = motifSlots.get(motifPattern).get(curMotifIndex);
+        telemetryM.addData("Motif State", slotState);
         // if we have the correct arficat in the shoot slot we can go to shooting
         if (spindexerSys.getShootSlotState() != slotState) {
             // if error in the rotate logic stop
-            if(!spindexerSys.rotateToArtifact(slotState)){
+            if(spindexerSys.rotateToArtifact(slotState) || this.isSpindexerBusy()){
+                return false;
+            } else if (!spindexerSys.moveToNextAvailableSlot()) {
                 resetMotifState();
                 return true;
             }
         }
 
         tryShoot();
+        return false;
+    }
+
+    /**
+     * Blindly attempts to move the spindexer to the first available Motif slot.
+     */
+    public void trySelectFirstMotifSlot() {
+        curMotifIndex = 0;
+        SlotState desiredArtifact = motifSlots.get(motifPattern).get(curMotifIndex);
+        if (!spindexerSys.rotateToArtifact(desiredArtifact)){
+            spindexerSys.advanceOneSlot();
+        }
+    }
+
+    public boolean isAnyArtifactUnknown() {
+        for (SlotState slotState : motifSlots.get(motifPattern)) {
+            if (slotState == SlotState.UNKNOWN) {
+                return true;
+            }
+        }
+
         return false;
     }
 
@@ -600,6 +640,10 @@ public class RobotSystem {
      */
     public boolean getShootReady() {
         return this.isShootReady;
+    }
+
+    public boolean isHoodShootPose() {
+        return hoodSys.isReadyToShoot();
     }
 
     /**
@@ -635,10 +679,24 @@ public class RobotSystem {
         }
     }
 
+    private boolean isSortingArtifacts = false;
+
     public boolean doArtifactSort() {
         if (!hoodSys.isReadyToShoot()) {
             hoodSys.setShootPose();
             return false;
+        }
+
+        if (this.isSpindexerBusy()) {
+            return false;
+        }
+
+        if (!isSortingArtifacts){
+            isSortingArtifacts = true;
+            // Assume the spindexer is empty to shortcut a spin cycle
+            if (spindexerSys.getIntakeSlotState() == SlotState.EMPTY) {
+                return true;
+            }
         }
 
         return spindexerSys.doCheckForArtifacts();
@@ -661,15 +719,6 @@ public class RobotSystem {
     public boolean getColorSensorDetectedArtifact() {
         return colorSensorSys.getLastDetection() != SlotState.EMPTY;
     }
-
-    public void setAutoIntaking(boolean autoIntaking) {
-        isAutoIntaking = autoIntaking;
-    }
-
-    public void toggleAutoIntaking() {
-        isAutoIntaking = !isAutoIntaking;
-    }
-
 
     /** SetSlotsEmpty */
     public void initSpindxerSlotsEmpty() {
@@ -720,8 +769,10 @@ public class RobotSystem {
     /** Nudges the spindexer's raw position by a small negative amount. */
     public void decreaseSpindexer() { spindexerSys.nudgePosition(-5); }
 
-    /** Sets the shooter's target range to near or far. */
-    public void setShooterTargetRange(boolean near) { shooterSys.setTargetRange(near); }
+    /** Sets the shooter's target range */
+    public void setShooterTargetRangeNear() { shooterSys.setTargetRange(ZoneDistance.NEAR); }
+    public void setShooterTargetRangeFar() { shooterSys.setTargetRange(ZoneDistance.FAR); }
+    public void setShooterTargetRangeMid() { shooterSys.setTargetRange(ZoneDistance.MID); }
 
     /** Toggles the Limelight's active pipeline. */
     public void toggleLimelightTarget() { limelightSys.toggleTargetPileline(); }
@@ -841,13 +892,17 @@ public class RobotSystem {
                         && hoodSys.isReadyToShoot()
                         && spindexerSys.isReady()) {
                     SlotState currentSlotState = spindexerSys.getIntakeSlotState();
-                    // Only change the state if either the slot is empty or we can change
-                    // an UNKNOWN slot into a known one.
-                    if ((detectedState != SlotState.UNKNOWN
-                            && detectedState != currentSlotState)
-                            || (detectedState == SlotState.UNKNOWN
-                            && currentSlotState == SlotState.EMPTY)) {
-                        spindexerSys.setIntakeSlotState(detectedState);
+
+                    // Shooting should empty slots so we just want to add here
+                    if (detectedState != SlotState.EMPTY) {
+                        if (currentSlotState == SlotState.EMPTY
+                                || currentSlotState == SlotState.UNKNOWN) {
+//                    if ((detectedState != SlotState.UNKNOWN
+//                            && detectedState != currentSlotState)
+//                            || (detectedState == SlotState.UNKNOWN
+//                            && currentSlotState == SlotState.EMPTY)) {
+                            spindexerSys.setIntakeSlotState(detectedState);
+                        }
                     }
                 }
 
@@ -934,29 +989,29 @@ public class RobotSystem {
      */
     private void displayTelemetry() {
         // TODO: remove unneeded output
-        telemetryM.addData("Shooter RPM", shooterSys.getCurrentRpm());
+        telemetryM.addData("Shooter RPM (avg)", shooterSys.getCurrentRpm());
         telemetryM.addData("Target RPM", shooterSys.getTargetRpm());
-        telemetryM.addData("Is Auto Intaking:", isAutoIntaking);
-        telemetryM.addData("Is Burst MODE", isBurstFire);
-        telemetryM.addData("Is Spindexer Ready", spindexerSys.isReady());
+//        telemetryM.addData("Is Auto Intaking:", isAutoIntaking);
+//        telemetryM.addData("Is Burst MODE", isBurstFire);
         telemetryM.addData("Spindexer offset:", spindexerSys.getCurrentOffset());
-        telemetryM.addData("Current zone", spindexerSys.getCurrentZone());
+        telemetryM.addData("Is Spindexer Ready", spindexerSys.isReady());
+//        telemetryM.addData("Current zone", spindexerSys.getCurrentZone());
 //        telemetryM.addData("Robot State", currentState.name());
 //        telemetryM.addData("Shoot Slot Index", spindexerSys.getCurShootSlot());
         telemetryM.addData("Shoot Slot State:", spindexerSys.getShootSlotState());
-        telemetryM.addData("Intake Slot State:", spindexerSys.getIntakeSlotState());
         telemetryM.addData("Standbby Slot State:", spindexerSys.getStandbySlotState());
+        telemetryM.addData("Intake Slot State:", spindexerSys.getIntakeSlotState());
 //        telemetryM.addData("Shoot Slot Number:", spindexerSys.getCurShootSlot());
     //   telemetryM.addData("IsMotif available", spindexerSys.isMotifAvailable());
 //        telemetryM.addData("Hood State:", hoodSys.getHoodState());
-//        telemetryM.addData("Raw Velecity:", shooterSys.getRawVelocity());
+//        telemetryM.addData("Motor RPM:", shooterSys.getMotorRpms());
 //        telemetryM.addData("shooterSys Ready:", shooterSys.isReadyToShoot());
-//        telemetryM.addData("Spindexer Raw Position", spindexerSys.getCurrentPosition());
 //        telemetryM.addData("isShootReady:", isShootReady);
+//        telemetryM.addData("Spindexer Raw Position", spindexerSys.getCurrentPosition());
 //        telemetryM.addData("CURRENT HEADING", follower.getHeading());
 
         // TODO: THIS SHOULD BE REMOVED BEFORE COMP
-        //this.draw();
+        this.draw();
         /* INPORTAINT This updates the telemetry for all systems here no need to duplicate anywhere else */
         telemetryM.update(telemetry);
     }

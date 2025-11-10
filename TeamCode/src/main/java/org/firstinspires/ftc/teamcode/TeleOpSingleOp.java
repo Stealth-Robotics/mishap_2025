@@ -202,16 +202,8 @@ public class TeleOpSingleOp extends OpMode {
         boolean lastIsIntakeActive = isIntakeActive;
 
         if (gamepad1.rightBumperWasPressed()) {
-            isIntakeActive = !isIntakeActive;
-        }
-
-        if (isIntakeActive != lastIsIntakeActive) {
-            if (isIntakeActive) {
-                robot.startIntake();
-            } else {
-                robot.stopIntake();
-            }
-        }  else if (gamepad1.leftBumperWasPressed()) {
+            robot.toggleIntake();
+        } else if (gamepad1.leftBumperWasPressed()) {
             robot.reverseIntake();
         } else if (gamepad1.leftBumperWasReleased()){
             // Stop intake only if neither bumper is pressed

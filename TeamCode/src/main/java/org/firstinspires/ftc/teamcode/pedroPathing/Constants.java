@@ -43,6 +43,7 @@ public class Constants {
             .lateralZeroPowerAcceleration(lateralZeroPowerAcceleration)
             .translationalPIDFCoefficients(new PIDFCoefficients(0.15, 0, 0.0001, .02))
             .headingPIDFCoefficients(new PIDFCoefficients(1.2, 0.0, 0.001, 0.02))
+            .centripetalScaling(0.0008)
             ;
 
     public static final PinpointConstants pinpointConstants = new PinpointConstants()

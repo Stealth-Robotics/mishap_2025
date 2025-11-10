@@ -33,7 +33,7 @@ public class SpindexerSubsystem {
 
     // NOTE: if you would like to adjust in FTC dashboard mark members as public static (Not final)
     /** The number of ticks to move backward after the index switch is released to center a slot. */
-    public static int INDEX_OFFSET_TICKS = 625;
+    public static int INDEX_OFFSET_TICKS = 190;
     public static int NEAR_ZONE_OFFSET = 0;
     public static int MID_ZONE_OFFSET = 0;
     public static int FAR_ZONE_OFFSET = 0;
@@ -49,23 +49,25 @@ public class SpindexerSubsystem {
     private static final double TICKS_PER_SLOT = TICKS_PER_REV / NUMBER_OF_SLOTS;
 
     /** The tolerance, in ticks, for considering the motor to have reached its target position. */
-    private static final int POSITION_TOLERANCE = 2;
+    private static final int POSITION_TOLERANCE = 4;
 
     /** The maximum power limit for spindexer rotation. */
-    public static double SPINDEXER_POWER_LIMIT = .8;
+    public static double SPINDEXER_POWER_LIMIT = .9;
     /** The maximum velocity (in ticks/sec) for spindexer rotation in RUN_TO_POSITION mode. */
     public static double SPINDEXER_VELOCITY_LIMIT = 2600;
 
     /** PIDF coefficients for position control, tunable via FTC-Dashboard. */
     // TODO: More tuning needed
-    public static PIDFCoefficients SPINDEXER_PIDF = new PIDFCoefficients(.55, 3.7,.001, 10);  //10, 2,1.2, 1); 8, 4,0.2, 1
+           //(.55, 0,.0001, 10)
+    public static PIDFCoefficients SPINDEXER_PIDF = new PIDFCoefficients(0.26, 4.26, 0, 12.6);  //10, 2,1.2, 1); 8, 4,0.2, 1
+    public static PIDFCoefficients SPINDEXER_PIDF_SLOW = new PIDFCoefficients(.2, 0,.0001, 10);
 
     private final ElapsedTime currentSpikeTimer = new ElapsedTime();
 
     /** allows brief spikes in the current to be ignored */
     private static final long CURRENT_SPIKE_TIMEOUT_MS = 500;
 
-
+    private static double MIN_SORT_TIME_MS = 500;
 
     //==================================================================================================
     //  P R I V A T E   M E M B E R   V A R I A B L E S
@@ -92,6 +94,8 @@ public class SpindexerSubsystem {
     private SortingState sortingState = SortingState.START;
 
     private ElapsedTime sortingTimer = new ElapsedTime();
+    private ElapsedTime minSorterTimer = new ElapsedTime();
+
 
     private static final double MAX_SORT_TIME_SECOND = 20;
 
@@ -129,7 +133,7 @@ public class SpindexerSubsystem {
         zoneMap.put(ZoneDistance.NEAR, -NEAR_ZONE_OFFSET);
         zoneMap.put(ZoneDistance.MID, -MID_ZONE_OFFSET);
         zoneMap.put(ZoneDistance.FAR, -FAR_ZONE_OFFSET);
-
+        minSorterTimer.reset();
         // The spindexer forward direction is reversed on the motor.
         spindexer.setDirection(DcMotorEx.Direction.REVERSE);
         // configures the overload protection amparage
@@ -149,7 +153,7 @@ public class SpindexerSubsystem {
      */
     public boolean doInitPosition() {
 
-        double velocity = 500;
+        double velocity = 900;
         switch (homingState) {
             case START:
                 // If not pressed, reverse until the switch is triggered.
@@ -159,7 +163,7 @@ public class SpindexerSubsystem {
                     spindexer.setVelocity(velocity); // Slow forward search
                     homingState = HomingState.SEARCHING_FORWARD;
                 } else {
-                    spindexer.setVelocity(-velocity / 2); //  slow reverse
+                    spindexer.setVelocity(-velocity / 3); //  slowly move forward until pressed
                     homingState = HomingState.SEARCHING_BACKWARD;
                 }
                 return false; // Process has just begun
@@ -168,7 +172,7 @@ public class SpindexerSubsystem {
                 // Move forward until the switch is released.
                 if (!isIndexSwitchPressed()) {
                     // Switch released. Now, slowly reverse to find the precise trigger point.
-                    spindexer.setVelocity(-velocity / 2);
+                    spindexer.setVelocity(-velocity / 3);
                     spindexer.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     homingState = HomingState.SEARCHING_BACKWARD;
                 }
@@ -187,7 +191,7 @@ public class SpindexerSubsystem {
                     spindexer.setTargetPosition(targetPosition);
                     spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     spindexer.setPower(SPINDEXER_POWER_LIMIT);
-                    spindexer.setVelocity(velocity);
+                    spindexer.setVelocity(SPINDEXER_VELOCITY_LIMIT / 3);
                     homingState = HomingState.MOVING_TO_OFFSET;
                 }
                 return false;
@@ -220,14 +224,9 @@ public class SpindexerSubsystem {
             return false;
         }
 
-        // if all artifacts are found to be not empty nore UNKNOWN we can stop spinning.
+        // if all artifacts have a color then we can stop
         if(Arrays.stream(slotStates)
-                .allMatch(state ->  state != SlotState.EMPTY && state != SlotState.UNKNOWN)){
-            return true;
-        }
-
-        // Assume the spindexer is empty to shortcut a spin cycle
-        if (getIntakeSlotState() == SlotState.EMPTY) {
+                .noneMatch(state -> state == SlotState.EMPTY || state == SlotState.UNKNOWN)) {
             return true;
         }
 
@@ -235,6 +234,8 @@ public class SpindexerSubsystem {
         if (getIntakeSlotState() == SlotState.ARTIFACT_GREEN) {
             setShootSlotState(SlotState.ARTIFACT_PURPLE);
             setStandbySlotState(SlotState.ARTIFACT_PURPLE);
+            // just incase this is not set
+            setIntakeSlotState(SlotState.ARTIFACT_GREEN);
             return true;
         }
 
@@ -253,7 +254,13 @@ public class SpindexerSubsystem {
                 return true;
         }
 
-        this.advanceOneSlot();
+        // Need to give a 1/2 second or so to allow the artifact to settle
+        // and the color sensor to detect the artifact
+        if (minSorterTimer.milliseconds() > MIN_SORT_TIME_MS) {
+            minSorterTimer.reset();
+            this.advanceOneSlot();
+        }
+
         return false;
     }
 
@@ -285,16 +292,15 @@ public class SpindexerSubsystem {
      */
     public boolean rotateToArtifact(SlotState desiredColor) {
         if (isEmergencyStop) {
-            return true;
+            return false;
         }
 
-        // Start searching from the current slot.)
-        // Start searching from the slot immediately after the current one.
-        int startingSlot = curShootSlot;
-
-        // Loop through all slots once to find a match.
-        for (int i = 0; i < NUMBER_OF_SLOTS; i++) {
-            int slotToTest = (startingSlot + i) % NUMBER_OF_SLOTS;
+        // We will loop exactly NUMBER_OF_SLOTS times to guarantee a full, non-repeating search.
+        // By starting our offset at 1, we ensure the first slot we check is the one *after* curShootSlot.
+        for (int i = 1; i <= NUMBER_OF_SLOTS; i++) {
+            // Calculate which slot to test by adding our loop offset to the current slot.
+            // The modulo operator ensures we wrap around correctly after passing the last slot.
+            int slotToTest = (curShootSlot + i) % NUMBER_OF_SLOTS;
             SlotState slotContent = slotStates[slotToTest];
 
             // If the slot is not empty, check if it's what we want.
@@ -307,7 +313,8 @@ public class SpindexerSubsystem {
             }
         }
 
-        // If the loop completes, no matching artifact was found.
+        telemetryM.debug("No matching artifact found.");
+        // If the loop completes without finding a match, it means no such artifact exists.
         return false;
     }
 
@@ -396,9 +403,6 @@ public class SpindexerSubsystem {
             return;
         }
 
-        // DO NOT SHIFT THE ARRAY.
-        // shiftSlotStates(true); // REMOVE THIS.
-
         // Calculate the next slot number, wrapping around if necessary.
         int nextSlot = ((curShootSlot - 1) + NUMBER_OF_SLOTS) % NUMBER_OF_SLOTS;
 
@@ -415,9 +419,6 @@ public class SpindexerSubsystem {
         if (isEmergencyStop) {
             return;
         }
-
-        // DO NOT SHIFT THE ARRAY.
-        // shiftSlotStates(false); // REMOVE THIS.
 
         // Calculate the previous slot number, wrapping around correctly.
         int previousSlotIndex = (curShootSlot + 1) % NUMBER_OF_SLOTS;

@@ -4,6 +4,7 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.PathBuilder;
 
 import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 
@@ -24,6 +25,90 @@ public class PathFarAuto1 extends PathManager{
         buildRedPath();
     }
 
+    private void buildRedPath() {
+        Follower follower = robot.getFollower();
+        // Start against wall in far shoot zone
+        // Move to Shoot 1
+        addRedPath(
+                follower.pathBuilder()
+                        .addPath(
+                                // Shoot1
+                                new BezierLine(new Pose(87.000, 9.000), new Pose(86.000, 18.000))
+                        )
+                        .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(70))
+                        .addParametricCallback(0, robot::trySelectFirstMotifSlot)
+                        .addParametricCallback(0.5, ()-> {
+                            robot.setShooterTargetRangeFar();
+                            robot.startShooter();
+                        })
+                        .build());
+        // Move to line 1 intake area
+        addRedPath(
+                follower.pathBuilder()
+                        .addPath(
+                                // Goto GPP
+                                new BezierCurve(
+                                        new Pose(86.000, 18.000),
+                                        new Pose(85.600, 34.600),
+                                        new Pose(96.000, 36.000)
+                                )
+                        )
+                        .setLinearHeadingInterpolation(Math.toRadians(70), Math.toRadians(-180))
+                        .addParametricCallback(.9, robot::startIntake)
+                        .build());
+        // Start Chomp
+        addRedPath(
+                follower.pathBuilder()
+                        .addPath(
+                                // Intake GPP
+                                new BezierLine(new Pose(96.000, 36.000), new Pose(132.000, 36.000))
+                        )
+                        .setTangentHeadingInterpolation()
+                        .setReversed()
+                        .addParametricCallback(.02, ()->follower.setMaxPower(.20))
+                        .build()
+        );
+
+        addRedPath(
+                follower.pathBuilder()
+                        .addPath(
+                                // Shoot2
+                                new BezierCurve(
+                                        new Pose(132.000, 36.000),
+                                        new Pose(115.800, 18.500),
+                                        new Pose(86.000, 18.000)
+                                )
+                        )
+                        .setLinearHeadingInterpolation(Math.toRadians(-180), Math.toRadians(70))
+                        .addParametricCallback(0, () -> {
+                            robot.stopIntake();
+                            follower.setMaxPower(1);
+                        })
+                        // attempt to find the first motif shot or rotate the spindexer.
+                        .addParametricCallback(0.3, robot::trySelectFirstMotifSlot)
+                        .addParametricCallback(.8, () -> {
+                            // Hack for when we have UNKNOWN artifacts
+                            robot.trySelectFirstMotifSlot();
+                            robot.startShooter();
+                        })
+                        .build()
+        );
+
+        addRedPath(
+                follower.pathBuilder()
+                        .addPath(
+                                // GoTo PGP
+                                new BezierCurve(
+                                        new Pose(86.000, 18.000),
+                                        new Pose(84.738, 62.153),
+                                        new Pose(96.000, 59.600)
+                                )
+                        )
+                        .setLinearHeadingInterpolation(Math.toRadians(70), Math.toRadians(-180))
+                        .build()
+        );
+    }
+
     private void buildBluePath() {
         Follower follower = robot.getFollower();
         // Start against wall in far shoot zone
@@ -35,7 +120,11 @@ public class PathFarAuto1 extends PathManager{
                                 new BezierLine(new Pose(57.000, 9.000), new Pose(58.000, 18.000))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(110))
-                        .addParametricCallback(0.9, robot::setReadyShoot)
+                        .addParametricCallback(0, robot::trySelectFirstMotifSlot)
+                        .addParametricCallback(0.2, ()-> {
+                            robot.setShooterTargetRangeFar();
+                            robot.startShooter();
+                        })
                         .build());
         // Move to line 1 intake area
         addBluePath(
@@ -61,6 +150,7 @@ public class PathFarAuto1 extends PathManager{
                         .setTangentHeadingInterpolation()
                         .setReversed()
                         .addParametricCallback(.02, ()->follower.setMaxPower(.20))
+                        .addParametricCallback(.99, robot::stopIntake)
                         .build()
         );
 
@@ -75,9 +165,18 @@ public class PathFarAuto1 extends PathManager{
                                 )
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(110))
-                        .addParametricCallback(0, robot::stopIntake)
                         .addParametricCallback(0, () -> follower.setMaxPower(1))
-                        .addParametricCallback(.99, robot::setReadyShoot)
+                        // Check in on the spindexer to see if there are any unknown artifacts and try to sort them
+                        .addCallback(
+                                () -> !robot.isSpindexerBusy()
+                                        && robot.isAnyArtifactUnknown()
+                                        && robot.isHoodShootPose(),
+                                robot::incrementSpindexerSlot)
+
+                        .addParametricCallback(.8, () -> {
+                            robot.trySelectFirstMotifSlot();
+                            robot.startShooter();
+                        })
                         .build()
         );
 
@@ -93,78 +192,6 @@ public class PathFarAuto1 extends PathManager{
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(110), Math.toRadians(0))
                         // get the shooter motors spinning early
-                        .build()
-        );
-    }
-
-    private void buildRedPath() {
-        Follower follower = robot.getFollower();
-        // Start against wall in far shoot zone
-        // Move to Shoot 1
-        addRedPath(
-                follower.pathBuilder()
-                        .addPath(
-                                // Move to shooting
-                                new BezierLine(new Pose(87.000, 9.000), new Pose(86.000, 18.000))
-                        )
-                        .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(69))
-                        .addParametricCallback(0.9, robot::setReadyShoot)
-                        .build());
-        // Move to line 1 intake area
-        addRedPath(
-                follower.pathBuilder()
-                        .addPath(
-                                // Move to get close to the balls
-                                new BezierCurve(
-                                        new Pose(86.000, 18.000),
-                                        new Pose(89.700, 32.100),
-                                        new Pose(96.000, 36.000)
-                                )
-                        )
-                        .setLinearHeadingInterpolation(Math.toRadians(69), Math.toRadians(180))
-                        .addParametricCallback(.9, robot::startIntake)
-                        .build());
-        // Start Chomp
-        addRedPath(
-                follower.pathBuilder()
-                        .addPath(
-                                // Move to the end of ball 3
-                                new BezierLine(new Pose(96.000, 36.000), new Pose(132.000, 35.670))
-                        )
-                        .setTangentHeadingInterpolation()
-                        .setReversed()
-                        .addParametricCallback(.02, ()->follower.setMaxPower(.20))
-                        .build()
-        );
-
-        addRedPath(
-                follower.pathBuilder()
-                        .addPath(
-                                // Go back to the shooting position
-                                new BezierCurve(
-                                        new Pose(132.000, 35.670),
-                                        new Pose(108.300, 13.300),
-                                        new Pose(86.000, 18.000)
-                                )
-                        )
-                        .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(69))
-                        .addParametricCallback(0, robot::stopIntake)
-                        .addParametricCallback(0, () -> follower.setMaxPower(1))
-                        .addParametricCallback(.99, robot::setReadyShoot)
-                        .build()
-        );
-
-        addRedPath(
-                follower.pathBuilder()
-                        .addPath(
-                                // Path 6
-                                new BezierCurve(
-                                        new Pose(86.000, 18.000),
-                                        new Pose(87.700, 56.800),
-                                        new Pose(96.000, 60.000)
-                                )
-                        )
-                        .setLinearHeadingInterpolation(Math.toRadians(69), Math.toRadians(180))
                         .build()
         );
     }
