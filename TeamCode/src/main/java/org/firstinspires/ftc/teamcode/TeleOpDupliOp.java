@@ -194,7 +194,7 @@ public class TeleOpDupliOp extends OpMode {
     private void handleIntakeControls() {
         if (gamepad1.rightBumperWasPressed()) {
             robot.toggleIntake();
-        } else if (gamepad1.leftBumperWasPressed()) {
+        } else if (gamepad2.leftBumperWasPressed()) {
             robot.reverseIntake();
         } else if (gamepad2.leftBumperWasReleased()) {
             // Stop intake only if neither bumper is pressed

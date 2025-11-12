@@ -30,7 +30,7 @@ public class ServoRunner extends LinearOpMode {
     double currentVelocity;
     double maxVelocity = 0.0;
 
-    public static PIDFCoefficients SPINDEXER_PIDF = new PIDFCoefficients(.55, 3.6,.001, 10);  //10, 2,1.2, 1); 8, 4,0.2, 1
+    public static PIDFCoefficients SPINDEXER_PIDF = new PIDFCoefficients(-.55, -3.6,-.001, -10);  //10, 2,1.2, 1); 8, 4,0.2, 1
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -42,31 +42,33 @@ public class ServoRunner extends LinearOpMode {
         Servo servoFlipper = hardwareMap.get(Servo.class, "kicker_servo");
         DcMotorEx rightShooter = hardwareMap.get(DcMotorEx.class, "right_shoot_motor");
         DcMotorEx leftShooter = hardwareMap.get(DcMotorEx.class, "left_shoot_motor");
+
         rightShooter.setDirection(DcMotorSimple.Direction.REVERSE);
 
         DcMotorEx spindexer = hardwareMap.get(DcMotorEx.class, "spindexer_motor");
-        spindexer.resetDeviceConfigurationForOpMode();
+        //spindexer.resetDeviceConfigurationForOpMode();
 
         spindexer.setDirection(DcMotorSimple.Direction.REVERSE);
         spindexer.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         spindexer.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        spindexer.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //spindexer.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         // Set a tolerance for how close to the target is "close enough" (in encoder ticks)
         // This can help prevent oscillations around the target.
-        spindexer.setTargetPositionTolerance(0);
+        spindexer.setTargetPositionTolerance(2);
 
         // Default to BRAKE mode for holding position.
         spindexer.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        spindexer.setTargetPosition(0); // Important to set a target after mode change
+       // spindexer.setTargetPosition(0); // Important to set a target after mode change
         //spindexer.(2400);
-        spindexer.setPower(.7);
+        //spindexer.setPower(.7);
+        spindexer.setVelocity(0);
 
         // ...// Apply the defined PIDF coefficients to the motor for RUN_TO_POSITION mode
         spindexer.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, SPINDEXER_PIDF);
-
+        //spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         servoIntakeRight.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -84,20 +86,20 @@ public class ServoRunner extends LinearOpMode {
         servoFlipper.setPosition(.2);
         while (opModeIsActive()) {
 
-//            telemetry.addData("Spindexer Velocity", spindexer.getVelocity());
-//            telemetry.addData("Spindixer Position", spindexer.getCurrentPosition());
-//            telemetry.addData("Spindiexer Mode ", spindexer.getMode());
-//            telemetry.addData("Spindixer power", spindexer.getPower());
-//            telemetry.addData("Spindixer Busy", spindexer.isBusy());
+            telemetry.addData("Spindexer Velocity", spindexer.getVelocity());
+            telemetry.addData("Spindixer Position", spindexer.getCurrentPosition());
+            telemetry.addData("Spindiexer Mode ", spindexer.getMode());
+            telemetry.addData("Spindixer power", spindexer.getPower());
+            telemetry.addData("Spindixer Busy", spindexer.isBusy());
 
 
             if (gamepad1.xWasPressed()) {
                 spindexer.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                spindexer.setVelocity(-500); // Or your desired velocity
+                spindexer.setVelocity(100);
             } else if (gamepad1.xWasReleased())
             {
-                spindexer.setTargetPosition(500);
-                spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                spindexer.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                spindexer.setVelocity(0); // Or your desired velocity
             }
 
 //            telemetry.addLine("Running");

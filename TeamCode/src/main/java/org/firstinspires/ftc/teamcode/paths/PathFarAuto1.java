@@ -80,14 +80,15 @@ public class PathFarAuto1 extends PathManager{
                                 )
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(-180), Math.toRadians(70))
-                        .addParametricCallback(0, () -> {
-                            robot.stopIntake();
-                            follower.setMaxPower(1);
-                        })
-                        // attempt to find the first motif shot or rotate the spindexer.
-                        .addParametricCallback(0.3, robot::trySelectFirstMotifSlot)
+                        .addParametricCallback(0, () -> follower.setMaxPower(1))
+                        // Check in on the spindexer to see if there are any unknown artifacts and try to sort them
+                        .addCallback(
+                                () -> !robot.isSpindexerBusy()
+                                        && robot.isAnyArtifactUnknown()
+                                        && robot.isHoodShootPose(),
+                                robot::incrementSpindexerSlot)
+
                         .addParametricCallback(.8, () -> {
-                            // Hack for when we have UNKNOWN artifacts
                             robot.trySelectFirstMotifSlot();
                             robot.startShooter();
                         })

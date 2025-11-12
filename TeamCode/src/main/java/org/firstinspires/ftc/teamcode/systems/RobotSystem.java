@@ -187,8 +187,6 @@ public class RobotSystem {
         return spindexerSys.doInitPosition();
     }
 
-
-
     //==================================================================================================
     // Core Logic
     //==================================================================================================
@@ -200,6 +198,7 @@ public class RobotSystem {
     public void update() {
         // Always update critical subsystems
         follower.update();
+        spindexerSys.update();
         limelightSys.update();
         shooterSys.update();
         colorSensorSys.update();
@@ -454,7 +453,7 @@ public class RobotSystem {
         if (currentState == SystemState.INTAKING
                 || currentState == SystemState.REVERSING_INTAKE) {
             stopIntake();
-        } else {
+        } else if (currentState != SystemState.STOPPING_INTAKE){
             startIntake();
         }
     }
@@ -887,24 +886,22 @@ public class RobotSystem {
             case IDLE:
                 // IDLE state keep an eye on the intaking slot
                 // if there is a change update the state
-                SlotState detectedState = colorSensorSys.getLastDetection();
-                if (detectedState != SlotState.TRANSITIONING
-                        && hoodSys.isReadyToShoot()
-                        && spindexerSys.isReady()) {
+                if (!this.isSpindexerBusy()) {
+                    SlotState detectedState = colorSensorSys.getLastDetection();
                     SlotState currentSlotState = spindexerSys.getIntakeSlotState();
 
-                    // Shooting should empty slots so we just want to add here
-                    if (detectedState != SlotState.EMPTY) {
-                        if (currentSlotState == SlotState.EMPTY
-                                || currentSlotState == SlotState.UNKNOWN) {
-//                    if ((detectedState != SlotState.UNKNOWN
-//                            && detectedState != currentSlotState)
-//                            || (detectedState == SlotState.UNKNOWN
-//                            && currentSlotState == SlotState.EMPTY)) {
+//                    // Shooting should empty slots so we just want to add here
+//                    if (detectedState != SlotState.EMPTY) {
+//                        if (currentSlotState == SlotState.EMPTY
+//                                || currentSlotState == SlotState.UNKNOWN) {
+                    if ((detectedState != SlotState.UNKNOWN
+                            && detectedState != currentSlotState)
+                            || (detectedState == SlotState.UNKNOWN
+                            && currentSlotState == SlotState.EMPTY)) {
                             spindexerSys.setIntakeSlotState(detectedState);
                         }
                     }
-                }
+                //}
 
                 break;
             case INTAKING:
@@ -1007,7 +1004,7 @@ public class RobotSystem {
 //        telemetryM.addData("Motor RPM:", shooterSys.getMotorRpms());
 //        telemetryM.addData("shooterSys Ready:", shooterSys.isReadyToShoot());
 //        telemetryM.addData("isShootReady:", isShootReady);
-//        telemetryM.addData("Spindexer Raw Position", spindexerSys.getCurrentPosition());
+        telemetryM.addData("Spindexer Raw Position", spindexerSys.getCurrentPosition());
 //        telemetryM.addData("CURRENT HEADING", follower.getHeading());
 
         // TODO: THIS SHOULD BE REMOVED BEFORE COMP
