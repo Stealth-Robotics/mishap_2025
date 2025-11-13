@@ -60,6 +60,7 @@ public class SpindexerSubsystem {
     /** PIDF coefficients for position control, tunable via FTC-Dashboard. */
     // TODO: More tuning needed
            //(.55, 0,.0001, 10)
+            // this full line works pretty good with the motor controller
     //public static PIDFCoefficients SPINDEXER_PIDF = new PIDFCoefficients(0.26, 4.26, 0, 12.6);  //10, 2,1.2, 1); 8, 4,0.2, 1
     public static PIDFCoefficients SPINDEXER_PIDF = new PIDFCoefficients(2.5, 0.01,0, 10.0);  //10, 2,1.2, 1); 8, 4,0.2, 1
 //    public static PIDFController SPINDEXER_PIDF_CONTROLLER = new PIDFController(
