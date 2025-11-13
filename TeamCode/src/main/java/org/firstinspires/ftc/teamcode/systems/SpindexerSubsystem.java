@@ -34,7 +34,7 @@ public class SpindexerSubsystem {
 
     // NOTE: if you would like to adjust in FTC dashboard mark members as public static (Not final)
     /** The number of ticks to move backward after the index switch is released to center a slot. */
-    public static int INDEX_OFFSET_TICKS = 400;
+    public static int INDEX_OFFSET_TICKS = 330;
     public static int NEAR_ZONE_OFFSET = 0;
     public static int MID_ZONE_OFFSET = 0;
     public static int FAR_ZONE_OFFSET = 0;
@@ -50,26 +50,24 @@ public class SpindexerSubsystem {
     private static final double TICKS_PER_SLOT = TICKS_PER_REV / NUMBER_OF_SLOTS;
 
     /** The tolerance, in ticks, for considering the motor to have reached its target position. */
-    private static final int POSITION_TOLERANCE = 6;
+    private static final int POSITION_TOLERANCE = 70;
 
     /** The maximum power limit for spindexer rotation. */
     public static double SPINDEXER_POWER_LIMIT = .9;
     /** The maximum velocity (in ticks/sec) for spindexer rotation in RUN_TO_POSITION mode. */
-    public static double SPINDEXER_VELOCITY_LIMIT = 2800;
+    public static double SPINDEXER_VELOCITY_LIMIT = 2600;
 
     /** PIDF coefficients for position control, tunable via FTC-Dashboard. */
     // TODO: More tuning needed
            //(.55, 0,.0001, 10)
     //public static PIDFCoefficients SPINDEXER_PIDF = new PIDFCoefficients(0.26, 4.26, 0, 12.6);  //10, 2,1.2, 1); 8, 4,0.2, 1
-    public static PIDFCoefficients SPINDEXER_PIDF = new PIDFCoefficients(2, 2, 0,13);  //10, 2,1.2, 1); 8, 4,0.2, 1
+    public static PIDFCoefficients SPINDEXER_PIDF = new PIDFCoefficients(2.5, 0.01,0, 10.0);  //10, 2,1.2, 1); 8, 4,0.2, 1
 //    public static PIDFController SPINDEXER_PIDF_CONTROLLER = new PIDFController(
 //            .026
 //            , 3.5
 //            , .0001
 //            , SPINDEXER_PIDF.f
 //    );
-
-    private static final ElapsedTime pidTimer = new ElapsedTime();
 
     private final ElapsedTime currentSpikeTimer = new ElapsedTime();
 
@@ -150,7 +148,6 @@ public class SpindexerSubsystem {
         spindexer.setDirection(DcMotorEx.Direction.REVERSE);
         // configures the overload protection amparage
         spindexer.setCurrentAlert(OVERLOAD_AMPS, CurrentUnit.AMPS);
-        pidTimer.reset();
         resetEncoder(); // Reset encoder to a known state on startup
     }
 

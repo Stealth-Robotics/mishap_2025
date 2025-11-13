@@ -31,10 +31,10 @@ public class ShooterSubsystem {
 
     // --- Constants ---
     public static final double MAX_RPM = 5200;
-    public static final double MIN_RPM = 3000;
+    public static final double MIN_RPM = 2000;
     public static final double DEFAULT_RPM_NEAR = 4250;
     public static final double DEFAULT_RPM_MID = 4300;
-    public static final double DEFAULT_RPM_FAR = 4750;
+    public static final double DEFAULT_RPM_FAR =3000;
 
     public static final double RPM_CHANGE_AMOUNT = 50;
     private static final double VELOCITY_TOLERANCE_LOW = 5; // The allowed RPM error in which the shooter is considered "ready".
@@ -50,7 +50,7 @@ public class ShooterSubsystem {
     // F (Feedforward): Proactively applies power based on the target velocity, which is crucial for velocity control.
     // TODO: more tuning needed
  //   private static final PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(90, .5, 10, 13);
-    private static final PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(50, 0.05, 0, 12.7); //1.3, 0.15, 0, 12.15);
+    private static final PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(50, 0.05, 0, 12.8); //1.3, 0.15, 0, 12.15);
 
     // --- State Variables ---
     private boolean isShooterEnabled = false; // New state to track if the shooter is supposed to be running
