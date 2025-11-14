@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.systems;
 
-import com.qualcomm.robotcore.hardware.DcMotorControllerEx;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
@@ -26,15 +25,15 @@ public class ShooterSubsystem {
 
     private final ElapsedTime shootTimer = new ElapsedTime();
 
-    private static final double MIN_SHOOT_TIME_MS = 400;
+    private static final double MIN_SHOOT_TIME_MS = 500;
     private static final double MAX_SHOOT_TIME_MS = 2000;
 
     // --- Constants ---
     public static final double MAX_RPM = 5200;
     public static final double MIN_RPM = 2000;
-    public static final double DEFAULT_RPM_NEAR = 4250;
-    public static final double DEFAULT_RPM_MID = 4300;
-    public static final double DEFAULT_RPM_FAR =3000;
+    public static final double DEFAULT_RPM_NEAR = 2550;
+    public static final double DEFAULT_RPM_MID = 2650;
+    public static final double DEFAULT_RPM_FAR =2950;
 
     public static final double RPM_CHANGE_AMOUNT = 50;
     private static final double VELOCITY_TOLERANCE_LOW = 5; // The allowed RPM error in which the shooter is considered "ready".
@@ -50,7 +49,8 @@ public class ShooterSubsystem {
     // F (Feedforward): Proactively applies power based on the target velocity, which is crucial for velocity control.
     // TODO: more tuning needed
  //   private static final PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(90, .5, 10, 13);
-    private static final PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(50, 0.05, 0, 12.8); //1.3, 0.15, 0, 12.15);
+    private static final PIDFCoefficients MOTOR_VELO_PID_LEFT = new PIDFCoefficients(50, 0.05, 0, 12.8); //1.3, 0.15, 0, 12.15);
+    private static final PIDFCoefficients MOTOR_VELO_PID_RIGHT = new PIDFCoefficients(20, 0.05, 0, 13.1); //1.3, 0.15, 0, 12.15);
 
     // --- State Variables ---
     private boolean isShooterEnabled = false; // New state to track if the shooter is supposed to be running
@@ -80,9 +80,9 @@ public class ShooterSubsystem {
         rightShooter.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
         // Apply the tuned PIDF coefficients for velocity control.
-        leftShooter.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, MOTOR_VELO_PID);
+        leftShooter.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, MOTOR_VELO_PID_LEFT);
         leftShooter.setPositionPIDFCoefficients(5.0);
-        rightShooter.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, MOTOR_VELO_PID);
+        rightShooter.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, MOTOR_VELO_PID_RIGHT);
         rightShooter.setPositionPIDFCoefficients(5.0);
         // Initialize velocity readers to get filtered RPM values from the motors.
         rightVelocityReader = new MotorVelocityReader(rightShooter, TICKS_PER_REV);
@@ -245,12 +245,21 @@ public class ShooterSubsystem {
         return rightShooter.getVelocity() > 100 && leftShooter.getVelocity() > 100;
     }
 
+    public double getLeftRpm() {
+        return leftShooter.getVelocity() / TICKS_PER_REV * 60;
+    }
+
+    public double getRightRpm() {
+        return rightShooter.getVelocity() / TICKS_PER_REV * 60;
+    }
+
+
     /**
      * Gets the current average RPM of the shooter motors.
      * @return The average RPM as calculated by the velocity readers.
      */
     public double getCurrentRpm() {
-        return currentRpm;
+            return currentRpm;
     }
 
     /**

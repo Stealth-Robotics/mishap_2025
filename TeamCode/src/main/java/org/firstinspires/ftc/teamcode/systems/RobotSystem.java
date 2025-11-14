@@ -987,6 +987,8 @@ public class RobotSystem {
     private void displayTelemetry() {
         // TODO: remove unneeded output
         telemetryM.addData("Shooter RPM (avg)", shooterSys.getCurrentRpm());
+        telemetryM.addData("Left Shooter RPM", shooterSys.getLeftRpm());
+        telemetryM.addData("Right Shooter RPM", shooterSys.getRightRpm());
         telemetryM.addData("Target RPM", shooterSys.getTargetRpm());
 //        telemetryM.addData("Is Auto Intaking:", isAutoIntaking);
 //        telemetryM.addData("Is Burst MODE", isBurstFire);

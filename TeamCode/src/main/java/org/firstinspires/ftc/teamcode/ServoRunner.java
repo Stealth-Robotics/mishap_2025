@@ -15,6 +15,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.systems.SpindexerSubsystem;
 
 @TeleOp(name="Servo Runner", group="Tests")
+@Disabled
 public class ServoRunner extends LinearOpMode {
     private boolean isIntake = false;
     private boolean isOuttake = false;

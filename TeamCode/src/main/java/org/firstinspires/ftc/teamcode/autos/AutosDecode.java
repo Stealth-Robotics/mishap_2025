@@ -24,7 +24,7 @@ import java.util.HashSet;
  */
 public abstract class AutosDecode extends OpMode {
 
-    public static final double READ_MOTIF_TIMEOUT_SECONDS = 25;
+    public static final double READ_MOTIF_TIMEOUT_SECONDS = 5;
     public static final double AIM_TIMEOUT_MS = 4000;
     public static final double AIM_MIN_MS = 2000;
 
@@ -88,8 +88,8 @@ public abstract class AutosDecode extends OpMode {
      */
     protected void setSpindexerInitState()
     {
-        robot.initSpindxerSlotsEmpty();
-        //robot.initSpindxerSlotsAuto();
+        //robot.initSpindxerSlotsEmpty();
+        robot.initSpindxerSlotsAuto();
     }
 
     /**
@@ -391,7 +391,8 @@ public abstract class AutosDecode extends OpMode {
             return PathState.STOP;
         }
 
-        follower.followPath(curPath);
+
+        follower.followPath(curPath, true);
         return follower.isBusy() ? PathState.BUSY : PathState.IDLE;
     }
 }

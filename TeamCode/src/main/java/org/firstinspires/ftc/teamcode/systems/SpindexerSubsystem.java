@@ -34,23 +34,23 @@ public class SpindexerSubsystem {
 
     // NOTE: if you would like to adjust in FTC dashboard mark members as public static (Not final)
     /** The number of ticks to move backward after the index switch is released to center a slot. */
-    public static int INDEX_OFFSET_TICKS = 330;
+    public static int INDEX_OFFSET_TICKS = 130;
     public static int NEAR_ZONE_OFFSET = 0;
     public static int MID_ZONE_OFFSET = 0;
     public static int FAR_ZONE_OFFSET = 0;
 
     /** This value protects the spindexer from jamming and/or crushing the world */
-    private static final double OVERLOAD_AMPS = 8.0;
+    private static final double OVERLOAD_AMPS = 7.0;
 
     /** Ticks per revolution for the GoBilda 43 RPM motor (3895.9) geared up. */
-    private static final double TICKS_PER_REV = 8192;
+    private static final double TICKS_PER_REV = 3896.0;
     /** The number of slots in the spindexer. */
     private static final int NUMBER_OF_SLOTS = 3;
     /** The number of encoder ticks needed to move one slot. */
     private static final double TICKS_PER_SLOT = TICKS_PER_REV / NUMBER_OF_SLOTS;
 
     /** The tolerance, in ticks, for considering the motor to have reached its target position. */
-    private static final int POSITION_TOLERANCE = 70;
+    private static final int POSITION_TOLERANCE = 10;
 
     /** The maximum power limit for spindexer rotation. */
     public static double SPINDEXER_POWER_LIMIT = .9;
@@ -62,7 +62,7 @@ public class SpindexerSubsystem {
            //(.55, 0,.0001, 10)
             // this full line works pretty good with the motor controller
     //public static PIDFCoefficients SPINDEXER_PIDF = new PIDFCoefficients(0.26, 4.26, 0, 12.6);  //10, 2,1.2, 1); 8, 4,0.2, 1
-    public static PIDFCoefficients SPINDEXER_PIDF = new PIDFCoefficients(2.5, 0.01,0, 10.0);  //10, 2,1.2, 1); 8, 4,0.2, 1
+    public static PIDFCoefficients SPINDEXER_PIDF = new PIDFCoefficients(02.6, .1, 0.1, 12.6);  //10, 2,1.2, 1); 8, 4,0.2, 1
 //    public static PIDFController SPINDEXER_PIDF_CONTROLLER = new PIDFController(
 //            .026
 //            , 3.5
@@ -75,7 +75,9 @@ public class SpindexerSubsystem {
     /** allows brief spikes in the current to be ignored */
     private static final long CURRENT_SPIKE_TIMEOUT_MS = 200;
 
-    private static final double MIN_SORT_TIME_MS = 500;
+    private static final double MIN_SORT_TIME_MS = 1000;
+
+    private static final double MIN_ROTATE_TIME_MS = 1000;
 
     //==================================================================================================
     //  P R I V A T E   M E M B E R   V A R I A B L E S
@@ -105,6 +107,8 @@ public class SpindexerSubsystem {
     private final ElapsedTime minSorterTimer = new ElapsedTime();
 
     private final ElapsedTime minHomeTimer = new ElapsedTime();
+
+    private final ElapsedTime minRotateTimer = new ElapsedTime();
 
     private static final double MIN_HOME_TIME_MS = 3500;
 
@@ -168,7 +172,7 @@ public class SpindexerSubsystem {
      */
     public boolean doInitPosition() {
 
-        double velocity = 900;
+        double velocity = 1200;
         switch (homingState) {
             case START:
                 // If not pressed, reverse until the switch is triggered.
@@ -187,7 +191,7 @@ public class SpindexerSubsystem {
                 // Move forward until the switch is released.
                 if (!isIndexSwitchPressed()) {
                     // Switch released. Now, slowly reverse to find the precise trigger point.
-                    spindexer.setVelocity(-velocity / 4);
+                    spindexer.setVelocity(-velocity / 6);
                     spindexer.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     homingState = HomingState.SEARCHING_BACKWARD;
                 }
@@ -387,6 +391,7 @@ public class SpindexerSubsystem {
 
         // Set motor pose based on current zone offset
         //noinspection DataFlowIssue
+        minRotateTimer.reset();
         spindexer.setTargetPosition(targetPosition + zoneMap.get(currentZone));
 //        spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         spindexer.setVelocity(SPINDEXER_VELOCITY_LIMIT);
@@ -587,7 +592,7 @@ public class SpindexerSubsystem {
      */
     public void setSlotsAuto(){
         Arrays.fill(slotStates, SlotState.ARTIFACT_PURPLE);
-        slotStates[0] = SlotState.ARTIFACT_GREEN;
+        slotStates[2] = SlotState.ARTIFACT_GREEN;
         curShootSlot = 0; // Assume we start at slot 0
     }
 
@@ -656,7 +661,8 @@ public class SpindexerSubsystem {
         }
 
         int error = Math.abs(spindexer.getTargetPosition() - spindexer.getCurrentPosition());
-        return error <= POSITION_TOLERANCE;
+        double velocity = Math.abs(spindexer.getVelocity());
+        return error <= POSITION_TOLERANCE && velocity < 20 && minRotateTimer.milliseconds() > MIN_ROTATE_TIME_MS;
     }
 
     /**

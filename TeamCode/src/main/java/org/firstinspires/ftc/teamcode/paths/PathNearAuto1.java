@@ -30,10 +30,11 @@ public class PathNearAuto1 extends PathManager {
                 // name: To Shoot 1, color: #66B85C
                 follower.pathBuilder()
                         .addPath(
+                                // To Shoot 1
                                 new BezierCurve(
-                                        new Pose(126, 112.2)
-                                        , new Pose(92.9, 119.8)
-                                        , new Pose(86.7, 108)
+                                        new Pose(126.000, 112.200),
+                                        new Pose(92.900, 119.800),
+                                        new Pose(89.000, 111.000)
                                 )
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(152), Math.toRadians(31))
@@ -48,10 +49,11 @@ public class PathNearAuto1 extends PathManager {
                 // name: Start PPG, color: #9AB55D
                 follower.pathBuilder()
                         .addPath(
+                                // Start PPG
                                 new BezierCurve(
-                                        new Pose(86.7, 108)
-                                        , new Pose(87.5, 90.1)
-                                        , new Pose(96.3, 84)
+                                        new Pose(89.000, 111.000),
+                                        new Pose(87.500, 90.100),
+                                        new Pose(96.300, 84.000)
                                 )
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(31), Math.toRadians(-180))
@@ -62,33 +64,41 @@ public class PathNearAuto1 extends PathManager {
                 // name: Intake PPG, color: #8878CD
                 follower.pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(96.3, 84), new Pose(126, 84))
+                                // Intake PPG
+                                new BezierLine(new Pose(96.300, 84.000), new Pose(128.000, 84.000))
                         )
                         .setTangentHeadingInterpolation()
                         .setReversed()
-                        .addParametricCallback(0.02, () -> follower.setMaxPower(0.2))
+                        .addParametricCallback(0.1, () -> follower.setMaxPower(0.2))
                         .build()
         );
         addRedPath(
                 // name: Shoot 2, color: #6BCD9D
                 follower.pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(126, 84), new Pose(86.7, 108))
+                                // Shoot 2
+                                new BezierLine(new Pose(128.000, 84.000), new Pose(88.000, 107.700))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(-180), Math.toRadians(31))
                         .addParametricCallback(0, () -> follower.setMaxPower(1))
-                        .addParametricCallback(.3, robot::trySelectFirstMotifSlot)
-                        .addParametricCallback(.8, robot::startShooter)
+                        .addParametricCallback(.8, robot::trySelectFirstMotifSlot)
+                        .addParametricCallback(.9, robot::startShooter)
+                        .addCallback(
+                                () -> !robot.isSpindexerBusy()
+                                        && robot.isAnyArtifactUnknown()
+                                        && robot.isHoodShootPose(),
+                                robot::incrementSpindexerSlot)
                         .build()
         );
         addRedPath(
                 // name: Go To PGP, color: #8DC859
                 follower.pathBuilder()
                         .addPath(
+                                // Go To PGP
                                 new BezierCurve(
-                                        new Pose(86.7, 108)
-                                        , new Pose(76.1, 71.7)
-                                        , new Pose(96.1, 59.5)
+                                        new Pose(88.000, 107.700),
+                                        new Pose(76.100, 71.700),
+                                        new Pose(96.100, 59.500)
                                 )
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(31), Math.toRadians(-180))
@@ -102,9 +112,9 @@ public class PathNearAuto1 extends PathManager {
                         .addPath(
                                 // To Shoot 1
                                 new BezierCurve(
-                                        new Pose(18, 112.2),
-                                        new Pose(51.1, 119.8),
-                                        new Pose(57.3, 108)
+                                        new Pose(18.000, 112.200),
+                                        new Pose(51.100, 119.800),
+                                        new Pose(55.000, 111.000)
                                 )
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(28), Math.toRadians(149))
@@ -118,11 +128,11 @@ public class PathNearAuto1 extends PathManager {
         addBluePath(
                 follower.pathBuilder()
                         .addPath(
-                                // Move Line PPG
+                                // Start PPG
                                 new BezierCurve(
-                                        new Pose(57.3, 108),
-                                        new Pose(56.5, 90.1),
-                                        new Pose(47.7, 84)
+                                        new Pose(55.000, 111.000),
+                                        new Pose(56.500, 90.100),
+                                        new Pose(47.700, 84.000)
                                 )
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(149), Math.toRadians(0))
@@ -133,33 +143,39 @@ public class PathNearAuto1 extends PathManager {
                 follower.pathBuilder()
                         .addPath(
                                 // Intake PPG
-                                new BezierLine(new Pose(47.7, 84), new Pose(18, 84))
+                                new BezierLine(new Pose(47.700, 84.000), new Pose(16.000, 84.000))
                         )
                         .setTangentHeadingInterpolation()
                         .setReversed()
-                        .addParametricCallback(0.02, () -> follower.setMaxPower(0.2))
+                        .addParametricCallback(0.1, () -> follower.setMaxPower(0.2))
                         .build()
         );
         addBluePath(
                 follower.pathBuilder()
                         .addPath(
-                                // To Shoot 2
-                                new BezierLine(new Pose(18, 84), new Pose(57.3, 108))
+                                // Shoot 2
+                                new BezierLine(new Pose(16.000, 84.000), new Pose(55.500, 109.500))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(149))
                         .addParametricCallback(0, () -> follower.setMaxPower(1))
-                        .addParametricCallback(.3, robot::trySelectFirstMotifSlot)
+                        .addParametricCallback(.5, robot::trySelectFirstMotifSlot)
                         .addParametricCallback(.8, robot::startShooter)
+                        .addCallback(
+                                () -> !robot.isSpindexerBusy()
+                                        && robot.isAnyArtifactUnknown()
+                                        && robot.isHoodShootPose(),
+                                robot::incrementSpindexerSlot)
+
                         .build()
         );
         addBluePath(
                 follower.pathBuilder()
-                        // Move PGP
                         .addPath(
+                                // Go To PGP
                                 new BezierCurve(
-                                        new Pose(57.3, 108),
-                                        new Pose(67.9, 71.7),
-                                        new Pose(47.9, 59.5)
+                                        new Pose(55.500, 109.500),
+                                        new Pose(67.900, 71.700),
+                                        new Pose(48.000, 59.500)
                                 )
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(149), Math.toRadians(0))
