@@ -21,6 +21,7 @@ import org.firstinspires.ftc.teamcode.common.*;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -100,6 +101,8 @@ public class RobotSystem {
     //==================================================================================================
     // Member Variables
     //==================================================================================================
+    private final Map<ZoneDistance, Double> zoneMap;
+    private ZoneDistance currentZone = ZoneDistance.FAR;
 
     // --- Subsystems ---
     private final SweeperSubsystem sweeperSys;
@@ -165,6 +168,10 @@ public class RobotSystem {
         Drawing.init();
         this.telemetry = telemetry;
         this.telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
+        zoneMap = new HashMap<>();
+        zoneMap.put(ZoneDistance.FAR, 0.0);
+        zoneMap.put(ZoneDistance.MID, 0.0);
+        zoneMap.put(ZoneDistance.NEAR, 0.0);
     }
 
     //==================================================================================================
@@ -271,6 +278,30 @@ public class RobotSystem {
         }
     }
 
+    public void setCurrentZone(double distanceInch){
+        if (distanceInch < ZoneDistance.MID.id){
+            currentZone = ZoneDistance.NEAR;
+        }else if (distanceInch < ZoneDistance.FAR.id) {
+            currentZone = ZoneDistance.MID;
+        }else {
+            currentZone = ZoneDistance.FAR;
+        }
+    }
+
+    private double getCurrentAimOffset() {
+        //noinspection DataFlowIssue
+        return zoneMap.get(currentZone);
+    }
+
+    public void increaseAimAngle() {
+        double value = getCurrentAimOffset() + 0.5;
+        zoneMap.put(currentZone, value);
+    }
+
+    public void decreaseAimAngle() {
+        double value = getCurrentAimOffset() - 0.5;
+        zoneMap.put(currentZone, value);
+    }
     /**
      * Controls the robot's drivetrain movement and wraps the follower's tele-op drive logic.
      *
@@ -294,10 +325,11 @@ public class RobotSystem {
                 double distance = LimelightSubsystem.calcGoalDistanceByTy(llPose.getY());
                 shooterSys.setTargetRpmFromDisance(distance);
                 spindexerSys.setOffsetByDistance(distance);
+                this.setCurrentZone(distance);
                 //telemetryM.addData("Power OUT:", output);
                 //telemetryM.addData("LimeLightTX:", llPose.getX());
                 // The output is applied to the rotation power (note: may need to be inverted).
-                turn = getScaledTxOutput(llPose.getX(), AUTO_AIM_TOLERANCE);
+                turn = getScaledTxOutput(llPose.getX() + getCurrentAimOffset(), AUTO_AIM_TOLERANCE);
 
             } else {
                 // If the target is lost, reset the PID controller to prevent integral windup.
@@ -645,6 +677,10 @@ public class RobotSystem {
         return hoodSys.isReadyToShoot();
     }
 
+    public boolean isHoodIntakePose() {
+        return hoodSys.isReadyIntake();
+    }
+
     /**
      * Gets the current Pedro pose from limelight 3D pose
      * @param latency number of milliseconds to sample the average pose
@@ -916,7 +952,7 @@ public class RobotSystem {
 
                     // Condition 1: An artifact is detected.
                     if (itemDetected != SlotState.EMPTY
-                            && hoodSys.isReadyInTake()
+                            && hoodSys.isReadyIntake()
                             && spindexerSys.isReady()
                             && kickerSys.isReady()) {
 
@@ -986,12 +1022,13 @@ public class RobotSystem {
      */
     private void displayTelemetry() {
         // TODO: remove unneeded output
+        telemetryM.addData("Target RPM", shooterSys.getTargetRpm());
         telemetryM.addData("Shooter RPM (avg)", shooterSys.getCurrentRpm());
+        telemetryM.addData("Current AIM offset", getCurrentAimOffset());
         telemetryM.addData("Left Shooter RPM", shooterSys.getLeftRpm());
         telemetryM.addData("Right Shooter RPM", shooterSys.getRightRpm());
-        telemetryM.addData("Target RPM", shooterSys.getTargetRpm());
-//        telemetryM.addData("Is Auto Intaking:", isAutoIntaking);
-//        telemetryM.addData("Is Burst MODE", isBurstFire);
+        telemetryM.addData("Is Auto Intaking:", isAutoIntaking);
+        telemetryM.addData("Is Burst MODE", isBurstFire);
         telemetryM.addData("Spindexer offset:", spindexerSys.getCurrentOffset());
         telemetryM.addData("Is Spindexer Ready", spindexerSys.isReady());
 //        telemetryM.addData("Current zone", spindexerSys.getCurrentZone());
@@ -1006,7 +1043,7 @@ public class RobotSystem {
 //        telemetryM.addData("Motor RPM:", shooterSys.getMotorRpms());
 //        telemetryM.addData("shooterSys Ready:", shooterSys.isReadyToShoot());
 //        telemetryM.addData("isShootReady:", isShootReady);
-        telemetryM.addData("Spindexer Raw Position", spindexerSys.getCurrentPosition());
+//        telemetryM.addData("Spindexer Raw Position", spindexerSys.getCurrentPosition());
 //        telemetryM.addData("CURRENT HEADING", follower.getHeading());
 
         // TODO: THIS SHOULD BE REMOVED BEFORE COMP

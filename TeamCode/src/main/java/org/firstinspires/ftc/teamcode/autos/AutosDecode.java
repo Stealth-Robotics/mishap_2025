@@ -110,9 +110,9 @@ public abstract class AutosDecode extends OpMode {
         Pose curPose = robot.getPedroPoseFromLimelight(800);
         if (curPose != null) {
             this.lastPose = curPose;
-            telemetryM.addData("Alliance: ", PathManager.getAllianceFromPose(curPose) == Alliance.RED ? "RED" : "BLUE");
-            telemetryM.addData("Last Pose X", curPose.getX());
-            telemetryM.addData("Last Pose Y", curPose.getY());
+            //telemetryM.addData("Limelight Alliance: ", PathManager.getAllianceFromPose(curPose) == Alliance.RED ? "RED" : "BLUE");
+            //telemetryM.addData("Last Pose X", curPose.getX());
+            //telemetryM.addData("Last Pose Y", curPose.getY());
             telemetryM.addData("Last Pose Heading:", Math.toDegrees(curPose.getHeading()));
 
         }
@@ -238,7 +238,7 @@ public abstract class AutosDecode extends OpMode {
         }
 
         telemetryM.addData("Path State", pathState);
-        //telemetryM.addData("Follower State:", follower.isBusy());
+        telemetryM.addData("Follower State:", follower.isBusy());
         telemetryM.addData("Path Index", paths.getSegmentIndex());
     }
 
@@ -328,6 +328,7 @@ public abstract class AutosDecode extends OpMode {
             robot.setMotifPattern(Motif.PPG);
             return true;
         }
+
         boolean ret = robot.doReadMotif();
         if (ret) {
             // update the static motif variable

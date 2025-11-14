@@ -44,10 +44,7 @@ public class PathManager implements Path {
         this.robot = robot;
     }
 
-    public PathManager() {
-    }
-
-    /**
+     /**
      * Retrieves the next path segment in the sequence for the current alliance.
      * Increments the path index after retrieval.
      *

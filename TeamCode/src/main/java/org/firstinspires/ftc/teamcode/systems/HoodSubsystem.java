@@ -102,7 +102,7 @@ public class HoodSubsystem {
         return (hoodState == HoodState.SHOOT);
     }
 
-    public boolean isReadyInTake() {
+    public boolean isReadyIntake() {
         return (hoodState == HoodState.INTAKE);
     }
 

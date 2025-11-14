@@ -117,17 +117,18 @@ public class TeleOpDupliOp extends OpMode {
      * Groups driving-related controls for clarity.
      */
     private void handleDriveControls() {
-        if (gamepad2.leftStickButtonWasPressed() || gamepad1.leftStickButtonWasPressed()) {
+        if (gamepad1.leftStickButtonWasPressed()) {
             isRobotCentric = !isRobotCentric;
         }
+
         if (gamepad2.rightStickButtonWasPressed() || gamepad1.rightStickButtonWasPressed()) {
             isSlowMo = !isSlowMo;
         }
 
         // Auto-aim is active only while the X button is held down
-        if (gamepad2.xWasPressed() || gamepad1.xWasPressed()) {
+        if (gamepad1.xWasPressed()) {
             autoAim = true;
-        } else if (gamepad2.xWasReleased() || gamepad1.xWasReleased()) {
+        } else if (gamepad1.xWasReleased()) {
             autoAim = false;
         }
 
@@ -185,7 +186,21 @@ public class TeleOpDupliOp extends OpMode {
             robot.decreaseShooterRpm();
         }
 
-        // Target range selection using triggers
+        // Gamepad 1 controls burst fire on/off
+        if (gamepad1.right_trigger > 0.2) {
+            robot.setBurstFire(true);
+            robot.setReadyShoot();
+        } else if(gamepad1.left_trigger > 0.2) {
+            robot.setBurstFire(false);
+        }
+
+        // Gamepad 2 can change the auto aim angle to target
+        if (gamepad2.right_trigger > 0.2) {
+            robot.increaseAimAngle();
+        } else if(gamepad2.left_trigger > 0.2) {
+            robot.decreaseAimAngle();
+        }
+
     }
 
     /**
@@ -194,8 +209,12 @@ public class TeleOpDupliOp extends OpMode {
     private void handleIntakeControls() {
         if (gamepad1.rightBumperWasPressed()) {
             robot.toggleIntake();
-        } else if (gamepad2.leftBumperWasPressed()) {
+        }
+        if (gamepad1.leftBumperWasPressed()) {
             robot.reverseIntake();
+            if (robot.isHoodIntakePose()) {
+                robot.decrementSpindexerSlot();
+            }
         } else if (gamepad2.leftBumperWasReleased()) {
             // Stop intake only if neither bumper is pressed
             robot.stopIntake();
@@ -216,13 +235,12 @@ public class TeleOpDupliOp extends OpMode {
         if (gamepad2.leftBumperWasPressed()) {
             robot.decrementSpindexerSlot();
         }
-        if (gamepad2.dpadLeftWasPressed() || gamepad1.dpadLeftWasPressed()) {
+        if (gamepad2.dpadLeftWasPressed()) {
             robot.increaseSpindexer();
         }
-        if (gamepad2.dpadRightWasPressed() || gamepad1.dpadRightWasPressed()) {
+        if (gamepad2.dpadRightWasPressed()) {
             robot.decreaseSpindexer();
         }
-
     }
 
     /**
