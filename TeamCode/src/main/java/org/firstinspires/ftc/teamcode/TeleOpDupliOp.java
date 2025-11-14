@@ -155,10 +155,11 @@ public class TeleOpDupliOp extends OpMode {
             if (shootState == ShootState.IDLE) {
                 shootState = ShootState.PREPARING;
                 robot.setReadyShoot(); // Start preparing the shooter
-            } else {
-                // A quick double press will keep the shooter spinning
-                shootState = ShootState.IDLE;
             }
+//            else {
+//                // A quick double press will keep the shooter spinning
+//                shootState = ShootState.IDLE;
+//            }
         }
 
         if (shootState == ShootState.PREPARING) {
