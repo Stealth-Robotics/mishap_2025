@@ -29,8 +29,6 @@ public abstract class AutosDecode extends OpMode {
     public static final double AIM_MIN_MS = 2000;
 
     public static final double INTAKE_WAIT_MS = 1000;
-
-    protected static final double PIPELINE_SWITCH_DELAY = 1000;
     protected final ElapsedTime actionTimer = new ElapsedTime();
     protected static final long INTAKE_DELAY = 5000; // delay to keep hood open
     protected final HashSet<Integer> shootIndexes = new HashSet<>();

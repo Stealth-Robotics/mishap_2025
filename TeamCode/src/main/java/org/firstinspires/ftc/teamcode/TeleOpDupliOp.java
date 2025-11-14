@@ -195,9 +195,9 @@ public class TeleOpDupliOp extends OpMode {
         }
 
         // Gamepad 2 can change the auto aim angle to target
-        if (gamepad2.right_trigger > 0.2) {
+        if (gamepad2.right_trigger > 0.4) {
             robot.increaseAimAngle();
-        } else if(gamepad2.left_trigger > 0.2) {
+        } else if(gamepad2.left_trigger > 0.4) {
             robot.decreaseAimAngle();
         }
 

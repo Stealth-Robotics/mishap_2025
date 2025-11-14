@@ -6,7 +6,7 @@ import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.control.PIDFCoefficients;
-import com.pedropathing.control.PIDFController;
+import com.arcrobotics.ftclib.controller.PIDFController;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.math.MathFunctions;
@@ -43,11 +43,11 @@ public class RobotSystem {
     /** Multiplier to reduce drive speed for fine-tuned control. */
     public static double SLOW_MODE_MULTIPLIER = 0.3;
 
-    public static double AUTO_AIM_TOLERANCE = 0.3;
+    public static double AUTO_AIM_TOLERANCE = 0.2;
 
 
     /** The maximum rotational power applied during auto-aim. */
-    public static final double MAX_ROTATION_POWER = 0.90;
+    public static final double MAX_ROTATION_POWER = 0.98;
 
     public static final double MIN_ROTATION_POWER = .07;
 
@@ -104,6 +104,10 @@ public class RobotSystem {
     private final Map<ZoneDistance, Double> zoneMap;
     private ZoneDistance currentZone = ZoneDistance.FAR;
 
+    private static final double MAX_AIM_ANGLE = 8;
+    private static final double MIN_AIM_ANGLE = -8;
+
+
     // --- Subsystems ---
     private final SweeperSubsystem sweeperSys;
     private final HoodSubsystem hoodSys;
@@ -115,7 +119,14 @@ public class RobotSystem {
     private final ColorSensorSubsystem colorSensorSys;
 
     // --- Control and Telemetry ---
-    private static final PIDFController headingController = new PIDFController(HEADING_COEFFICIENTS);
+    //private static final PIDFController headingController = new PIDFController(HEADING_COEFFICIENTS);
+    private final PIDFController headingController = new PIDFController(
+            .014,//HEADING_COEFFICIENTS.P,
+            .51,
+            0,
+            .068
+    );
+
     private final TelemetryManager telemetryM;
     private final Telemetry telemetry;
 
@@ -168,6 +179,7 @@ public class RobotSystem {
         Drawing.init();
         this.telemetry = telemetry;
         this.telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
+        headingController.setIntegrationBounds(-.08, .08);
         zoneMap = new HashMap<>();
         zoneMap.put(ZoneDistance.FAR, 0.0);
         zoneMap.put(ZoneDistance.MID, 0.0);
@@ -294,14 +306,23 @@ public class RobotSystem {
     }
 
     public void increaseAimAngle() {
+        if (getCurrentAimOffset() >= MAX_AIM_ANGLE) {
+            return;
+        }
+
         double value = getCurrentAimOffset() + 0.5;
         zoneMap.put(currentZone, value);
     }
 
     public void decreaseAimAngle() {
+        if (getCurrentAimOffset() <= MIN_AIM_ANGLE) {
+            return;
+        }
+
         double value = getCurrentAimOffset() - 0.5;
         zoneMap.put(currentZone, value);
     }
+
     /**
      * Controls the robot's drivetrain movement and wraps the follower's tele-op drive logic.
      *
@@ -326,10 +347,10 @@ public class RobotSystem {
                 shooterSys.setTargetRpmFromDisance(distance);
                 spindexerSys.setOffsetByDistance(distance);
                 this.setCurrentZone(distance);
-                //telemetryM.addData("Power OUT:", output);
-                //telemetryM.addData("LimeLightTX:", llPose.getX());
+                telemetryM.addData("LimeLightTX:", llPose.getX());
                 // The output is applied to the rotation power (note: may need to be inverted).
                 turn = getScaledTxOutput(llPose.getX() + getCurrentAimOffset(), AUTO_AIM_TOLERANCE);
+                telemetryM.addData("Power OUT:", turn);
 
             } else {
                 // If the target is lost, reset the PID controller to prevent integral windup.
@@ -996,23 +1017,23 @@ public class RobotSystem {
         }
 
         // Set the PID controller's target to 0 (no error).
-        headingController.setTargetPosition(0);
+        headingController.setSetPoint(0);
         // Update the controller with the current error.
-        headingController.updateError(-txDelta);
+        double pidOutput = headingController.calculate(txDelta);
         // Run the PID calculation.
-        double pidOutput = headingController.run();
+        //double pidOutput = headingController.run();
 
         // If the error is outside the tolerance, return the clamped PID output.
         // Otherwise, return 0 to stop turning.
-        if (Math.abs(pidOutput) > 1e-4 && Math.abs(pidOutput) < MIN_ROTATION_POWER) {
-            pidOutput = pidOutput + (Math.signum(pidOutput) * ROTATION_SIGNUM_POWER);
-            if (Math.abs(pidOutput) > MIN_ROTATION_POWER){
-                pidOutput = Math.signum(pidOutput) * MIN_ROTATION_POWER;
-            }else
-            if (Math.abs(pidOutput) < MIN_ROTATION_POWER) {
-                pidOutput = 0;
-            }
-        }
+//        if (Math.abs(pidOutput) > 1e-4 && Math.abs(pidOutput) < MIN_ROTATION_POWER) {
+//            pidOutput = pidOutput + (Math.signum(pidOutput) * ROTATION_SIGNUM_POWER);
+//            if (Math.abs(pidOutput) > MIN_ROTATION_POWER){
+//                pidOutput = Math.signum(pidOutput) * MIN_ROTATION_POWER;
+//            }else
+//            if (Math.abs(pidOutput) < MIN_ROTATION_POWER) {
+//                pidOutput = 0;
+//            }
+//        }
 
         return  MathFunctions.clamp(pidOutput, -MAX_ROTATION_POWER, MAX_ROTATION_POWER);
     }

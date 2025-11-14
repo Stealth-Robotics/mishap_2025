@@ -192,7 +192,16 @@ public class TeleOpSingleOp extends OpMode {
             robot.setReadyShoot();
         } else if(gamepad1.left_trigger > 0.2) {
             robot.setBurstFire(false);
+            robot.stopShooter();
         }
+
+        // TODO: TEST CODE REMOVE FOR SINGLE OP
+        // Gamepad 2 can change the auto aim angle to target
+//        if (gamepad1.right_trigger > 0.4) {
+//            robot.increaseAimAngle();
+//        } else if(gamepad1.left_trigger > 0.4) {
+//            robot.decreaseAimAngle();
+//        }
     }
 
     /**
