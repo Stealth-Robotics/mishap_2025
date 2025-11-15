@@ -11,9 +11,7 @@ import org.firstinspires.ftc.teamcode.paths.PathNearAuto1;
 import org.firstinspires.ftc.teamcode.paths.PathState;
 
 import java.util.Arrays;
-@Autonomous(name = "Shoot Near either Side", group = "Autonomous", preselectTeleOp = "_TeleOp_Driver_Operator")
-@Configurable
-@Disabled
+
 public class AutoNearOne extends AutosDecode {
 
     @Override
@@ -33,9 +31,9 @@ public class AutoNearOne extends AutosDecode {
         // change the angle of the far shots by a couple of degrees:
         // a negative number turns the bot more to the left positive more to the right
         if (Alliance.isBlue()) {
-            this.aimOffset = 4;
+            this.aimOffset = 0;
         } else {
-            this.aimOffset = -2;
+            this.aimOffset = 0;
         }
 
         Pose startPose = paths.getPathStart();

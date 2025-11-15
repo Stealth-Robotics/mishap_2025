@@ -12,9 +12,6 @@ import org.firstinspires.ftc.teamcode.paths.PathState;
 
 import java.util.Arrays;
 
-@Autonomous(name = "Shoot Mid either Side", group = "Autonomous", preselectTeleOp = "_TeleOp_Driver_Operator")
-@Configurable
-@Disabled
 public class AutoMidshotOne extends AutosDecode {
 
     @Override
@@ -34,9 +31,9 @@ public class AutoMidshotOne extends AutosDecode {
         // change the angle of the far shots by a couple of degrees:
         // a negative number turns the bot more to the left positive more to the right
         if (Alliance.isBlue()) {
-            this.aimOffset = 4;
+            this.aimOffset = 2;
         } else {
-            this.aimOffset = -2;
+            this.aimOffset = -3;
         }
 
         Pose startPose = paths.getPathStart();

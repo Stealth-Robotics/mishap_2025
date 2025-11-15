@@ -11,10 +11,11 @@ import org.firstinspires.ftc.teamcode.paths.PathState;
 
 import java.util.Arrays;
 
-@Autonomous(name = "Shoot Far either Side", group = "Autonomous", preselectTeleOp = "_TeleOp_Driver_Operator")
-@Configurable
-@Disabled
+//@Autonomous(name = "Shoot Far either Side", group = "Autonomous", preselectTeleOp = "_TeleOp_Driver_Operator")
+//@Configurable
+//@Disabled
 public class AutoFarOne extends AutosDecode {
+
 
     @Override
     protected Path initPaths() {
@@ -29,27 +30,19 @@ public class AutoFarOne extends AutosDecode {
         robot.initSpindxerSlotsEmpty();
     }
 
-    // TODO: uncomment if you don't want limelight to be used as aliance positioning
-//    @Override
-//    protected void setAlliance() {
-//        // Set the specific alliance for this OpMode
-//        // can use limelight data if you want
-//        Alliance.set(Alliance.BLUE);
-//    }
-
     /**
      * This is overriding using the limelight as the start Pose
      * this can be removed once limelight is tuned
      */
     @Override
     protected void setStartingPose() {
-        
+
         // cahnge the angle of the far shots by a couple of degrees:
         // a negative number turns the bot more to the left positive more to the right
         if (Alliance.isBlue()) {
-            this.aimOffset = -4;
+            this.aimOffset = -3.5;
         } else {
-            this.aimOffset = 4;
+            this.aimOffset = 3.5;
         }
 
         follower.setStartingPose(paths.getPathStart());

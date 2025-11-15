@@ -117,7 +117,7 @@ public class PathMidShot extends PathManager{
                         .setLinearHeadingInterpolation(Math.toRadians(28), Math.toRadians(130))
                         .addParametricCallback(0, robot::trySelectFirstMotifSlot)
                         .addParametricCallback(0.8, ()-> {
-                            robot.setShooterTargetRangeFar();
+                            robot.setShooterTargetRangeMid();
                             robot.startShooter();
                         })
                         .build());

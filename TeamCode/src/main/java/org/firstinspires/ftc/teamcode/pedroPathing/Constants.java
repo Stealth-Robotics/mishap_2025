@@ -71,10 +71,13 @@ public class Constants {
             .90);
 
     public static Follower createFollower(HardwareMap hardwareMap) {
-        return new FollowerBuilder(followerConstants, hardwareMap)
+        Follower f = new FollowerBuilder(followerConstants, hardwareMap)
                 .pinpointLocalizer(pinpointConstants)
                 .mecanumDrivetrain(mecanumConstants)
                 .pathConstraints(pathConstraints)
                 .build();
+        f.activateDrive();
+        f.activateHeading();
+        return f;
     }
 }
