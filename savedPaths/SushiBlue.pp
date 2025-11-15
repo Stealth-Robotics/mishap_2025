@@ -1,0 +1,1 @@
+{"startPoint":{"x":18,"y":112.2,"heading":"linear","startDeg":90,"endDeg":0},"lines":[{"name":"To Shoot 1","endPoint":{"x":58.7,"y":123.1,"heading":"linear","startDeg":28,"endDeg":166},"controlPoints":[],"color":"#66B85C"}],"shapes":[]}
