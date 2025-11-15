@@ -24,9 +24,10 @@ public class PathBallThief extends PathManager {
         // name: Shoot1, color: #89D585
                 follower.pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(87, 9), new Pose(87, 18))
+                                // Shoot1
+                                new BezierLine(new Pose(57.000, 9.000), new Pose(57.000, 18.000))
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(70))
+                        .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(110))
                         .addParametricCallback(0, robot::trySelectFirstMotifSlot)
                         .addParametricCallback(0.5, ()-> {
                             robot.setShooterTargetRangeFar();
@@ -38,9 +39,10 @@ public class PathBallThief extends PathManager {
         // name: Steal Balls 1, color: #87AAA9
                 follower.pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(87, 18), new Pose(120.6, 19))
+                                // Steal Balls 1
+                                new BezierLine(new Pose(57.000, 18.000), new Pose(23.400, 19.000))
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(70), Math.toRadians(-180))
+                        .setLinearHeadingInterpolation(Math.toRadians(110), Math.toRadians(0))
                         .addParametricCallback(.9, robot::startIntake)
                         .build()
         );
@@ -48,17 +50,21 @@ public class PathBallThief extends PathManager {
         // name: Steal 2, color: #979D79
                 follower.pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(120.6, 19), new Pose(135.9, 19))
+                                // Steal 2
+                                new BezierLine(new Pose(23.400, 19.000), new Pose(8.100, 19.000))
                         )
-                        .addParametricCallback(.1, ()->follower.setMaxPower(.2))
+                        .addParametricCallback(.1, ()->follower.setMaxPower(.20))
+                        .setConstantHeadingInterpolation(Math.toRadians(0))
                         .build()
         );
         addBluePath(
         // name: Steal 3, color: #D6D56C
                 follower.pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(135.9, 19), new Pose(127, 19))
+                                // Steal 3
+                                new BezierLine(new Pose(8.100, 19.000), new Pose(17.000, 19.000))
                         )
+                        .setConstantHeadingInterpolation(Math.toRadians(0))
                         .addParametricCallback(.1, ()->follower.setMaxPower(.50))
                         .build()
         );
@@ -66,16 +72,20 @@ public class PathBallThief extends PathManager {
         // name: Steal4, color: #8CA6D8
                 follower.pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(127, 19), new Pose(127, 8.1))
+                                // Steal4
+                                new BezierLine(new Pose(17.000, 19.000), new Pose(17.000, 8.100))
                         )
+                        .setConstantHeadingInterpolation(Math.toRadians(0))
                         .build()
         );
         addBluePath(
         // name: Steal 5, color: #A79B78
                 follower.pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(127, 8.1), new Pose(135.7, 8.1))
+                                // Steal 5
+                                new BezierLine(new Pose(17.000, 8.100), new Pose(8.300, 8.100))
                         )
+                        .setConstantHeadingInterpolation(Math.toRadians(0))
                         .addParametricCallback(.1, ()->follower.setMaxPower(.20))
 
                         .build()
@@ -84,9 +94,10 @@ public class PathBallThief extends PathManager {
         // name: Shoot2, color: #C7AC68
                 follower.pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(135.7, 8.1), new Pose(87, 17.8))
+                                // Shoot2
+                                new BezierLine(new Pose(8.300, 8.100), new Pose(57.000, 17.800))
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(-180), Math.toRadians(70))
+                        .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(110))
                         .addParametricCallback(0, () -> follower.setMaxPower(1))
                         // Check in on the spindexer to see if there are any unknown artifacts and try to sort them
                         .addCallback(
@@ -106,9 +117,10 @@ public class PathBallThief extends PathManager {
         // name: Park, color: #5875CB
                 follower.pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(87, 17.8), new Pose(99, 36))
+                                // Park
+                                new BezierLine(new Pose(57.000, 17.800), new Pose(45.000, 36.000))
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(70), Math.toRadians(-180))
+                        .setLinearHeadingInterpolation(Math.toRadians(110), Math.toRadians(0))
                         .build()
         );
     }
