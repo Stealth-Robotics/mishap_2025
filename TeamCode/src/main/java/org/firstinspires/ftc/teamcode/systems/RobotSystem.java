@@ -454,6 +454,19 @@ public class RobotSystem {
     }
 
     /**
+     * Use in for those WTF moments
+     */
+    public void resetRobot() {
+        this.initSpindxerSlotsEmpty();
+        currentState = SystemState.IDLE;
+        kickerSys.setReady();
+        hoodSys.setShootPose();
+        sweeperSys.stopIntake();
+        shooterSys.stop();
+        spindexerSys.setBrake();
+    }
+
+    /**
      * Starts the intake process. Stops the shooter, sets hood to intake position,
      * and runs the sweeper and spindexer.
      */
@@ -941,6 +954,11 @@ public class RobotSystem {
 
                     break;
             case IDLE:
+                // A double check for the stuck kicker
+                if (!kickerSys.isReady()) {
+                    kickerSys.setReady();
+                }
+
                 // IDLE state keep an eye on the intaking slot
                 // if there is a change update the state
                 if (!this.isSpindexerBusy()) {
@@ -1046,13 +1064,14 @@ public class RobotSystem {
         telemetryM.addData("Target RPM", shooterSys.getTargetRpm());
         telemetryM.addData("Shooter RPM (avg)", shooterSys.getCurrentRpm());
         telemetryM.addData("Current AIM offset", getCurrentAimOffset());
-        telemetryM.addData("Left Shooter RPM", shooterSys.getLeftRpm());
-        telemetryM.addData("Right Shooter RPM", shooterSys.getRightRpm());
-        telemetryM.addData("Is Auto Intaking:", isAutoIntaking);
-        telemetryM.addData("Is Burst MODE", isBurstFire);
+        //telemetryM.addData("Left Shooter RPM", shooterSys.getLeftRpm());
+        //telemetryM.addData("Right Shooter RPM", shooterSys.getRightRpm());
+        telemetryM.addData("Auto Intaking:", isAutoIntaking);
+        telemetryM.addData("Burst MODE", isBurstFire);
         telemetryM.addData("Spindexer offset:", spindexerSys.getCurrentOffset());
         telemetryM.addData("Is Spindexer Ready", spindexerSys.isReady());
-//        telemetryM.addData("Current zone", spindexerSys.getCurrentZone());
+        telemetryM.addData("shooterSys Ready:", shooterSys.isReadyToShoot());
+        telemetryM.addData("Current zone", spindexerSys.getCurrentZone());
 //        telemetryM.addData("Robot State", currentState.name());
 //        telemetryM.addData("Shoot Slot Index", spindexerSys.getCurShootSlot());
         telemetryM.addData("Shoot Slot State:", spindexerSys.getShootSlotState());
@@ -1062,13 +1081,12 @@ public class RobotSystem {
     //   telemetryM.addData("IsMotif available", spindexerSys.isMotifAvailable());
 //        telemetryM.addData("Hood State:", hoodSys.getHoodState());
 //        telemetryM.addData("Motor RPM:", shooterSys.getMotorRpms());
-//        telemetryM.addData("shooterSys Ready:", shooterSys.isReadyToShoot());
 //        telemetryM.addData("isShootReady:", isShootReady);
 //        telemetryM.addData("Spindexer Raw Position", spindexerSys.getCurrentPosition());
 //        telemetryM.addData("CURRENT HEADING", follower.getHeading());
 
         // TODO: THIS SHOULD BE REMOVED BEFORE COMP
-        this.draw();
+        //this.draw();
         /* INPORTAINT This updates the telemetry for all systems here no need to duplicate anywhere else */
         telemetryM.update(telemetry);
     }

@@ -146,6 +146,11 @@ public class TeleOpDupliOp extends OpMode {
             // TODO: can use Pose offset to keep current pose
             robot.resetIMU();
         }
+
+        if (gamepad2.yWasPressed()) {
+            //Resets all of the states
+            robot.resetRobot();
+        }
     }
 
     /**
