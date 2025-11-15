@@ -29,6 +29,8 @@ public class TeleOpDupliOp extends OpMode {
 
     private boolean isSpindexerInitialized = false;
 
+    private boolean wasTriggerPressed = false;
+
     /**
      * This method is run once when the driver hits "INIT" on the Driver Station.
      * It's used for all initialization tasks.
@@ -196,10 +198,16 @@ public class TeleOpDupliOp extends OpMode {
         }
 
         // Gamepad 2 can change the auto aim angle to target
-        if (gamepad2.right_trigger > 0.4) {
+        // the boolean makes the trigger act like a digital button
+        if (gamepad2.right_trigger > 0.4 && !wasTriggerPressed) {
             robot.increaseAimAngle();
-        } else if(gamepad2.left_trigger > 0.4) {
+            wasTriggerPressed = true;
+        } else if(gamepad2.left_trigger > 0.4 && !wasTriggerPressed) {
             robot.decreaseAimAngle();
+            wasTriggerPressed = true;
+        }else if(wasTriggerPressed
+                && (gamepad2.right_trigger < 0.1 && gamepad2.left_trigger < 0.1)) {
+            wasTriggerPressed = false;
         }
 
     }
@@ -209,8 +217,11 @@ public class TeleOpDupliOp extends OpMode {
      */
     private void handleIntakeControls() {
         if (gamepad1.rightBumperWasPressed()) {
-            robot.toggleIntake();
+            robot.startIntake();
+        }else if (gamepad1.rightBumperWasReleased()) {
+            robot.stopIntake();
         }
+
         if (gamepad1.leftBumperWasPressed()) {
             robot.reverseIntake();
             if (robot.isHoodIntakePose()) {

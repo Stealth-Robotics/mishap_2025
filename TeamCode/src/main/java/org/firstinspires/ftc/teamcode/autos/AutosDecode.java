@@ -38,10 +38,12 @@ public abstract class AutosDecode extends OpMode {
 
     protected double startWaitTimeSeconds = 0;
 
+    protected int motifIndex = 0;
+
     protected TelemetryManager telemetryM;
     protected Follower follower;
     protected RobotSystem robot;
-    protected PathState pathState = PathState.READ_MOTIF;
+    protected PathState pathState = PathState.IDLE;
     protected Path paths;
     private final ElapsedTime stateTimer = new ElapsedTime();
 
@@ -170,6 +172,8 @@ public abstract class AutosDecode extends OpMode {
     @Override
     public void loop() {
         // robot.update calls follower.update
+        telemetryM.addData("Index!!!", paths.getSegmentIndex());
+        telemetryM.addData("Total Count", paths.getSegmentCount());
         robot.update();
 
         // Protect the robot from early start
@@ -199,7 +203,7 @@ public abstract class AutosDecode extends OpMode {
                 if (!this.doMotifOrTimeout()) {
                     return;
                 }
-
+                stateTimer.reset();
                 pathState = PathState.SET_TARGET;
                 break;
             case SET_TARGET:
@@ -246,6 +250,13 @@ public abstract class AutosDecode extends OpMode {
      */
     protected PathState checkIndexForAction() {
         int curIndex = paths.getSegmentIndex();
+        if (curIndex == motifIndex)
+        {
+            stateTimer.reset();
+            motifIndex = -1;
+            return PathState.READ_MOTIF;
+        }
+
         if (curIndex != lastPathIndex) {
             subActionStep =0;
             lastPathIndex = curIndex;
