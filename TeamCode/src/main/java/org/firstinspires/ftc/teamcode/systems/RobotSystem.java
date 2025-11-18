@@ -221,6 +221,7 @@ public class RobotSystem {
         limelightSys.update();
         shooterSys.update();
         colorSensorSys.update();
+        kickerSys.update();
 
         // incase we getting spindexer jamming
         handleOverCurrent();

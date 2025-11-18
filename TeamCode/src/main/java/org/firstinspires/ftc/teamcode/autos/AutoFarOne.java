@@ -27,7 +27,8 @@ public class AutoFarOne extends AutosDecode {
 
     @Override
     protected void setSpindexerSlots(){
-        robot.initSpindxerSlotsEmpty();
+
+        robot.initSpindxerSlotsAuto();
     }
 
     /**

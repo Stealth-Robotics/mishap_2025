@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.systems;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -23,11 +24,13 @@ public class KickerSubsystem {
 
 
     /** Number of Ms to wait for kicker transition*/
-    public static final long KICK_DELAY = 250;
+    public static final long KICK_DELAY = 400;
 
     private boolean isReady = false;
 
-    private static final Timer timer = new Timer();
+    //private static final Timer timer = new Timer();
+    private static final ElapsedTime timer = new ElapsedTime();
+
 
     /**
      * Constructs the KickerSubsystem.
@@ -41,11 +44,18 @@ public class KickerSubsystem {
         setReady();
     }
 
+    public void update() {
+        if (timer.milliseconds() > KICK_DELAY) {
+            isReady = true;
+        }
+    }
+
     /**
      * Moves the kicker to the "up" position to perform the kick action.
      */
     public void kickIt() {
         isReady = false;
+        timer.reset();
         kickerServo.setPosition(KICKER_UP_POSITION);
     }
 
@@ -59,12 +69,6 @@ public class KickerSubsystem {
         }
 
         kickerServo.setPosition(KICKER_DOWN_POSITION);
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                isReady = true;
-            }
-        }, KICK_DELAY);
     }
 
     /**

@@ -1,47 +1,49 @@
 package org.firstinspires.ftc.teamcode.autos;
 
-import com.bylazar.configurables.annotations.Configurable;
-import com.pedropathing.geometry.Pose;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-
 import org.firstinspires.ftc.teamcode.common.Alliance;
 import org.firstinspires.ftc.teamcode.paths.Path;
-import org.firstinspires.ftc.teamcode.paths.PathNearAuto1;
+import org.firstinspires.ftc.teamcode.paths.PathFarAuto1;
+import org.firstinspires.ftc.teamcode.paths.PathFarSmelt;
 import org.firstinspires.ftc.teamcode.paths.PathState;
 
 import java.util.Arrays;
 
-public class AutoNearOne extends AutosDecode {
+//@Autonomous(name = "Shoot Far either Side", group = "Autonomous", preselectTeleOp = "_TeleOp_Driver_Operator")
+//@Configurable
+//@Disabled
+public class AutoFarSmelt extends AutosDecode {
+
 
     @Override
     protected Path initPaths() {
         shootIndexes.addAll(Arrays.asList(1, 4));
         intakeIndexes.addAll(Arrays.asList(3));
-        return new PathNearAuto1(robot);
+
+        return new PathFarSmelt(robot);
     }
 
     @Override
-    protected void setSpindexerSlots() {
+    protected void setSpindexerSlots(){
 
         robot.initSpindxerSlotsEmpty();
     }
 
+    /**
+     * This is overriding using the limelight as the start Pose
+     * this can be removed once limelight is tuned
+     */
     @Override
     protected void setStartingPose() {
-        // change the angle of the far shots by a couple of degrees:
+
+        // cahnge the angle of the far shots by a couple of degrees:
         // a negative number turns the bot more to the left positive more to the right
         if (Alliance.isBlue()) {
-            this.aimOffset = 0;
+            this.aimOffset = -3.5;
         } else {
-            this.aimOffset = 0;
+            this.aimOffset = 3.5;
         }
 
-        Pose startPose = paths.getPathStart();
-        if (lastPose != null) {
-            startPose = startPose.setHeading(lastPose.getHeading());
-        }
-        follower.setStartingPose(startPose);
+        follower.setStartingPose(paths.getPathStart());
     }
 
     @Override
@@ -57,5 +59,4 @@ public class AutoNearOne extends AutosDecode {
 
         return PathState.IDLE;
     }
-
 }

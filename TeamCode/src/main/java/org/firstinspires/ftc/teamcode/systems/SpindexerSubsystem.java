@@ -34,7 +34,7 @@ public class SpindexerSubsystem {
 
     // NOTE: if you would like to adjust in FTC dashboard mark members as public static (Not final)
     /** The number of ticks to move backward after the index switch is released to center a slot. */
-    public static int INDEX_OFFSET_TICKS = 125;
+    public static int INDEX_OFFSET_TICKS = 130;
     public static int NEAR_ZONE_OFFSET = 0;
     public static int MID_ZONE_OFFSET = 0;
     public static int FAR_ZONE_OFFSET = 0;
@@ -179,7 +179,7 @@ public class SpindexerSubsystem {
                 spindexer.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 if (isIndexSwitchPressed()) {
                     // If already pressed, move forward to find the edge where it releases.
-                    spindexer.setVelocity(velocity); // Slow forward search
+                    spindexer.setVelocity(velocity * 1.5); // Slow forward search
                     homingState = HomingState.SEARCHING_FORWARD;
                 } else {
                     spindexer.setVelocity(-velocity / 4); //  slowly move forward until pressed
