@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.common.Alliance;
 import org.firstinspires.ftc.teamcode.common.FinalPose;
 import org.firstinspires.ftc.teamcode.common.Motif;
 import org.firstinspires.ftc.teamcode.common.Pipeline;
+import org.firstinspires.ftc.teamcode.common.SpindexerIndex;
 import org.firstinspires.ftc.teamcode.paths.Path;
 import org.firstinspires.ftc.teamcode.paths.PathManager;
 import org.firstinspires.ftc.teamcode.paths.PathState;
@@ -99,7 +100,7 @@ public abstract class AutosDecode extends OpMode {
     public void init_loop() {
         robot.update();
         if (!isSpindexerReady) {
-            isSpindexerReady = robot.doInitSpindexer();
+            isSpindexerReady = robot.doInitSpindexer(true);
         } else if (!areArtifactsSorted) {
             areArtifactsSorted = robot.doArtifactSort();
         }
@@ -175,7 +176,7 @@ public abstract class AutosDecode extends OpMode {
         telemetryM.addData("Index!!!", paths.getSegmentIndex());
         telemetryM.addData("Total Count", paths.getSegmentCount());
         robot.update();
-
+        FinalPose.setPose(follower.getPose());
         // Protect the robot from early start
         if (!isSpindexerReady) {
             telemetryM.addLine("Waiting for Spindexer JJ!!!");
@@ -231,7 +232,7 @@ public abstract class AutosDecode extends OpMode {
                 break;
             case STOP:
                 follower.breakFollowing();
-                FinalPose.setPose(follower.getPose());
+
                 requestOpModeStop();
                 return;
             case CONTINUE:

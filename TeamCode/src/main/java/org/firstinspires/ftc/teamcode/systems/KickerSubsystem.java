@@ -4,9 +4,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 /**
  * Manages the kicker mechanism of the robot.
  * This subsystem controls a servo to "kick" or interact with an object.
@@ -17,14 +14,14 @@ public class KickerSubsystem {
     private final Servo kickerServo;
 
     /** The servo position when the kicker is in the 'up' or 'kicked' state. */
-    private static final double KICKER_UP_POSITION = 0.505;
+    private static final double KICKER_KICK_POSITION = 0.508;
 
     /** The servo position when the kicker is in the 'down' or 'ready' state. */
-    private static final double KICKER_DOWN_POSITION = 0.15;
+    private static final double KICKER_READY_POSITION = 0.15;
 
 
     /** Number of Ms to wait for kicker transition*/
-    public static final long KICK_DELAY = 400;
+    public static final long KICK_DELAY = 600;
 
     private boolean isReady = false;
 
@@ -45,30 +42,33 @@ public class KickerSubsystem {
     }
 
     public void update() {
-        if (timer.milliseconds() > KICK_DELAY) {
+        if (isReady) {
+            return;
+        }
+
+        if (timer.milliseconds() > KICK_DELAY && kickerServo.getPosition() <= KICKER_READY_POSITION + 0.01) {
             isReady = true;
+        } else if (timer.milliseconds() > KICK_DELAY / 2.0) {
+            kickerServo.setPosition(KICKER_READY_POSITION);
         }
     }
 
     /**
-     * Moves the kicker to the "up" position to perform the kick action.
+     * Moves the kicker to the "KICK" position to perform the kick action.
      */
     public void kickIt() {
         isReady = false;
         timer.reset();
-        kickerServo.setPosition(KICKER_UP_POSITION);
+        kickerServo.setPosition(KICKER_KICK_POSITION);
     }
 
     /**
-     * Moves the kicker to the "down" position, preparing it for a kick.
+     * Moves the kicker to the "READY" position, preparing it for a kick.
      * This is the default or resting state.
      */
     public void setReady() {
-        if (isReady()) {
-            return;
-        }
 
-        kickerServo.setPosition(KICKER_DOWN_POSITION);
+        kickerServo.setPosition(KICKER_READY_POSITION);
     }
 
     /**
@@ -78,6 +78,6 @@ public class KickerSubsystem {
      */
     public boolean isReady() {
         // Compare the current servo position to the target 'down' position within a tolerance.
-        return isReady && kickerServo.getPosition() <= KICKER_DOWN_POSITION + 0.01;
+        return isReady && kickerServo.getPosition() <= KICKER_READY_POSITION + 0.01;
     }
 }

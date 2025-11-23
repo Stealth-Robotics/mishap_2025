@@ -211,6 +211,10 @@ public class ShooterSubsystem {
         return zoneMap.get(currentRpmZone);
     }
 
+    public ZoneDistance getCurrentZone() {
+        return currentRpmZone;
+    }
+
     /**
      * Checks if the shooter motors are at their target RPM within a defined tolerance.
      * This is useful for determining when it's safe to feed a projectile.

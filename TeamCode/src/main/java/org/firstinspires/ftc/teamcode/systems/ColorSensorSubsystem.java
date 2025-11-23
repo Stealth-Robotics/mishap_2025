@@ -25,16 +25,16 @@ public class ColorSensorSubsystem {
     // Hue is 0-360, Saturation and Value are 0.0-1.0
 
     // --- CLOSE RANGE (e.g., 20-58mm) ---
-    public static double[] greenArtifactCloseHSV = {155, 165, 0.6, .74, 0.08, .22};
-    public static double[] purpleArtifactCloseHSV = {170, 225, 0.4, .7, .04, .25};
+    public static double[] greenArtifactCloseHSV = {150, 168, 0.6, .74, 0.08, .22};
+    public static double[] purpleArtifactCloseHSV = {170, 240, 0.4, .7, .04, .25};
 
     // --- FAR RANGE (e.g., 58-72mm) ---
-    public static double[] greenArtifactFarHSV = {153.5, 161, 0.6, .8, 0.07, .091};
-    public static double[] purpleArtifactFarHSV = {171, 215, .4, .59, 0.05, .2};
+    public static double[] greenArtifactFarHSV = {150, 167, 0.6, .8, 0.07, .091};
+    public static double[] purpleArtifactFarHSV = {169, 240, .4, .59, 0.05, .2};
 
     // --- DISTANCE THRESHOLDS ---
     private static final double MIN_DISTANCE_MM = 20;
-    private static final double MAX_DISTANCE_MM = 72;
+    private static final double MAX_DISTANCE_MM = 70;
     // This value separates "close" from "far" range. Tune this as needed.
     private static final double CLOSE_FAR_THRESHOLD_MM = 58;
 
@@ -134,7 +134,8 @@ public class ColorSensorSubsystem {
         boolean satMatch = (saturation >= targetHsv[2] && saturation <= targetHsv[3]);
         boolean valMatch = (value >= targetHsv[4] && value <= targetHsv[5]);
 
-        return hueMatch && satMatch && valMatch;
+        // only matching Hue for now
+        return hueMatch; //&& satMatch && valMatch;
     }
 
     /**

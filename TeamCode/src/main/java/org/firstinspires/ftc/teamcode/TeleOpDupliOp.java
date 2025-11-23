@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.common.Alliance;
 import org.firstinspires.ftc.teamcode.common.FinalPose;
 import org.firstinspires.ftc.teamcode.common.Motif;
+import org.firstinspires.ftc.teamcode.common.SpindexerIndex;
 import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 
 @TeleOp (name = "_TeleOp_Driver_Operator", group = "Main")
@@ -30,6 +31,8 @@ public class TeleOpDupliOp extends OpMode {
     private boolean isSpindexerInitialized = false;
 
     private boolean wasTriggerPressed = false;
+    private boolean resetInProgress = false;
+
 
     /**
      * This method is run once when the driver hits "INIT" on the Driver Station.
@@ -107,12 +110,26 @@ public class TeleOpDupliOp extends OpMode {
             return;
         }
 
+        if (gamepad2.yWasPressed()) {
+            //Resets all of the states
+            robot.resetRobot();
+            this.resetInProgress = true;
+        }
+
         // --- Driver Controls ---
         handleDriveControls();
-        handleShooterControls();
-        handleIntakeControls();
-        handleSpindexerControls();
-        handleOtherControls();
+        if (resetInProgress) {
+            SpindexerIndex.setInvalid();
+            resetInProgress = !robot.doInitSpindexer(true);
+        }
+        else {
+
+            // --- Operator Controls ---)
+            handleShooterControls();
+            handleIntakeControls();
+            handleSpindexerControls();
+            handleOtherControls();
+        }
     }
 
     /**
@@ -145,11 +162,6 @@ public class TeleOpDupliOp extends OpMode {
         if (gamepad1.yWasPressed()) {
             // TODO: can use Pose offset to keep current pose
             robot.resetIMU();
-        }
-
-        if (gamepad2.yWasPressed()) {
-            //Resets all of the states
-            robot.resetRobot();
         }
     }
 
