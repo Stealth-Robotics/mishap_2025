@@ -7,9 +7,7 @@ import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.hardware.digitalchickenlabs.OctoQuad;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
@@ -35,7 +33,7 @@ public class SpindexerSubsystem {
     /**
      * The number of ticks to move backward after the index switch is released to center a slot.
      */
-    public static int INDEX_OFFSET_TICKS = 128;
+    public static int INDEX_OFFSET_TICKS = 125;
 
 
     private static final int SLOT_0_OFFSET = 0;
@@ -261,12 +259,12 @@ public class SpindexerSubsystem {
         }
 
         // You can add telemetry here to monitor PID performance
-        telemetryM.addData("Spindexer Target", adjustedPose);
-        telemetryM.addData("Spindexer Position", currentPosition);
-        telemetryM.addData("Spindexer Power", spindexer.getPower());
-        telemetryM.addData("PIDF Power", power);
-        telemetryM.addData("PIDF Error", spindexerPidf.getPositionError());
-        telemetryM.addData("Absolute Position", this.getCurrentAbsolutePosition());
+//        telemetryM.addData("Spindexer Target", adjustedPose);
+//        telemetryM.addData("Spindexer Position", currentPosition);
+//        telemetryM.addData("Spindexer Power", spindexer.getPower());
+//        telemetryM.addData("PIDF Power", power);
+//        telemetryM.addData("PIDF Error", spindexerPidf.getPositionError());
+//        telemetryM.addData("Absolute Position", this.getCurrentAbsolutePosition());
 
     }
     //==================================================================================================
@@ -304,9 +302,14 @@ public class SpindexerSubsystem {
             // force the octoquad to reset the wrap value
             octoquad.setSingleChannelPulseWidthTracksWrap(REV_PWM_1, false);
             octoquad.setSingleChannelPulseWidthTracksWrap(REV_PWM_1, true);
-            this.curShootSlot = 0;
+//            this.curShootSlot = 0;
+//            int currentPosition = getCurrentPosition();
+//            double shortestPathDelta = calculateShortestPathDelta(currentPosition, INDEX_OFFSET_TICKS, TICKS_PER_REV);
+
+            this.curShootSlot = this.getClosestSlotNumber();
             int currentPosition = getCurrentPosition();
-            double shortestPathDelta = calculateShortestPathDelta(currentPosition, INDEX_OFFSET_TICKS, TICKS_PER_REV);
+            double shortestPathDelta = calculateShortestPathDelta(currentPosition, getAbsoluteSloteTicks(curShootSlot), TICKS_PER_REV);
+
             this.lastTargetPosition = (int) Math.round(currentPosition + shortestPathDelta);
             minHomeTimer.reset();
             homingState = HomingState.MOVING_TO_OFFSET;
@@ -723,6 +726,34 @@ public class SpindexerSubsystem {
         return getStateBySlotNum(curShootSlot);
     }
 
+    /**
+     * Finds the slot number that is physically closest to the spindexer's current absolute position.
+     *
+     * @return The index of the closest slot.
+     */
+    private int getClosestSlotNumber() {
+        int closestSlot = 0;
+        int currentPosition = this.getCurrentAbsolutePosition();
+        for (int i = 0; i < NUMBER_OF_SLOTS; i++) {
+            int slotTicks = getAbsoluteSloteTicks(i);
+            if (Math.abs(slotTicks - currentPosition) <= TICKS_PER_SLOT / 2) {
+                closestSlot = i;
+                break;
+            }
+        }
+
+        return closestSlot;
+    }
+
+    /**
+     * Calculates the absolute encoder ticks for a given slot number.
+     *
+     * @param slotNumber The slot number for which to calculate the ticks.
+     * @return The absolute encoder ticks for the specified slot.
+     */
+    private int getAbsoluteSloteTicks(int slotNumber){
+        return (int) Math.round(INDEX_OFFSET_TICKS + SLOT_OFFSET_TICKS[slotNumber] + TICKS_PER_SLOT * slotNumber);
+    }
 
     //==================================================================================================
     //  M O T O R   C O N T R O L   &   U T I L I T I E S

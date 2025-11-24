@@ -48,14 +48,13 @@ public class ShooterSubsystem {
     // D (Derivative): Prevents overshooting the target.
     // F (Feedforward): Proactively applies power based on the target velocity, which is crucial for velocity control.
     // TODO: more tuning needed
- //   private static final PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(90, .5, 10, 13);
-    private static final PIDFCoefficients MOTOR_VELO_PID_LEFT = new PIDFCoefficients(40, 0.05, 0, 12.8); //1.3, 0.15, 0, 12.15);
-    private static final PIDFCoefficients MOTOR_VELO_PID_RIGHT = new PIDFCoefficients(30, 0.05, 0, 13.0); //1.3, 0.15, 0, 12.15);
+
+    private static final PIDFCoefficients MOTOR_VELO_PID_LEFT = new PIDFCoefficients(10, 0.17, 0, 11.61);
+    private static final PIDFCoefficients MOTOR_VELO_PID_RIGHT = new PIDFCoefficients(10, 0.17, 0, 11.93);
 
     // --- State Variables ---
     private boolean isShooterEnabled = false; // New state to track if the shooter is supposed to be running
     private double currentRpm = 0;
-    private boolean isNear = false; // Restored this state variable
 
     private ZoneDistance currentRpmZone = ZoneDistance.FAR;
 
@@ -82,8 +81,11 @@ public class ShooterSubsystem {
         // Apply the tuned PIDF coefficients for velocity control.
         leftShooter.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, MOTOR_VELO_PID_LEFT);
         leftShooter.setPositionPIDFCoefficients(5.0);
+        leftShooter.setTargetPositionTolerance(20);
         rightShooter.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, MOTOR_VELO_PID_RIGHT);
         rightShooter.setPositionPIDFCoefficients(5.0);
+        rightShooter.setTargetPositionTolerance(20);
+
         // Initialize velocity readers to get filtered RPM values from the motors.
         rightVelocityReader = new MotorVelocityReader(rightShooter, TICKS_PER_REV);
         leftVelocityReader = new MotorVelocityReader(leftShooter, TICKS_PER_REV);

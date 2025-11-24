@@ -78,6 +78,6 @@ public class KickerSubsystem {
      */
     public boolean isReady() {
         // Compare the current servo position to the target 'down' position within a tolerance.
-        return isReady && kickerServo.getPosition() <= KICKER_READY_POSITION + 0.01;
+        return isReady && kickerServo.getPosition() <= KICKER_READY_POSITION + 0.05;
     }
 }

@@ -43,24 +43,22 @@ public class RobotSystem {
     /** Multiplier to reduce drive speed for fine-tuned control. */
     public static double SLOW_MODE_MULTIPLIER = 0.3;
 
+    /** Deadzone for auto aiming note limelight degrees  **/
     public static double AUTO_AIM_TOLERANCE = 0.2;
-
 
     /** The maximum rotational power applied during auto-aim. */
     public static final double MAX_ROTATION_POWER = 0.98;
 
-    public static final double MIN_ROTATION_POWER = .07;
-
-    public static final double ROTATION_SIGNUM_POWER = .06;
-
+//    public static final double MIN_ROTATION_POWER = .07;
+//
+//    public static final double ROTATION_SIGNUM_POWER = .06;
 
     public static final int MAX_OVER_CURRENT_COUNT = 4;
 
     private static final double MAX_UNJAM_TIME = 1000;
 
-    /** PIDF coefficients for the heading controller used in auto-aim. */
-    private static final PIDFCoefficients HEADING_COEFFICIENTS
-            = new PIDFCoefficients(0.016, 0, 0, 0); //0.018, 0.0001, 0.001, 0.02
+//    private static final PIDFCoefficients HEADING_COEFFICIENTS
+//            = new PIDFCoefficients(0.016, 0, 0, 0); //0.018, 0.0001, 0.001, 0.02
 
     /** Maps the current motif pattern to a list of slot states. */
     private static final Map<Motif, List<SlotState>> motifSlots = Map.of(
@@ -119,9 +117,8 @@ public class RobotSystem {
     private final ColorSensorSubsystem colorSensorSys;
 
     // --- Control and Telemetry ---
-    //private static final PIDFController headingController = new PIDFController(HEADING_COEFFICIENTS);
     private final PIDFController headingController = new PIDFController(
-            .014,//HEADING_COEFFICIENTS.P,
+            .014,
             .51,
             0,
             .068
@@ -200,6 +197,11 @@ public class RobotSystem {
         return doInitSpindexer(false);
     }
 
+    /**
+     * Inititialize the spindexer with the optional parameter for foring the init.
+     * @param force true to ignore saved values and just do the init
+     * @return true if done otherwise false
+     */
     public boolean doInitSpindexer(boolean force) {
         if (!hoodSys.isReadyToShoot()
                 || !kickerSys.isReady()
@@ -533,8 +535,7 @@ public class RobotSystem {
      * Prepares the robot to shoot by spinning up the shooter wheels and setting the hood angle.
      */
     public void setReadyShoot() {
-        if (currentState != SystemState.PREPPING_SHOOT
-            && currentState != SystemState.STOPPING_INTAKE) {
+        if (currentState != SystemState.STOPPING_INTAKE) {
 
             if (currentState == SystemState.REVERSING_INTAKE
                     || currentState == SystemState.INTAKING) {
@@ -929,7 +930,10 @@ public class RobotSystem {
                     spindexerSys.setShootSlotEmpty();
                     currentState = SystemState.AFTER_SHOT;
                     stateTimer.reset();
+                } else if (!shooterSys.isRunning()) {
+                    shooterSys.runShooter();
                 }
+
                 break;
 
             case AFTER_SHOT:
@@ -1035,21 +1039,22 @@ public class RobotSystem {
      */
     private void displayTelemetry() {
         // TODO: remove unneeded output
+        telemetryM.addData("Current zone", shooterSys.getCurrentZone());
+        telemetryM.addData("Current AIM offset", getCurrentAimOffset());
         telemetryM.addData("Target RPM", shooterSys.getTargetRpm());
         telemetryM.addData("Shooter RPM (avg)", shooterSys.getCurrentRpm());
-        telemetryM.addData("Current AIM offset", getCurrentAimOffset());
-        //telemetryM.addData("Left Shooter RPM", shooterSys.getLeftRpm());
-        //telemetryM.addData("Right Shooter RPM", shooterSys.getRightRpm());
+        telemetryM.addData("LeftRpm", shooterSys.getLeftRpm());
+        telemetryM.addData("RightRpm", shooterSys.getRightRpm());
         telemetryM.addData("Auto Intaking:", isAutoIntaking);
         telemetryM.addData("Burst MODE", isBurstFire);
         telemetryM.addData("Spindexer offset:", spindexerSys.getCurrentOffset());
         telemetryM.addData("Is Spindexer Ready", spindexerSys.isReady());
         telemetryM.addData("shooterSys Ready:", shooterSys.isReadyToShoot());
-        telemetryM.addData("Current zone", shooterSys.getCurrentZone());
-//        telemetryM.addData("Robot State", currentState.name());
-//        telemetryM.addData("Shoot Slot Index", spindexerSys.getCurShootSlot());
+        telemetryM.addData("Hood Ready:", hoodSys.isReadyToShoot());
+        telemetryM.addData("Kicker Ready:", kickerSys.isReady());
+        telemetryM.addData("Robot State", currentState.name());
         telemetryM.addData("Shoot Slot State:", spindexerSys.getShootSlotState());
-        telemetryM.addData("Standbby Slot State:", spindexerSys.getStandbySlotState());
+        telemetryM.addData("Standby Slot State:", spindexerSys.getStandbySlotState());
         telemetryM.addData("Intake Slot State:", spindexerSys.getIntakeSlotState());
         telemetryM.addData("Shoot Slot Number:", spindexerSys.getCurShootSlot());
     //   telemetryM.addData("IsMotif available", spindexerSys.isMotifAvailable());
