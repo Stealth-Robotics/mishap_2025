@@ -265,10 +265,10 @@ public class TeleOpDupliOp extends OpMode {
             robot.decrementSpindexerSlot();
         }
         if (gamepad2.dpadLeftWasPressed()) {
-            robot.increaseSpindexer();
+            robot.decreaseSpindexer();
         }
         if (gamepad2.dpadRightWasPressed()) {
-            robot.decreaseSpindexer();
+            robot.increaseSpindexer();
         }
     }
 

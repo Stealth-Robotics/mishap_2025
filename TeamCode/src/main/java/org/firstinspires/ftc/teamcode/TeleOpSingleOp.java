@@ -233,10 +233,10 @@ public class TeleOpSingleOp extends OpMode {
             robot.incrementSpindexerSlot();
         }
         if (gamepad1.dpadLeftWasPressed()) {
-            robot.increaseSpindexer();
+            robot.decreaseSpindexer();
         }
         if (gamepad1.dpadRightWasPressed()) {
-            robot.decreaseSpindexer();
+            robot.increaseSpindexer();
         }
     }
 

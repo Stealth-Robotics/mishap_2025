@@ -4,8 +4,10 @@ import com.arcrobotics.ftclib.controller.PIDFController;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
+import com.qualcomm.hardware.digitalchickenlabs.OctoQuad;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -33,17 +35,23 @@ public class SpindexerSubsystem {
     /**
      * The number of ticks to move backward after the index switch is released to center a slot.
      */
-    public static int INDEX_OFFSET_TICKS = 320;
+    public static int INDEX_OFFSET_TICKS = 128;
+
+
+    private static final int SLOT_0_OFFSET = 0;
+    private static final int SLOT_1_OFFSET = -2;
+    private static final int SLOT_2_OFFSET = 6;
 
     /**
      * This value protects the spindexer from jamming and/or crushing the world
      */
     private static final double OVERLOAD_AMPS = 7.0;
 
+
     /**
-     * Ticks per revolution for the GoBilda 43 RPM motor (3895.9) geared up.
+     * the nuber of absolute ticks of the REV encoder per revolution
      */
-    private static final double TICKS_PER_REV = 8192.0;
+    private static final double TICKS_PER_REV = 1024;
     /**
      * The number of slots in the spindexer.
      */
@@ -56,38 +64,35 @@ public class SpindexerSubsystem {
     /**
      * The tolerance, in ticks, for considering the motor to have reached its target position.
      */
-    private static final int POSITION_TOLERANCE = 10;
+    private static final int POSITION_TOLERANCE = 4;
 
     /**
      * The maximum power limit for spindexer rotation.
      */
     public static double SPINDEXER_POWER_LIMIT = .98;
-    /**
-     * The maximum velocity (in ticks/sec) for spindexer rotation in RUN_TO_POSITION mode.
-     */
-    //public static double SPINDEXER_VELOCITY_LIMIT = 2600;
-
-    public static double SPINDEXER_KI_TICK_RANGE = 50;
 
     /**
      * PIDF coefficients for position control, tunable via FTC-Dashboard.
      */
-    // TODO: More tuning needed
-    //(.55, 0,.0001, 10)
-    // this full line works pretty good with the motor controller
-    //public static PIDFCoefficients SPINDEXER_PIDF = new PIDFCoefficients(0.26, 4.26, 0, 12.6);  //10, 2,1.2, 1); 8, 4,0.2, 1
-    //public static PIDFCoefficients SPINDEXER_PIDF = new PIDFCoefficients(02.6, .1, 0.1, 12.6);  //10, 2,1.2, 1); 8, 4,0.2, 1
-    public static double KP = 0.001;
-    public static double KI = 0.005; //.05;
-    public static double KD = 0.00001;
+    public static double KP = 0.0075;
+    public static double KI = 0.09;
+    public static double KD = 0.0005;
     public static double KF = 0;
-    public static double PIDF_BOUNDS = 25;
 
-    private static final int SLOT_0_OFFSET = 0;
-    private static final int SLOT_1_OFFSET = 70;
-    private static final int SLOT_2_OFFSET = 50;
+    public static  PIDFController spindexerPidf =
+            new PIDFController(KP, KI, KD, KF);
 
+    public static double PIDF_BOUNDS = .85;
+    public static double SPINDEXER_KI_TICK_RANGE = 15;
 
+    private static final int REV_PWM_1 = 4;
+
+    // REV V1 Through Bore Encoder PMW range
+    private static final int REV_PWM_LOW = 1;
+    private static final int REV_PWM_HIGH = 1024;
+    private static final double DEGREES_PER_US = (360.0 / 1024.0);  // REV Through Bore Encoder
+    private static final int VELOCITY_SAMPLE_INTERVAL_MS = 25;   // To provide 40 updates/Sec.
+    private final OctoQuad octoquad;
     // Per slot offsets
     private static final int[] SLOT_OFFSET_TICKS = {
             SLOT_0_OFFSET,    // Offset for Slot 0
@@ -95,8 +100,6 @@ public class SpindexerSubsystem {
             SLOT_2_OFFSET    // Example: Slot 2 needs to be nudged forward 10 ticks
     };
 
-
-    public PIDFController spindexerPidf;
 
     private final ElapsedTime currentSpikeTimer = new ElapsedTime();
 
@@ -114,7 +117,6 @@ public class SpindexerSubsystem {
     //==================================================================================================
 
     private final DcMotorEx spindexer;
-    private final TouchSensor indexSwitch;
 
     /**
      * An array to hold the state of each slot (e.g., EMPTY, ARTIFACT_GREEN).
@@ -126,7 +128,6 @@ public class SpindexerSubsystem {
      */
     private int curShootSlot = 0;
 
-    private int previousSlot = -1;
 
     /**
      * Stores the last commanded target position, used to resume position after floating.
@@ -149,7 +150,7 @@ public class SpindexerSubsystem {
 
     private final ElapsedTime minRotateTimer = new ElapsedTime();
 
-    private static final double MIN_HOME_TIME_MS = 2500;
+    private static final double MIN_HOME_TIME_MS = 1500;
 
     private static final double MAX_HOME_TIME_MS = 8000;
 
@@ -184,8 +185,8 @@ public class SpindexerSubsystem {
 
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
         spindexer = hardwareMap.get(DcMotorEx.class, "spindexer_motor");
-        indexSwitch = hardwareMap.get(TouchSensor.class, "index_switch");
-        spindexerPidf = new PIDFController(KP, KI, KD, KF);
+        octoquad = hardwareMap.get(OctoQuad.class, "octoquad");
+        initOctoQuad();
         spindexerPidf.setIntegrationBounds(-PIDF_BOUNDS, PIDF_BOUNDS);
         minSorterTimer.reset();
         spindexer.setDirection(DcMotorEx.Direction.FORWARD);
@@ -195,12 +196,33 @@ public class SpindexerSubsystem {
         //resetEncoder(); // Reset encoder to a known state on startup
     }
 
+    /**
+     * Configures the octoquad for quadrature encoders 0-3 and PWM (absolute encoder) for 4-7.
+     */
+    private void initOctoQuad() {
+        octoquad.setChannelBankConfig(OctoQuad.ChannelBankConfig.BANK1_QUADRATURE_BANK2_PULSE_WIDTH);
+        octoquad.setAllVelocitySampleIntervals(VELOCITY_SAMPLE_INTERVAL_MS);
+
+        // set channels 4 to 7 for REV through bore PWM (absolute) encoders
+        for (int i = 4; i < 8; i++) {
+            // TODO: decide if we want to wrap or not
+            octoquad.setSingleChannelPulseWidthTracksWrap(i, true);
+            octoquad.setSingleChannelPulseWidthParams(i, REV_PWM_LOW, REV_PWM_HIGH);
+        }
+
+        // set the spindexer REV encoder to reverse
+        octoquad.setSingleEncoderDirection(REV_PWM_1, OctoQuad.EncoderDirection.REVERSE);
+
+        // if the octoquad has a brown out this will make sure it picks the setttings back up.
+        octoquad.saveParametersToFlash();
+    }
+
     public void update() {
         updatePidf();
         if (isReady() && homingState.equals(HomingState.HOMED)) {
-            SpindexerIndex.setPosition(spindexer.getCurrentPosition(), curShootSlot);
-        }
-        else if (homingState.equals(HomingState.HOMED)) {
+            octoquad.refreshCache();
+            SpindexerIndex.setPosition(this.getCurrentPosition(), curShootSlot);
+        } else if (homingState.equals(HomingState.HOMED)) {
             SpindexerIndex.setInvalid();
         }
     }
@@ -216,58 +238,59 @@ public class SpindexerSubsystem {
             return;
         }
 
-        int adjustedPose = lastTargetPosition - SLOT_OFFSET_TICKS[curShootSlot];
+        int adjustedPose = lastTargetPosition + SLOT_OFFSET_TICKS[curShootSlot];
+        int currentPosition = this.getCurrentPosition();
 
         // Set the target for the PIDF controller
         spindexerPidf.setSetPoint(adjustedPose);
 
         // Only apply KI when close to setpoint
-        if (Math.abs(spindexer.getCurrentPosition() - adjustedPose) > SPINDEXER_KI_TICK_RANGE) {
+        if (Math.abs(currentPosition - adjustedPose) > SPINDEXER_KI_TICK_RANGE) {
             spindexerPidf.clearTotalError();
         }
 
         // Calculate the power needed to reach the target position
-        double power = -spindexerPidf.calculate(spindexer.getCurrentPosition());
+        double power = spindexerPidf.calculate(currentPosition);
 
-        if (Math.abs(adjustedPose - spindexer.getCurrentPosition()) >= POSITION_TOLERANCE + 1) {
+        if (Math.abs(adjustedPose - currentPosition) + 1 >= POSITION_TOLERANCE) {
             // Apply the calculated power to the motor, respecting the power limit
             spindexer.setPower(Math.max(-SPINDEXER_POWER_LIMIT, Math.min(power, SPINDEXER_POWER_LIMIT)));
-        }
-        else {
+        } else {
             spindexer.setPower(0);
+            spindexerPidf.clearTotalError();
         }
 
         // You can add telemetry here to monitor PID performance
         telemetryM.addData("Spindexer Target", adjustedPose);
-        telemetryM.addData("Spindexer Position", spindexer.getCurrentPosition());
+        telemetryM.addData("Spindexer Position", currentPosition);
         telemetryM.addData("Spindexer Power", spindexer.getPower());
         telemetryM.addData("PIDF Power", power);
         telemetryM.addData("PIDF Error", spindexerPidf.getPositionError());
+        telemetryM.addData("Absolute Position", this.getCurrentAbsolutePosition());
+
     }
     //==================================================================================================
     //  I N I T I A L I Z A T I O N   &   S T A T E   M A C H I N E
     //==================================================================================================
 
     /**
-     * Executes the stateful homing sequence to find a precise zero position using the index switch.
+     * Executes the stateful homing sequence to find the zero position + offset
      * This method must be called repeatedly in a loop (e.g., in an OpMode's init_loop).
      *
      * @return True when the entire homing process is complete; otherwise false.
      */
     public boolean doInitPosition(boolean force) {
-        // Define power levels for homing. Use lower power for precision.
 
+        // If a state has been caried over use that
         if (SpindexerIndex.getIsValid() && !force
-            && homingState != HomingState.HOMED) {
+                && homingState != HomingState.HOMED) {
             this.curShootSlot = SpindexerIndex.getShootSlot();
             this.lastTargetPosition = SpindexerIndex.getPosition();
             homingState = HomingState.HOMED;
             return true;
         }
 
-        double fastSearchPower = 0.85;  // Power for moving toward the switch initially.
-        double slowSearchPower = 0.095;  // Slow power for finding the precise switch edge.
-
+        // reset any offsets added from the controller
         if (force && homingState.equals(HomingState.HOMED)) {
             SLOT_OFFSET_TICKS[0] = SLOT_0_OFFSET;
             SLOT_OFFSET_TICKS[1] = SLOT_1_OFFSET;
@@ -275,70 +298,28 @@ public class SpindexerSubsystem {
             homingState = HomingState.START;
         }
 
-        switch (homingState) {
-            case START:
-
-                if (isIndexSwitchPressed()) {
-                    // If starting pressed, move backwords quickly to find the release point.
-                    spindexer.setPower(-fastSearchPower); // Positive power moves forward.
-                    homingState = HomingState.SEARCHING_BACKWARD;
-                } else {
-                    // If not pressed, move forward SLOWLY to find the press point.
-                    spindexer.setPower(slowSearchPower);
-                    homingState = HomingState.SEARCHING_FORWARD;
-                }
-
-                return false;
-            case SEARCHING_BACKWARD:
-                // Continue moving backwords until the switch is released.
-                if (!isIndexSwitchPressed()) {
-                    // Switch released. Now, move forward slowly to find the precise trigger point.
-                    spindexer.setPower(slowSearchPower);
-                    homingState = HomingState.SEARCHING_FORWARD;
-                }
-
-                return false;
-
-            case SEARCHING_FORWARD:
-                // Continue moving forward until the switch is pressed.
-                if (isIndexSwitchPressed()) {
-                    // Switch has just been pressed. This is our precise trigger point.
-                    spindexer.setPower(0); // Stop the motor immediately.
-
-                    // The rest of your logic is already correct for the custom PIDF!
-                    int triggerPosition = spindexer.getCurrentPosition();
-                    this.lastTargetPosition = triggerPosition - INDEX_OFFSET_TICKS;
-
-                    spindexerPidf.setSetPoint(this.lastTargetPosition);
-                    homingState = HomingState.MOVING_TO_OFFSET;
-                    minHomeTimer.reset();
-                }
-
-                return false;
-
-            case MOVING_TO_OFFSET:
-                // The updatePidf() method is now handling the movement.
-                // We just need to check if it has reached the target.
-                if ((isReady() && minHomeTimer.milliseconds() > MIN_HOME_TIME_MS)
-                || minHomeTimer.milliseconds() > MAX_HOME_TIME_MS) {
-                    homingState = HomingState.DONE;
-                    spindexer.setPower(0); // Stop the motor.
-                }
-
-                return false;
-
-            case DONE:
-                // Finalize the homing process.
-                resetEncoder(); // The current position is now our absolute zero.
-                homingState = HomingState.HOMED;
-                return true; // Signal completion.
-
-            case HOMED:
-                // The spindexer is successfully homed.
-                return true;
+        // start a rotate to slot 0
+        if (homingState.equals(HomingState.START)) {
+            octoquad.resetSinglePosition(REV_PWM_1);
+            // force the octoquad to reset the wrap value
+            octoquad.setSingleChannelPulseWidthTracksWrap(REV_PWM_1, false);
+            octoquad.setSingleChannelPulseWidthTracksWrap(REV_PWM_1, true);
+            this.curShootSlot = 0;
+            int currentPosition = getCurrentPosition();
+            double shortestPathDelta = calculateShortestPathDelta(currentPosition, INDEX_OFFSET_TICKS, TICKS_PER_REV);
+            this.lastTargetPosition = (int) Math.round(currentPosition + shortestPathDelta);
+            minHomeTimer.reset();
+            homingState = HomingState.MOVING_TO_OFFSET;
+            return false;
         }
 
-        return false; // Should not be reached
+        if (isReady() && minHomeTimer.milliseconds() > MIN_HOME_TIME_MS
+                || minHomeTimer.milliseconds() > MAX_HOME_TIME_MS) {
+            homingState = HomingState.HOMED;
+            return true;
+        }
+
+        return false;
     }
 
     public boolean doCheckForArtifacts() {
@@ -386,9 +367,54 @@ public class SpindexerSubsystem {
         return false;
     }
 
+    /**
+     * Calculates the shortest delta in ticks to reach a target position from the current position,
+     * accounting for wrapping around the spindexer's full rotation.
+     *
+     * @param currentPosition    The current raw encoder position of the motor.
+     * @param targetPosition     The absolute target encoder position.
+     * @param ticksPerRevolution The total number of encoder ticks for one full revolution (e.g., NUMBER_OF_SLOTS * TICKS_PER_SLOT).
+     * @return The shortest delta in ticks to apply to the current position to reach the target.
+     */
+    private double calculateShortestPathDelta(double currentPosition, double targetPosition, double ticksPerRevolution) {
+        // Calculate the direct path
+        double directDelta = targetPosition - currentPosition;
+
+        // Calculate the path if we wrap around (go the other way)
+        double wrappedDelta;
+        if (directDelta > 0) {
+            // If moving forward, the wrapped path is to go backward by the remaining distance
+            wrappedDelta = directDelta - ticksPerRevolution;
+        } else {
+            // If moving backward, the wrapped path is to go forward by the remaining distance
+            wrappedDelta = directDelta + ticksPerRevolution;
+        }
+
+        // Return the delta with the smaller absolute magnitude
+        if (Math.abs(directDelta) <= Math.abs(wrappedDelta)) {
+            return directDelta;
+        } else {
+            return wrappedDelta;
+        }
+    }
+
+
     //==================================================================================================
     //  C O R E   M O V E M E N T   M E T H O D S
     //==================================================================================================
+
+    public int getCurrentPosition() {
+        OctoQuad.EncoderDataBlock dataBlock = octoquad.readAllEncoderData();
+        return dataBlock.positions[REV_PWM_1];
+    }
+
+    public int getCurrentAbsolutePosition() {
+        return Math.floorMod(getCurrentPosition(), REV_PWM_HIGH) + 1;
+    }
+
+    public double getCurrentAbsoluteAngle() {
+        return (getCurrentAbsolutePosition() * DEGREES_PER_US);
+    }
 
     /**
      * Checks if the spindexer is currently over the current limit.
@@ -491,14 +517,13 @@ public class SpindexerSubsystem {
         this.lastTargetPosition = targetPosition;
 
         // Updates the pointer to the new absolute slot.
-        previousSlot = curShootSlot;
         curShootSlot = slotNumber;
     }
 
     private double getDelta(int destinationSlot) {
 
         // Calculate the difference in slots.
-        double deltaInSlots =  curShootSlot - destinationSlot;
+        double deltaInSlots = destinationSlot - curShootSlot;
 
         // Find the shortest path in terms of slots (e.g., is it shorter to go from slot 0 to 2, or 0 to 1?)
         if (deltaInSlots > NUMBER_OF_SLOTS / 2.0) {
@@ -581,25 +606,10 @@ public class SpindexerSubsystem {
         SLOT_OFFSET_TICKS[curShootSlot] += ticksToNudge;
     }
 
-    /**
-     * Gets the raw tick count on the spindexer motor.
-     *
-     * @return The current position of the motor.
-     */
-    public int getCurrentPosition() {
-        return spindexer.getCurrentPosition();
-    }
 
 //==================================================================================================
 //  S L O T   M A N A G E M E N T
 //==================================================================================================
-
-/**
- * NEW MAPPING:
- * - Shoot Slot:   curShootSlot
- * - Standby Slot: (curShootSlot + 1) % NUMBER_OF_SLOTS
- * - Intake Slot:  (curShootSlot + 2) % NUMBER_OF_SLOTS
- */
 
     /**
      * Returns the current slot index aligned with the shooter.
@@ -689,13 +699,6 @@ public class SpindexerSubsystem {
     }
 
     /**
-     * Returns the index of the slot that was previously in the shoot position.
-     */
-    public int getPreviousSlot() {
-        return previousSlot;
-    }
-
-    /**
      * Resets the state of all slots to EMPTY.
      */
     public void setSlotsEmpty() {
@@ -706,9 +709,9 @@ public class SpindexerSubsystem {
      * Sets all slots to a predefined autonomous configuration (GPP).
      */
     public void setSlotsAuto() {
-        Arrays.fill(slotStates, SlotState.ARTIFACT_PURPLE);
+        slotStates[0] = SlotState.ARTIFACT_PURPLE;
+        slotStates[1] = SlotState.ARTIFACT_PURPLE;
         slotStates[2] = SlotState.ARTIFACT_GREEN;
-        curShootSlot = 0; // Assume we start at slot 0
     }
 
     /**
@@ -719,7 +722,6 @@ public class SpindexerSubsystem {
     public SlotState getShootSlotState() {
         return getStateBySlotNum(curShootSlot);
     }
-
 
 
     //==================================================================================================
@@ -753,15 +755,15 @@ public class SpindexerSubsystem {
 
         // Calculate the true final target, exactly as it's calculated in the update() method.
         // This is the position the PIDF controller is actually aiming for.
-        int finalTargetPosition = lastTargetPosition - SLOT_OFFSET_TICKS[curShootSlot];
+        int finalTargetPosition = lastTargetPosition + SLOT_OFFSET_TICKS[curShootSlot];
 
         // Calculate the error: the difference between where we want to be and where we are.
-        double error = finalTargetPosition - spindexer.getCurrentPosition();
+        double error = finalTargetPosition - this.getCurrentPosition();
 
         // Check all conditions for readiness:
         //    - The position error is within the acceptable tolerance.
         //    - The minimum time for rotation has passed (to prevent premature triggers).
-        return Math.abs(error) < POSITION_TOLERANCE
+        return Math.abs(error) <= POSITION_TOLERANCE
                 && minRotateTimer.milliseconds() > MIN_ROTATE_TIME_MS;
     }
 
@@ -784,45 +786,21 @@ public class SpindexerSubsystem {
         isFloat = true;
     }
 
-
     /**
-     * Checks if the magnetic index switch is currently triggered.
-     * The logic is inverted because the hardware sensor is normally closed.
+     * Checks if all slots are full.
      *
-     * @return True if the switch is pressed (magnet is present).
+     * @return true for full otherwise false
      */
-    public boolean isIndexSwitchPressed() {
-        return !indexSwitch.isPressed();
-    }
-
-    /**
-     * Allows for manual spinning of the spindexer with a given power.
-     * @param power The power to apply, from -1.0 to 1.0.
-     */
-    public void spin(double power) {
-        spindexer.setPower(power);
-    }
-
     public boolean isFull() {
         return Arrays.stream(slotStates).noneMatch(state -> state == SlotState.EMPTY);
     }
 
+    /**
+     * Checks if all slots are empty.
+     *
+     * @return true for empty otherwise false
+     */
     public boolean isEmpty() {
         return Arrays.stream(slotStates).allMatch(state -> state == SlotState.EMPTY);
     }
-
-    /**
-     * Resets the motor's encoder count to zero and sets the current position as the new zero.
-     */
-    private void resetEncoder() {
-        // Stop the motor and reset the encoder's internal counter to 0.
-        spindexer.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        // Set our internal target and the controller's target to the new zero position.
-        this.lastTargetPosition = 0;
-        spindexerPidf.reset();
-        spindexerPidf.setSetPoint(0);
-
-        // Set the motor for our manual control loop. The update() method will control power.
-        spindexer.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-    }}
+}

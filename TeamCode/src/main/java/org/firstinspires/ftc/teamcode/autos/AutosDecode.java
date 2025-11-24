@@ -89,8 +89,8 @@ public abstract class AutosDecode extends OpMode {
      */
     protected void setSpindexerInitState()
     {
-        //robot.initSpindxerSlotsEmpty();
-        robot.initSpindxerSlotsAuto();
+        robot.initSpindxerSlotsEmpty();
+        //robot.initSpindxerSlotsAuto();
     }
 
     /**

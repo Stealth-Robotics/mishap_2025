@@ -838,10 +838,10 @@ public class RobotSystem {
     public void decreaseShooterRpm() { shooterSys.decreaseCurrentRpmRange(); }
 
     /** Nudges the spindexer's raw position by a small positive amount. */
-    public void increaseSpindexer() { spindexerSys.nudgePosition(-10); }
+    public void increaseSpindexer() { spindexerSys.nudgePosition(5); }
 
     /** Nudges the spindexer's raw position by a small negative amount. */
-    public void decreaseSpindexer() { spindexerSys.nudgePosition(+10); }
+    public void decreaseSpindexer() { spindexerSys.nudgePosition(-5); }
 
     /** Sets the shooter's target range */
     public void setShooterTargetRangeNear() { shooterSys.setTargetRange(ZoneDistance.NEAR); }
@@ -1027,21 +1027,6 @@ public class RobotSystem {
         headingController.setSetPoint(0);
         // Update the controller with the current error.
         double pidOutput = headingController.calculate(txDelta);
-        // Run the PID calculation.
-        //double pidOutput = headingController.run();
-
-        // If the error is outside the tolerance, return the clamped PID output.
-        // Otherwise, return 0 to stop turning.
-//        if (Math.abs(pidOutput) > 1e-4 && Math.abs(pidOutput) < MIN_ROTATION_POWER) {
-//            pidOutput = pidOutput + (Math.signum(pidOutput) * ROTATION_SIGNUM_POWER);
-//            if (Math.abs(pidOutput) > MIN_ROTATION_POWER){
-//                pidOutput = Math.signum(pidOutput) * MIN_ROTATION_POWER;
-//            }else
-//            if (Math.abs(pidOutput) < MIN_ROTATION_POWER) {
-//                pidOutput = 0;
-//            }
-//        }
-
         return  MathFunctions.clamp(pidOutput, -MAX_ROTATION_POWER, MAX_ROTATION_POWER);
     }
 
