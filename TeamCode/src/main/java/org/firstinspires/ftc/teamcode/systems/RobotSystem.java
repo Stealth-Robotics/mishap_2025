@@ -1040,11 +1040,20 @@ public class RobotSystem {
     private void displayTelemetry() {
         // TODO: remove unneeded output
         telemetryM.addData("Current zone", shooterSys.getCurrentZone());
-        telemetryM.addData("Current AIM offset", getCurrentAimOffset());
+
+        double aimOffset = getCurrentAimOffset();
+        String txt = "Center";
+        if (aimOffset < 0) {
+            txt = "Left";
+        } else if (aimOffset > 0) {
+            txt = "Right";
+        }
+
+        telemetryM.addLine(String.format("Current Aim Angle: %.2f (%s)", getCurrentAimOffset(), txt));
         telemetryM.addData("Target RPM", shooterSys.getTargetRpm());
         telemetryM.addData("Shooter RPM (avg)", shooterSys.getCurrentRpm());
-        telemetryM.addData("LeftRpm", shooterSys.getLeftRpm());
-        telemetryM.addData("RightRpm", shooterSys.getRightRpm());
+//        telemetryM.addData("LeftRpm", shooterSys.getLeftRpm());
+//        telemetryM.addData("RightRpm", shooterSys.getRightRpm());
         telemetryM.addData("Auto Intaking:", isAutoIntaking);
         telemetryM.addData("Burst MODE", isBurstFire);
         telemetryM.addData("Spindexer offset:", spindexerSys.getCurrentOffset());
