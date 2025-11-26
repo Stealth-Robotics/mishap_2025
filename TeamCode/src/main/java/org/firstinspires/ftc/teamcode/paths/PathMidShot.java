@@ -36,7 +36,7 @@ public class PathMidShot extends PathManager{
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(152), Math.toRadians(50))
                         .addParametricCallback(0, robot::trySelectFirstMotifSlot)
-                        .addParametricCallback(0.8, ()-> {
+                        .addParametricCallback(1, ()-> {
                             robot.setShooterTargetRangeMid();
                             robot.startShooter();
                         })
@@ -60,7 +60,7 @@ public class PathMidShot extends PathManager{
                         )
                         .setTangentHeadingInterpolation()
                         .setReversed()
-                        .addParametricCallback(.1, ()->follower.setMaxPower(.20))
+                        .addParametricCallback(.1, ()->follower.setMaxPower(INTAKE_SPEED))
                         .build()
         );
 
@@ -140,7 +140,7 @@ public class PathMidShot extends PathManager{
                         )
                         .setTangentHeadingInterpolation()
                         .setReversed()
-                        .addParametricCallback(.1, ()->follower.setMaxPower(.20))
+                        .addParametricCallback(.1, ()->follower.setMaxPower(INTAKE_SPEED))
                         .addParametricCallback(.99, robot::stopIntake)
                         .build()
         );

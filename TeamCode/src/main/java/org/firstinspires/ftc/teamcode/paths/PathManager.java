@@ -20,6 +20,8 @@ import java.util.List;
  */
 public class PathManager implements Path {
 
+    public static double INTAKE_SPEED = 0.25;
+
     /** The starting pose of the robot on the field. */
     protected Pose startPose;
 

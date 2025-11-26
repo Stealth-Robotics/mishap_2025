@@ -37,7 +37,7 @@ public class PathFarAuto1 extends PathManager{
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(70))
                         .addParametricCallback(0, robot::trySelectFirstMotifSlot)
-                        .addParametricCallback(0.5, ()-> {
+                        .addParametricCallback(1, ()-> {
                             robot.setShooterTargetRangeFar();
                             robot.startShooter();
                         })
@@ -65,7 +65,7 @@ public class PathFarAuto1 extends PathManager{
                         )
                         .setTangentHeadingInterpolation()
                         .setReversed()
-                        .addParametricCallback(.1, ()->follower.setMaxPower(.20))
+                        .addParametricCallback(.1, ()->follower.setMaxPower(INTAKE_SPEED))
                         .build()
         );
 
@@ -88,10 +88,8 @@ public class PathFarAuto1 extends PathManager{
                                         && robot.isHoodShootPose(),
                                 robot::incrementSpindexerSlot)
 
-                        .addParametricCallback(.8, () -> {
-                            robot.trySelectFirstMotifSlot();
-                            robot.startShooter();
-                        })
+                        .addParametricCallback(.5, robot::trySelectFirstMotifSlot)
+                        .addParametricCallback(1, robot::startShooter)
                         .build()
         );
 
@@ -122,7 +120,7 @@ public class PathFarAuto1 extends PathManager{
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(110))
                         .addParametricCallback(0, robot::trySelectFirstMotifSlot)
-                        .addParametricCallback(0.2, ()-> {
+                        .addParametricCallback(1, ()-> {
                             robot.setShooterTargetRangeFar();
                             robot.startShooter();
                         })
@@ -150,7 +148,7 @@ public class PathFarAuto1 extends PathManager{
                         )
                         .setTangentHeadingInterpolation()
                         .setReversed()
-                        .addParametricCallback(.02, ()->follower.setMaxPower(.20))
+                        .addParametricCallback(.02, ()->follower.setMaxPower(INTAKE_SPEED))
                         .addParametricCallback(.99, robot::stopIntake)
                         .build()
         );
@@ -174,10 +172,8 @@ public class PathFarAuto1 extends PathManager{
                                         && robot.isHoodShootPose(),
                                 robot::incrementSpindexerSlot)
 
-                        .addParametricCallback(.8, () -> {
-                            robot.trySelectFirstMotifSlot();
-                            robot.startShooter();
-                        })
+                        .addParametricCallback(.5, robot::trySelectFirstMotifSlot)
+                        .addParametricCallback(1, robot::startShooter)
                         .build()
         );
 

@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 @Configurable
 public class SweeperSubsystem {
 
-    public static double MAX_SWEEPER_SPEED = .8; // 1.0
+    public static double MAX_SWEEPER_SPEED = 1; // 1.0
 
     public static double MAX_EGG_BEATER_SPEED = 1; // 1.0
 
@@ -62,6 +62,15 @@ public class SweeperSubsystem {
         rightSweeper.setPower(0);
         eggbeater.setPower(0);
     }
+
+    public void stopEggbeater() {
+        eggbeater.setPower(0);
+    }
+
+    public void startEggbeater() {
+        eggbeater.setPower(MAX_EGG_BEATER_SPEED);
+    }
+
 
     /**
      * Reverses the direction of the sweeper mechanism for outtake or to clear a jam.

@@ -79,7 +79,7 @@ public class PathOnWallNear extends PathManager{
                         )
                         .setTangentHeadingInterpolation()
                         .setReversed()
-                        .addParametricCallback(.1, ()->follower.setMaxPower(.20))
+                        .addParametricCallback(.1, ()->follower.setMaxPower(INTAKE_SPEED))
                         .build()
         );
 
@@ -169,7 +169,7 @@ public class PathOnWallNear extends PathManager{
                         )
                         .setTangentHeadingInterpolation()
                         .setReversed()
-                        .addParametricCallback(.1, ()->follower.setMaxPower(.20))
+                        .addParametricCallback(.1, ()->follower.setMaxPower(INTAKE_SPEED))
                         .addParametricCallback(.99, robot::stopIntake)
                         .build()
         );

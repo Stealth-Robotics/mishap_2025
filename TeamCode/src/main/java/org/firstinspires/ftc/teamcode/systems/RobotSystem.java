@@ -19,6 +19,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.common.*;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.opencv.ml.EM;
 
 
 import java.util.HashMap;
@@ -56,9 +57,6 @@ public class RobotSystem {
     public static final int MAX_OVER_CURRENT_COUNT = 4;
 
     private static final double MAX_UNJAM_TIME = 1000;
-
-//    private static final PIDFCoefficients HEADING_COEFFICIENTS
-//            = new PIDFCoefficients(0.016, 0, 0, 0); //0.018, 0.0001, 0.001, 0.02
 
     /** Maps the current motif pattern to a list of slot states. */
     private static final Map<Motif, List<SlotState>> motifSlots = Map.of(
@@ -99,6 +97,8 @@ public class RobotSystem {
     //==================================================================================================
     // Member Variables
     //==================================================================================================
+
+    private final Debouncer artifactDebouncer = new Debouncer(1.0, Debouncer.DebounceType.kFalling);
     private final Map<ZoneDistance, Double> zoneMap;
     private ZoneDistance currentZone = ZoneDistance.FAR;
 
@@ -469,7 +469,7 @@ public class RobotSystem {
         hoodSys.setShootPose();
         sweeperSys.stopIntake();
         shooterSys.stop();
-        spindexerSys.setBrake();
+        spindexerSys.resetEmergencyStop();
 
     }
 
@@ -526,7 +526,7 @@ public class RobotSystem {
         if (currentState == SystemState.INTAKING
                 || currentState == SystemState.REVERSING_INTAKE) {
             stopIntake();
-        } else if (currentState != SystemState.STOPPING_INTAKE){
+        } else {
             startIntake();
         }
     }
@@ -609,7 +609,8 @@ public class RobotSystem {
      * @return returns false until done shooting the motif
      */
     public boolean continueShootMotif() {
-        telemetry.addData("Motif index", curMotifIndex);
+        telemetryM.addData("Motif State", currentState);
+        telemetry.addData("isMotifAvailable", isMotifAvailable);
         // must wait for the spindexer or shot cycle to finish
         if (this.isSpindexerBusy() || currentState == SystemState.SHOOT_IT) {
             return false;
@@ -904,16 +905,17 @@ public class RobotSystem {
                 // The hood will let us know when it is closed check the delay setting in HoodSubsystem
                 if (hoodSys.isReadyToShoot()) {
                     sweeperSys.stopIntake();
+                    spindexerSys.setIntaking(false);
                     spindexerSys.setBrake();
 
                     SlotState slotState = colorSensorSys.getLastDetection();
                     if (slotState != SlotState.EMPTY) {
                         spindexerSys.setIntakeSlotState(slotState);
-                        if (spindexerSys.getShootSlotState() == SlotState.EMPTY) {
+                        //if (spindexerSys.getShootSlotState() == SlotState.EMPTY) {
                             spindexerSys.advanceOneSlot();
                             currentState = SystemState.SPINDEXING;
                             break;
-                        }
+                        //}
                     }else {
                         spindexerSys.setIntakeSlotEmpty();
                     }
@@ -965,16 +967,19 @@ public class RobotSystem {
                 // IDLE state keep an eye on the intaking slot
                 // if there is a change update the state
                 if (!this.isSpindexerBusy()) {
+                    // Use a debouncer to prevent transient uknown or empty etections
                     SlotState detectedState = colorSensorSys.getLastDetection();
                     SlotState currentSlotState = spindexerSys.getIntakeSlotState();
-
-                    if (detectedState != currentSlotState) {
+                    boolean isArtifactPresent = !detectedState.equals(SlotState.EMPTY) && !detectedState.equals(SlotState.UNKNOWN);
+                    boolean isArtifactStable = artifactDebouncer.calculate(isArtifactPresent);
+                    if (isArtifactStable == isArtifactPresent && detectedState != currentSlotState) {
                             spindexerSys.setIntakeSlotState(detectedState);
                         }
                 }
 
                 break;
             case INTAKING:
+                spindexerSys.setIntaking(true);
                 if (isAutoIntaking) {
 
                     SlotState itemDetected = colorSensorSys.getLastDetection();
@@ -1039,7 +1044,6 @@ public class RobotSystem {
      */
     private void displayTelemetry() {
         // TODO: remove unneeded output
-        telemetryM.addData("Current zone", shooterSys.getCurrentZone());
 
         double aimOffset = getCurrentAimOffset();
         String txt = "Center";
@@ -1049,32 +1053,32 @@ public class RobotSystem {
             txt = "Right";
         }
 
-        telemetryM.addLine(String.format("Current Aim Angle: %.2f (%s)", getCurrentAimOffset(), txt));
-        telemetryM.addData("Target RPM", shooterSys.getTargetRpm());
-        telemetryM.addData("Shooter RPM (avg)", shooterSys.getCurrentRpm());
-//        telemetryM.addData("LeftRpm", shooterSys.getLeftRpm());
-//        telemetryM.addData("RightRpm", shooterSys.getRightRpm());
-        telemetryM.addData("Auto Intaking:", isAutoIntaking);
-        telemetryM.addData("Burst MODE", isBurstFire);
-        telemetryM.addData("Spindexer offset:", spindexerSys.getCurrentOffset());
-        telemetryM.addData("Is Spindexer Ready", spindexerSys.isReady());
-        telemetryM.addData("shooterSys Ready:", shooterSys.isReadyToShoot());
-        telemetryM.addData("Hood Ready:", hoodSys.isReadyToShoot());
-        telemetryM.addData("Kicker Ready:", kickerSys.isReady());
         telemetryM.addData("Robot State", currentState.name());
+        telemetryM.addData("isShootReady:", isShootReady);
+//        telemetryM.addData("Current zone", shooterSys.getCurrentZone());
+//        telemetryM.addLine(String.format("Current Aim Angle: %.2f (%s)", getCurrentAimOffset(), txt));
+//        telemetryM.addData("Target RPM", shooterSys.getTargetRpm());
+//        telemetryM.addData("Shooter RPM (avg)", shooterSys.getCurrentRpm());
+////        telemetryM.addData("LeftRpm", shooterSys.getLeftRpm());
+////        telemetryM.addData("RightRpm", shooterSys.getRightRpm());
+
+////        telemetryM.addData("Auto Intaking:", isAutoIntaking);
+////        telemetryM.addData("Burst MODE", isBurstFire);
+//        telemetryM.addData("Spindexer offset:", spindexerSys.getCurrentOffset());
+//        telemetryM.addData("Is Spindexer Ready", spindexerSys.isReady());
+//        telemetryM.addData("shooterSys Ready:", shooterSys.isReadyToShoot());
+//        telemetryM.addData("Hood Ready:", hoodSys.isReadyToShoot());
+//        telemetryM.addData("Kicker Ready:", kickerSys.isReady());
         telemetryM.addData("Shoot Slot State:", spindexerSys.getShootSlotState());
         telemetryM.addData("Standby Slot State:", spindexerSys.getStandbySlotState());
         telemetryM.addData("Intake Slot State:", spindexerSys.getIntakeSlotState());
         telemetryM.addData("Shoot Slot Number:", spindexerSys.getCurShootSlot());
-    //   telemetryM.addData("IsMotif available", spindexerSys.isMotifAvailable());
-//        telemetryM.addData("Hood State:", hoodSys.getHoodState());
-//        telemetryM.addData("Motor RPM:", shooterSys.getMotorRpms());
-//        telemetryM.addData("isShootReady:", isShootReady);
+//       telemetryM.addData("IsMotif available", spindexerSys.isMotifAvailable());
 //        telemetryM.addData("Spindexer Raw Position", spindexerSys.getCurrentPosition());
 //        telemetryM.addData("CURRENT HEADING", follower.getHeading());
 
         // TODO: THIS SHOULD BE REMOVED BEFORE COMP
-        //this.draw();
+        this.draw();
         /* INPORTAINT This updates the telemetry for all systems here no need to duplicate anywhere else */
         telemetryM.update(telemetry);
     }

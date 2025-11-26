@@ -29,7 +29,7 @@ public class PathThiefTwo extends PathManager {
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(70))
                         .addParametricCallback(0, robot::trySelectFirstMotifSlot)
-                        .addParametricCallback(0.5, ()-> {
+                        .addParametricCallback(1, ()-> {
                             robot.setShooterTargetRangeFar();
                             robot.startShooter();
                         })
@@ -56,7 +56,7 @@ public class PathThiefTwo extends PathManager {
                                 )
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(-180), Math.toRadians(90))
-                        .addParametricCallback(.1, ()->follower.setMaxPower(.20))
+                        .addParametricCallback(.1, ()->follower.setMaxPower(INTAKE_SPEED))
         .build()
         );
         addRedPath(

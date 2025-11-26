@@ -34,7 +34,7 @@ public class ColorSensorSubsystem {
 
     // --- DISTANCE THRESHOLDS ---
     private static final double MIN_DISTANCE_MM = 20;
-    private static final double MAX_DISTANCE_MM = 70;
+    private static final double MAX_DISTANCE_MM = 72;
     // This value separates "close" from "far" range. Tune this as needed.
     private static final double CLOSE_FAR_THRESHOLD_MM = 58;
 
@@ -60,7 +60,7 @@ public class ColorSensorSubsystem {
 
     public void update() {
         lastDetection = getDetectedColor();
-        //updateTelemetry();
+//        updateTelemetry();
     }
 
     private void updateTelemetry() {

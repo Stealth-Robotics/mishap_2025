@@ -6,6 +6,7 @@ import com.bylazar.panels.json.PanelsWidget;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.hardware.digitalchickenlabs.OctoQuad;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -15,7 +16,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import dev.frozenmilk.util.graph.Graph;
 
 @TeleOp(name="Octo Test", group="Tests")
-@Configurable
+@Disabled
 public class OctoQuadTest extends OpMode {
 
     private static final int REV_PWM_1 = 4;

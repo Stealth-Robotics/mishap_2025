@@ -4,6 +4,7 @@ import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -13,6 +14,7 @@ import org.firstinspires.ftc.teamcode.common.Motif;
 import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 
 @TeleOp (name = "_TeleOp_Driver_Only", group = "Main")
+@Disabled
 public class TeleOpSingleOp extends OpMode {
 
     private boolean isRobotCentric = false;

@@ -29,7 +29,7 @@ public class PathBallThief extends PathManager {
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(110))
                         .addParametricCallback(0, robot::trySelectFirstMotifSlot)
-                        .addParametricCallback(0.5, ()-> {
+                        .addParametricCallback(1, ()-> {
                             robot.setShooterTargetRangeFar();
                             robot.startShooter();
                         })
@@ -53,7 +53,7 @@ public class PathBallThief extends PathManager {
                                 // Steal 2
                                 new BezierLine(new Pose(23.400, 19.000), new Pose(8.100, 19.000))
                         )
-                        .addParametricCallback(.1, ()->follower.setMaxPower(.20))
+                        .addParametricCallback(.1, ()->follower.setMaxPower(INTAKE_SPEED))
                         .setConstantHeadingInterpolation(Math.toRadians(0))
                         .build()
         );
@@ -86,7 +86,7 @@ public class PathBallThief extends PathManager {
                                 new BezierLine(new Pose(17.000, 8.100), new Pose(8.300, 8.100))
                         )
                         .setConstantHeadingInterpolation(Math.toRadians(0))
-                        .addParametricCallback(.1, ()->follower.setMaxPower(.20))
+                        .addParametricCallback(.1, ()->follower.setMaxPower(INTAKE_SPEED))
 
                         .build()
         );
