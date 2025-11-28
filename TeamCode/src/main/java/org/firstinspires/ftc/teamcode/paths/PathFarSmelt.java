@@ -29,7 +29,7 @@ public class PathFarSmelt extends PathManager{
         // Start against wall in far shoot zone
         // Move to Shoot 1
         addRedPath(
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 // Shoot1
                                 new BezierLine(new Pose(87.000, 9.000), new Pose(86.000, 18.000))
@@ -43,7 +43,7 @@ public class PathFarSmelt extends PathManager{
                         .build());
         // Move to line 1 intake area
         addRedPath(
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 // Goto GPP
                                 new BezierCurve(
@@ -57,7 +57,7 @@ public class PathFarSmelt extends PathManager{
                         .build());
         // Start Chomp
         addRedPath(
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 // Intake GPP
                                 new BezierLine(new Pose(96.000, 36.000), new Pose(132.000, 36.000))
@@ -69,7 +69,7 @@ public class PathFarSmelt extends PathManager{
         );
 
         addRedPath(
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 // Shoot2
                                 new BezierCurve(
@@ -79,7 +79,7 @@ public class PathFarSmelt extends PathManager{
                                 )
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(-180), Math.toRadians(70))
-                        .addParametricCallback(0, () -> follower.setMaxPower(1))
+                        .addParametricCallback(0, () -> follower.setMaxPower(MAX_SPEED))
                         // Check in on the spindexer to see if there are any unknown artifacts and try to sort them
                         .addCallback(
                                 () -> !robot.isSpindexerBusy()
@@ -95,7 +95,7 @@ public class PathFarSmelt extends PathManager{
         );
 
         addRedPath(
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 // GoTo PGP
                                 new BezierLine(new Pose(86.000, 18.000), new Pose(87.400, 38.800))
@@ -110,7 +110,7 @@ public class PathFarSmelt extends PathManager{
         // Start against wall in far shoot zone
         // Move to Shoot 1
         addBluePath(
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 // Shoot1
                                 new BezierLine(new Pose(57.000, 9.000), new Pose(58.000, 18.000))
@@ -124,7 +124,7 @@ public class PathFarSmelt extends PathManager{
                         .build());
         // Move to line 1 intake area
         addBluePath(
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 // SlowIntake1
                                 new BezierCurve(
@@ -138,7 +138,7 @@ public class PathFarSmelt extends PathManager{
                         .build());
         // Start Chomp
         addBluePath(
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 // chomp3
                                 new BezierLine(new Pose(48.000, 36.000), new Pose(12.000, 36.000))
@@ -151,7 +151,7 @@ public class PathFarSmelt extends PathManager{
         );
 
         addBluePath(
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 // Shoot2
                                 new BezierCurve(
@@ -161,7 +161,7 @@ public class PathFarSmelt extends PathManager{
                                 )
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(110))
-                        .addParametricCallback(0, () -> follower.setMaxPower(1))
+                        .addParametricCallback(0, () -> follower.setMaxPower(MAX_SPEED))
                         // Check in on the spindexer to see if there are any unknown artifacts and try to sort them
                         .addCallback(
                                 () -> !robot.isSpindexerBusy()
@@ -177,7 +177,7 @@ public class PathFarSmelt extends PathManager{
         );
 
         addBluePath(
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 // GoTo PGP
                                 new BezierLine(new Pose(58.000, 18.000), new Pose(56.5, 38.8))

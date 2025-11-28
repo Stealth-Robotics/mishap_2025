@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.systems;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -14,9 +15,11 @@ public class SweeperSubsystem {
 
     public static double MAX_SWEEPER_SPEED = 1; // 1.0
 
-    public static double MAX_EGG_BEATER_SPEED = 1; // 1.0
+    public static double MAX_EGG_BEATER_SPEED = .55; // 1.0
 
     public double curSweeperSpeed = MAX_SWEEPER_SPEED;
+
+    public boolean isEggbeaterRunning = false;
 
 
     /** The left CR servo for the sweeper mechanism. */
@@ -25,7 +28,7 @@ public class SweeperSubsystem {
     /** The right CR servo for the sweeper mechanism. */
     private final CRServo rightSweeper;
 
-    private final CRServo eggbeater;
+    private final DcMotorEx eggbeater;
 
     /**
      * Constructs a new SweeperSubsystem.
@@ -35,10 +38,10 @@ public class SweeperSubsystem {
     public SweeperSubsystem(HardwareMap hardwareMap) {
         leftSweeper = hardwareMap.get(CRServo.class, "left_sweeper_servo");
         rightSweeper = hardwareMap.get(CRServo.class, "right_sweeper_servo");
-        eggbeater = hardwareMap.get(CRServo.class, "eggbeater_servo");
+        eggbeater = hardwareMap.get(DcMotorEx.class, "eggbeater_motor");
 
-        eggbeater.setDirection(DcMotorSimple.Direction.REVERSE);
-
+        eggbeater.setDirection(DcMotorSimple.Direction.FORWARD);
+        eggbeater.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
 
         // Reverse the direction of the right sweeper so that both sweepers rotate inwards or outwards together.
@@ -51,7 +54,7 @@ public class SweeperSubsystem {
     public void startIntake() {
         leftSweeper.setPower(curSweeperSpeed);
         rightSweeper.setPower(curSweeperSpeed);
-        eggbeater.setPower(MAX_EGG_BEATER_SPEED);
+        this.startEggbeater();
     }
 
     /**
@@ -60,17 +63,22 @@ public class SweeperSubsystem {
     public void stopIntake() {
         leftSweeper.setPower(0);
         rightSweeper.setPower(0);
-        eggbeater.setPower(0);
+        this.stopEggbeater();
     }
 
     public void stopEggbeater() {
         eggbeater.setPower(0);
+        isEggbeaterRunning = false;
     }
 
     public void startEggbeater() {
         eggbeater.setPower(MAX_EGG_BEATER_SPEED);
+        isEggbeaterRunning = true;
     }
 
+    public boolean isEggbeaterRunning() {
+        return isEggbeaterRunning;
+    }
 
     /**
      * Reverses the direction of the sweeper mechanism for outtake or to clear a jam.

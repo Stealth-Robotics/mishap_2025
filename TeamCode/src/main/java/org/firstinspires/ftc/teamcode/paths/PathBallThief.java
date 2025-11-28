@@ -1,9 +1,11 @@
 package org.firstinspires.ftc.teamcode.paths;
 
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 
+import org.firstinspires.ftc.teamcode.common.ZoneDistance;
 import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 
 public class PathBallThief extends PathManager {
@@ -13,7 +15,7 @@ public class PathBallThief extends PathManager {
         addPaths();
     }
 
-    public void addPaths ( ) {
+    public void addPaths() {
         addRedPaths();
         addBluePaths();
     }
@@ -21,177 +23,194 @@ public class PathBallThief extends PathManager {
     public void addBluePaths() {
         Follower follower = robot.getFollower();
         addBluePath(
-        // name: Shoot1, color: #89D585
-                follower.pathBuilder()
+                // name: Shoot1, color: #89D585
+                pathBuilder()
                         .addPath(
                                 // Shoot1
-                                new BezierLine(new Pose(57.000, 9.000), new Pose(57.000, 18.000))
+                                new BezierLine(new Pose(57.000, 9.000), new Pose(58.000, 17.000))
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(110))
-                        .addParametricCallback(0, robot::trySelectFirstMotifSlot)
-                        .addParametricCallback(1, ()-> {
-                            robot.setShooterTargetRangeFar();
-                            robot.startShooter();
-                        })
+                        .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(108))
+                        .applyFirstShotSequence(ZoneDistance.FAR)
                         .build()
         );
         addBluePath(
-        // name: Steal Balls 1, color: #87AAA9
-                follower.pathBuilder()
+                // name: GoTo GPP, color: #87AAA9
+                pathBuilder()
                         .addPath(
-                                // Steal Balls 1
-                                new BezierLine(new Pose(57.000, 18.000), new Pose(23.400, 19.000))
+                                // GoTo GPP
+                                new BezierCurve(
+                                        new Pose(58.000, 17.000),
+                                        new Pose(58.400, 34.600),
+                                        new Pose(47.500, 35.000)
+                                )
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(110), Math.toRadians(0))
-                        .addParametricCallback(.9, robot::startIntake)
+                        .setLinearHeadingInterpolation(Math.toRadians(108), Math.toRadians(0))
+                        .addParametricCallback(.99, robot::startIntake)
                         .build()
         );
         addBluePath(
-        // name: Steal 2, color: #979D79
-                follower.pathBuilder()
+                // name: Intake GPP, color: #979D79
+                pathBuilder()
                         .addPath(
-                                // Steal 2
-                                new BezierLine(new Pose(23.400, 19.000), new Pose(8.100, 19.000))
-                        )
-                        .addParametricCallback(.1, ()->follower.setMaxPower(INTAKE_SPEED))
-                        .setConstantHeadingInterpolation(Math.toRadians(0))
-                        .build()
-        );
-        addBluePath(
-        // name: Steal 3, color: #D6D56C
-                follower.pathBuilder()
-                        .addPath(
-                                // Steal 3
-                                new BezierLine(new Pose(8.100, 19.000), new Pose(17.000, 19.000))
+                                // Intake GPP
+                                new BezierLine(new Pose(47.500, 35.000), new Pose(12.000, 36.000))
                         )
                         .setConstantHeadingInterpolation(Math.toRadians(0))
-                        .addParametricCallback(.1, ()->follower.setMaxPower(.50))
+                        .applyIntakeSequence()
                         .build()
         );
         addBluePath(
-        // name: Steal4, color: #8CA6D8
-                follower.pathBuilder()
-                        .addPath(
-                                // Steal4
-                                new BezierLine(new Pose(17.000, 19.000), new Pose(17.000, 8.100))
-                        )
-                        .setConstantHeadingInterpolation(Math.toRadians(0))
-                        .build()
-        );
-        addBluePath(
-        // name: Steal 5, color: #A79B78
-                follower.pathBuilder()
-                        .addPath(
-                                // Steal 5
-                                new BezierLine(new Pose(17.000, 8.100), new Pose(8.300, 8.100))
-                        )
-                        .setConstantHeadingInterpolation(Math.toRadians(0))
-                        .addParametricCallback(.1, ()->follower.setMaxPower(INTAKE_SPEED))
-
-                        .build()
-        );
-        addBluePath(
-        // name: Shoot2, color: #C7AC68
-                follower.pathBuilder()
+                pathBuilder()
                         .addPath(
                                 // Shoot2
-                                new BezierLine(new Pose(8.300, 8.100), new Pose(57.000, 17.800))
+                                new BezierCurve(
+                                        new Pose(12.000, 36.000),
+                                        new Pose(28.200, 18.500),
+                                        new Pose(55.000, 17.000)
+                                )
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(110))
-                        .addParametricCallback(0, () -> follower.setMaxPower(1))
-                        // Check in on the spindexer to see if there are any unknown artifacts and try to sort them
-                        .addCallback(
-                                () -> !robot.isSpindexerBusy()
-                                        && robot.isAnyArtifactUnknown()
-                                        && robot.isHoodShootPose(),
-                                robot::incrementSpindexerSlot)
+                        .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(108))
+                        .applyFollowupShotSequence(ZoneDistance.FAR)
+                        .build()
+        );
 
-                        .addParametricCallback(.8, () -> {
-                            robot.trySelectFirstMotifSlot();
-                            robot.startShooter();
-                        })
-
+        addBluePath(
+                pathBuilder()
+                        .addPath(
+                                // GoTo Wall
+                                new BezierLine(new Pose(55.000, 17.000), new Pose(12.000, 33.400))
+                        )
+                        .setLinearHeadingInterpolation(Math.toRadians(108), Math.toRadians(80))
+                        .addParametricCallback(.99, robot::startIntake)
                         .build()
         );
         addBluePath(
-        // name: Park, color: #5875CB
-                follower.pathBuilder()
+                pathBuilder()
+                        .addPath(
+                                // Steal
+                                new BezierLine(new Pose(12.000, 33.400), new Pose(12.000, 12.000))
+                        )
+                        .setLinearHeadingInterpolation(Math.toRadians(80), Math.toRadians(95))
+                        .applyIntakeSequence()
+                        .build()
+        );
+        addBluePath(
+                pathBuilder()
+                        .addPath(
+                                // Shoot3
+                                new BezierLine(new Pose(12.000, 12.000), new Pose(55.000, 17.000))
+                        )
+                        .setLinearHeadingInterpolation(Math.toRadians(95), Math.toRadians(108))
+                        .applyFollowupShotSequence(ZoneDistance.FAR)
+                        .build()
+        );
+        addBluePath(
+                // name: Park, color: #5875CB
+                pathBuilder()
                         .addPath(
                                 // Park
-                                new BezierLine(new Pose(57.000, 17.800), new Pose(45.000, 36.000))
+                                new BezierLine(new Pose(55.000, 17.000), new Pose(55.000, 30.000))
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(110), Math.toRadians(0))
+                        .setLinearHeadingInterpolation(Math.toRadians(108), Math.toRadians(-180))
                         .build()
         );
     }
+
     public void addRedPaths() {
-        Follower follower = robot.getFollower();
+
         addRedPath(
-        // name: Shoot1, color: #89D585
-                follower.pathBuilder()
+                // name: Shoot1, color: #89D585
+                pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(57, 9), new Pose(57, 18))
+                                // Shoot1
+                                new BezierLine(new Pose(87.000, 9.000), new Pose(86.000, 17.000))
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(110))
+                        .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(72))
+                        .applyFirstShotSequence(ZoneDistance.FAR)
                         .build()
         );
         addRedPath(
-        // name: Steal Balls 1, color: #87AAA9
-                follower.pathBuilder()
+                // name: GoTo GPP, color: #87AAA9
+                pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(57, 18), new Pose(23.4, 19))
+                                // GoTo GPP
+                                new BezierCurve(
+                                        new Pose(86.000, 17.000),
+                                        new Pose(85.600, 34.600),
+                                        new Pose(96.500, 35.000)
+                                )
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(110), Math.toRadians(0))
+                        .setLinearHeadingInterpolation(Math.toRadians(72), Math.toRadians(-180))
+                        .addParametricCallback(.99, robot::startIntake)
                         .build()
         );
         addRedPath(
-        // name: Steal 2, color: #979D79
-                follower.pathBuilder()
+                // name: Intake GPP, color: #979D79
+                pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(23.4, 19), new Pose(8.1, 19))
+                                // Intake GPP
+                                new BezierLine(new Pose(96.500, 35.000), new Pose(132.000, 36.000))
                         )
+                        .setConstantHeadingInterpolation(Math.toRadians(-180))
+                        .applyIntakeSequence()
                         .build()
         );
         addRedPath(
-        // name: Steal 3, color: #D6D56C
-                follower.pathBuilder()
+                // name: Shoot2, color: #B577AD
+                pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(8.1, 19), new Pose(17, 19))
+                                new BezierCurve(
+                                        new Pose(132.000, 36.000)
+                                        , new Pose(115.800, 18.500)
+                                        , new Pose(89.000, 17.000)
+                                )
                         )
+                        .setLinearHeadingInterpolation(Math.toRadians(-180.000), Math.toRadians(72.000))
+                        .applyFollowupShotSequence(ZoneDistance.FAR)
                         .build()
         );
         addRedPath(
-        // name: Steal4, color: #8CA6D8
-                follower.pathBuilder()
+                // name: GoTo Wall, color: #7BAAAC
+                pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(17, 19), new Pose(17, 8.1))
+                                new BezierCurve(
+                                        new Pose(89.000, 17.000)
+                                        , new Pose(98.000, 34.000)
+                                        , new Pose(132.000, 33.400)
+                                )
                         )
+                        .setLinearHeadingInterpolation(Math.toRadians(72.000), Math.toRadians(100.000))
+                        .addParametricCallback(.99, robot::startIntake)
                         .build()
         );
         addRedPath(
-        // name: Steal 5, color: #A79B78
-                follower.pathBuilder()
+                // name: Steal, color: #5CCB7B
+                pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(17, 8.1), new Pose(8.3, 8.1))
+                                new BezierLine(new Pose(132.000, 33.400), new Pose(132.000, 12.000))
                         )
+                        .setLinearHeadingInterpolation(Math.toRadians(100.000), Math.toRadians(85.000))
+                        .applyIntakeSequence()
                         .build()
         );
         addRedPath(
-        // name: Shoot2, color: #C7AC68
-                follower.pathBuilder()
+                // name: Shoot3, color: #865D88
+                pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(8.3, 8.1), new Pose(57, 17.8))
+                                new BezierLine(new Pose(132.000, 12.000), new Pose(89.000, 17.000))
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(110))
+                        .setLinearHeadingInterpolation(Math.toRadians(85.000), Math.toRadians(72.000))
+                        .applyFollowupShotSequence(ZoneDistance.FAR)
                         .build()
         );
         addRedPath(
-        // name: Park, color: #5875CB
-                follower.pathBuilder()
+                // name: Park, color: #C66BCC
+                pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(57, 17.8), new Pose(45, 36))
+                                // Park
+                                new BezierLine(new Pose(89.000, 17.000), new Pose(89.000, 30.000))
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(110), Math.toRadians(0))
+                        .setLinearHeadingInterpolation(Math.toRadians(72), Math.toRadians(0))
                         .build()
         );
     }

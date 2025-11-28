@@ -238,7 +238,7 @@ public class TeleOpDupliOp extends OpMode {
             if (robot.isHoodIntakePose()) {
                 robot.decrementSpindexerSlot();
             }
-        } else if (gamepad2.leftBumperWasReleased()) {
+        } else if (gamepad1.leftBumperWasReleased()) {
             // Stop intake only if neither bumper is pressed
             robot.stopIntake();
         }

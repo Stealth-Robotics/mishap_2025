@@ -6,11 +6,13 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 
 import org.firstinspires.ftc.teamcode.common.Pipeline;
+import org.firstinspires.ftc.teamcode.common.ZoneDistance;
 import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 
 public class PathOnWallNear extends PathManager{
     /**
-     * Constructs a new PathManager.
+     * Designed for squaring the bot against the arttifact sorting wall facing out to the
+     * oppposing team
      *
      * @param robot The instance of the {@link RobotSystem} this manager will interact with.
      */
@@ -26,39 +28,33 @@ public class PathOnWallNear extends PathManager{
     }
 
     private void buildRedPath() {
-        Follower follower = robot.getFollower();
+
         addRedPath(
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 // Go To Motif
                                 new BezierLine(new Pose(128.000, 112.000), new Pose(99.000, 112.000))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(-180), Math.toRadians(123))
-                        .addParametricCallback(0.5, ()-> robot.setLimelightPipeline(Pipeline.APRILTAG_MOTIF))
+                        .addParametricCallback(0.1, ()-> robot.setLimelightPipeline(Pipeline.APRILTAG_MOTIF))
                         .build()
         );
 
         // Start against wall in far shoot zone
         // Move to Shoot 1
         addRedPath(
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 // To Shoot 1
                                 new BezierLine(new Pose(99.000, 112.000), new Pose(89.900, 112.100))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(123), Math.toRadians(35))
-                        .addParametricCallback(0.1, ()-> {
-                            robot.setLimelightPipeline(Pipeline.APRILTAG_TARGET_RED);
-                            robot.trySelectFirstMotifSlot();
-                        })
-                        .addParametricCallback(0.8, ()-> {
-                            robot.setShooterTargetRangeMid();
-                            robot.startShooter();
-                        })
+                        .addParametricCallback(0.1, ()-> robot.setLimelightPipeline(Pipeline.APRILTAG_TARGET_RED))
+                        .applyFirstShotSequence(ZoneDistance.NEAR)
                         .build());
         // Move to line 1 intake area
         addRedPath(
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 // Start PPG
                                 new BezierCurve(
@@ -72,40 +68,30 @@ public class PathOnWallNear extends PathManager{
                         .build());
         // Start Chomp
         addRedPath(
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 // Intake PPG
                                 new BezierLine(new Pose(96.300, 84.000), new Pose(128.000, 84.000))
                         )
                         .setTangentHeadingInterpolation()
                         .setReversed()
-                        .addParametricCallback(.1, ()->follower.setMaxPower(INTAKE_SPEED))
+                        .applyIntakeSequence()
                         .build()
         );
 
         addRedPath(
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 // Shoot 2
                                 new BezierLine(new Pose(128.000, 84.000), new Pose(91.600, 108.500))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(-180), Math.toRadians(36))
-                        .addParametricCallback(0, () -> follower.setMaxPower(1))
-                        // Check in on the spindexer to see if there are any unknown artifacts and try to sort them
-                        .addCallback(
-                                () -> !robot.isSpindexerBusy()
-                                        && robot.isAnyArtifactUnknown()
-                                        && robot.isHoodShootPose(),
-                                robot::incrementSpindexerSlot)
-                        .addParametricCallback(.8, () -> {
-                            robot.trySelectFirstMotifSlot();
-                            robot.startShooter();
-                        })
+                        .applyFollowupShotSequence(ZoneDistance.NEAR)
                         .build()
         );
 
         addRedPath(
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 // Go To PGP
                                 new BezierCurve(
@@ -120,9 +106,9 @@ public class PathOnWallNear extends PathManager{
     }
 
     private void buildBluePath() {
-        Follower follower = robot.getFollower();
+
         addBluePath(
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 // Go To Motif
                                 new BezierLine(new Pose(16.000, 112.000), new Pose(45.000, 112.000))
@@ -131,24 +117,21 @@ public class PathOnWallNear extends PathManager{
                         .addParametricCallback(0.1, ()-> robot.setLimelightPipeline(Pipeline.APRILTAG_MOTIF))
                         .build()
         );
-                // Start against wall in far shoot zone
+
         // Move to Shoot 1
         addBluePath(
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 // To Shoot 1
                                 new BezierLine(new Pose(45.000, 112.000), new Pose(54.100, 112.100))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(57), Math.toRadians(145))
-                        .addParametricCallback(0, robot::trySelectFirstMotifSlot)
-                        .addParametricCallback(0.8, ()-> {
-                            robot.setShooterTargetRangeMid();
-                            robot.startShooter();
-                        })
+                        .addParametricCallback(0.1, ()-> {robot.setLimelightPipeline(Pipeline.APRILTAG_TARGET_BLUE);})
+                        .applyFirstShotSequence(ZoneDistance.NEAR)
                         .build());
         // Move to line 1 intake area
         addBluePath(
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 // Start PPG
                                 new BezierCurve(
@@ -162,41 +145,29 @@ public class PathOnWallNear extends PathManager{
                         .build());
         // Start Chomp
         addBluePath(
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 // Intake PPG
                                 new BezierLine(new Pose(47.700, 84.000), new Pose(16.000, 84.000))
                         )
                         .setTangentHeadingInterpolation()
-                        .setReversed()
-                        .addParametricCallback(.1, ()->follower.setMaxPower(INTAKE_SPEED))
-                        .addParametricCallback(.99, robot::stopIntake)
+                        .applyIntakeSequence()
                         .build()
         );
 
         addBluePath(
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 // Shoot 2
                                 new BezierLine(new Pose(16.000, 84.000), new Pose(52.400, 108.500))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(144))
-                        .addParametricCallback(0, () -> follower.setMaxPower(1))
-                        // Check in on the spindexer to see if there are any unknown artifacts and try to sort them
-                        .addCallback(
-                                () -> !robot.isSpindexerBusy()
-                                        && robot.isAnyArtifactUnknown()
-                                        && robot.isHoodShootPose(),
-                                robot::incrementSpindexerSlot)
-                        .addParametricCallback(.8, () -> {
-                            robot.trySelectFirstMotifSlot();
-                            robot.startShooter();
-                        })
+                        .applyFollowupShotSequence(ZoneDistance.NEAR)
                         .build()
         );
 
         addBluePath(
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 // Go To PGP
                                 new BezierCurve(

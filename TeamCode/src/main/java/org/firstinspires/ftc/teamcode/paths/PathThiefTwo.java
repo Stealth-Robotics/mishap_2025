@@ -23,7 +23,7 @@ public class PathThiefTwo extends PathManager {
         Follower follower = robot.getFollower();
         addRedPath(
         // name: Shoot1, color: #89D585
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 new BezierLine(new Pose(87, 9), new Pose(87, 18))
                         )
@@ -37,7 +37,7 @@ public class PathThiefTwo extends PathManager {
         );
         addRedPath(
         // name: Steal Balls 1, color: #87AAA9
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 new BezierLine(new Pose(87, 18), new Pose(119.609, 23.307))
                         )
@@ -47,7 +47,7 @@ public class PathThiefTwo extends PathManager {
         );
         addRedPath(
         // name: Take Balls, color: #9B5B6A
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 new BezierCurve(
                                         new Pose(119.609, 23.307)
@@ -61,7 +61,7 @@ public class PathThiefTwo extends PathManager {
         );
         addRedPath(
         // name: Back Shoot, color: #75A6BA
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 new BezierLine(new Pose(135.8, 8.2), new Pose(88.2, 17.9))
                         )
@@ -70,7 +70,7 @@ public class PathThiefTwo extends PathManager {
         );
         addRedPath(
         // name: Path 5, color: #9985B5
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 new BezierLine(new Pose(88.2, 17.9), new Pose(94.675, 35.051))
                         )
@@ -82,7 +82,7 @@ public class PathThiefTwo extends PathManager {
         Follower follower = robot.getFollower();
         addBluePath(
         // name: Shoot1, color: #89D585
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 new BezierLine(new Pose(57, 9), new Pose(57, 18))
                         )
@@ -91,7 +91,7 @@ public class PathThiefTwo extends PathManager {
         );
         addBluePath(
         // name: Steal Balls 1, color: #87AAA9
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 new BezierLine(new Pose(57, 18), new Pose(24.391, 23.307))
                         )
@@ -100,7 +100,7 @@ public class PathThiefTwo extends PathManager {
         );
         addBluePath(
         // name: Take Balls, color: #9B5B6A
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 new BezierCurve(
                                         new Pose(24.391, 23.307)
@@ -113,7 +113,7 @@ public class PathThiefTwo extends PathManager {
         );
         addBluePath(
         // name: Back Shoot, color: #75A6BA
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 new BezierLine(new Pose(8.2, 8.2), new Pose(55.8, 17.9))
                         )
@@ -122,7 +122,7 @@ public class PathThiefTwo extends PathManager {
         );
         addBluePath(
         // name: Path 5, color: #9985B5
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 new BezierLine(new Pose(55.8, 17.9), new Pose(49.325, 35.051))
                         )

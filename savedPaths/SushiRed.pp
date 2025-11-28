@@ -23,7 +23,7 @@ public class PathSushi extends PathManager {
         Follower follower = robot.getFollower();
         addBluePath(
         // name: To Shoot 1, color: #66B85C
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 new BezierLine(new Pose(126, 112.2), new Pose(85.3, 123.1))
                         )
@@ -35,7 +35,7 @@ public class PathSushi extends PathManager {
         Follower follower = robot.getFollower();
         addRedPath(
         // name: To Shoot 1, color: #66B85C
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 new BezierLine(new Pose(18, 112.2), new Pose(58.7, 123.1))
                         )

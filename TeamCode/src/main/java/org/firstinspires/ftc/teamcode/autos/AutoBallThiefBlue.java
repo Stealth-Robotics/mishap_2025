@@ -7,7 +7,6 @@ import org.firstinspires.ftc.teamcode.common.Alliance;
 
 @SuppressWarnings("unused")
 @Autonomous(name="Ball Thief Blue", group="Blue", preselectTeleOp="_TeleOp_Driver_Operator")
-@Disabled
 public class AutoBallThiefBlue extends AutoBallThief{
 
     @Override

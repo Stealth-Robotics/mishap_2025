@@ -5,6 +5,7 @@ import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 
+import org.firstinspires.ftc.teamcode.common.ZoneDistance;
 import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 
 public class PathNearAuto1 extends PathManager {
@@ -28,7 +29,7 @@ public class PathNearAuto1 extends PathManager {
         Follower follower = robot.getFollower();
         addRedPath(
                 // name: To Shoot 1, color: #66B85C
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 // To Shoot 1
                                 new BezierCurve(
@@ -38,16 +39,12 @@ public class PathNearAuto1 extends PathManager {
                                 )
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(152), Math.toRadians(31))
-                        .addParametricCallback(0, robot::trySelectFirstMotifSlot)
-                        .addParametricCallback(.8, ()->{
-                            robot.setShooterTargetRangeNear();
-                            robot.startShooter();
-                        })
+                        .applyFirstShotSequence(ZoneDistance.NEAR)
                         .build()
         );
         addRedPath(
                 // name: Start PPG, color: #9AB55D
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 // Start PPG
                                 new BezierCurve(
@@ -62,37 +59,30 @@ public class PathNearAuto1 extends PathManager {
         );
         addRedPath(
                 // name: Intake PPG, color: #8878CD
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 // Intake PPG
                                 new BezierLine(new Pose(96.300, 84.000), new Pose(128.000, 84.000))
                         )
                         .setTangentHeadingInterpolation()
                         .setReversed()
-                        .addParametricCallback(0.1, () -> follower.setMaxPower(INTAKE_SPEED))
+                        .applyIntakeSequence()
                         .build()
         );
         addRedPath(
                 // name: Shoot 2, color: #6BCD9D
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 // Shoot 2
                                 new BezierLine(new Pose(128.000, 84.000), new Pose(88.000, 107.700))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(-180), Math.toRadians(31))
-                        .addParametricCallback(0, () -> follower.setMaxPower(1))
-                        .addParametricCallback(.8, robot::trySelectFirstMotifSlot)
-                        .addParametricCallback(.9, robot::startShooter)
-                        .addCallback(
-                                () -> !robot.isSpindexerBusy()
-                                        && robot.isAnyArtifactUnknown()
-                                        && robot.isHoodShootPose(),
-                                robot::incrementSpindexerSlot)
+                        .applyFollowupShotSequence(ZoneDistance.NEAR)
                         .build()
         );
         addRedPath(
                 // name: Go To PGP, color: #8DC859
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 // Go To PGP
                                 new BezierCurve(
@@ -108,7 +98,7 @@ public class PathNearAuto1 extends PathManager {
     public void addBluePaths ( ) {
         Follower follower = robot.getFollower();
         addBluePath(
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 // To Shoot 1
                                 new BezierCurve(
@@ -118,15 +108,11 @@ public class PathNearAuto1 extends PathManager {
                                 )
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(28), Math.toRadians(149))
-                        .addParametricCallback(0, robot::trySelectFirstMotifSlot)
-                        .addParametricCallback(.8, ()->{
-                            robot.setShooterTargetRangeNear();
-                            robot.startShooter();
-                        })
+                        .applyFirstShotSequence(ZoneDistance.NEAR)
                         .build()
         );
         addBluePath(
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 // Start PPG
                                 new BezierCurve(
@@ -140,36 +126,28 @@ public class PathNearAuto1 extends PathManager {
                         .build()
         );
         addBluePath(
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 // Intake PPG
                                 new BezierLine(new Pose(47.700, 84.000), new Pose(16.000, 84.000))
                         )
                         .setTangentHeadingInterpolation()
                         .setReversed()
-                        .addParametricCallback(0.1, () -> follower.setMaxPower(INTAKE_SPEED))
+                        .applyIntakeSequence()
                         .build()
         );
         addBluePath(
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 // Shoot 2
                                 new BezierLine(new Pose(16.000, 84.000), new Pose(55.500, 109.500))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(149))
-                        .addParametricCallback(0, () -> follower.setMaxPower(1))
-                        .addParametricCallback(.5, robot::trySelectFirstMotifSlot)
-                        .addParametricCallback(.8, robot::startShooter)
-                        .addCallback(
-                                () -> !robot.isSpindexerBusy()
-                                        && robot.isAnyArtifactUnknown()
-                                        && robot.isHoodShootPose(),
-                                robot::incrementSpindexerSlot)
-
+                        .applyFollowupShotSequence(ZoneDistance.NEAR)
                         .build()
         );
         addBluePath(
-                follower.pathBuilder()
+               pathBuilder()
                         .addPath(
                                 // Go To PGP
                                 new BezierCurve(

@@ -11,11 +11,7 @@ import org.firstinspires.ftc.teamcode.paths.PathState;
 
 import java.util.Arrays;
 
-//@Autonomous(name = "Shoot Far either Side", group = "Autonomous", preselectTeleOp = "_TeleOp_Driver_Operator")
-//@Configurable
-//@Disabled
 public class AutoFarOne extends AutosDecode {
-
 
     @Override
     protected Path initPaths() {
@@ -41,9 +37,9 @@ public class AutoFarOne extends AutosDecode {
         // cahnge the angle of the far shots by a couple of degrees:
         // a negative number turns the bot more to the left positive more to the right
         if (Alliance.isBlue()) {
-            this.aimOffset = -3.5;
+            this.aimOffset = -2.0;
         } else {
-            this.aimOffset = 3.5;
+            this.aimOffset = 2.5;
         }
 
         follower.setStartingPose(paths.getPathStart());

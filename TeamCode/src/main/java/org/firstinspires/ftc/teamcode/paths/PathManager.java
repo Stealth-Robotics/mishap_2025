@@ -2,7 +2,9 @@ package org.firstinspires.ftc.teamcode.paths;
 
 import androidx.annotation.Nullable;
 
+import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.PathBuilder;
 import com.pedropathing.paths.PathChain;
 
 import org.firstinspires.ftc.teamcode.common.Alliance;
@@ -20,7 +22,10 @@ import java.util.List;
  */
 public class PathManager implements Path {
 
-    public static double INTAKE_SPEED = 0.25;
+    public static double MAX_SPEED = 1;
+    public static double INTAKE_SPEED = 0.22;
+
+    public static double SLOW_SPEED = .1;
 
     /** The starting pose of the robot on the field. */
     protected Pose startPose;
@@ -44,6 +49,10 @@ public class PathManager implements Path {
      */
     public PathManager(RobotSystem robot) {
         this.robot = robot;
+    }
+
+    public PathBuilderDecode pathBuilder() {
+        return new PathBuilderDecode(robot);
     }
 
      /**
@@ -98,11 +107,22 @@ public class PathManager implements Path {
         robot.getFollower().setStartingPose(this.startPose);
     }
 
+    /**
+     * Sets the alliance based on the robot's starting X-coordinate on the field.
+     *
+     * @param pose The {@link Pose} to determine the alliance from.
+     */
     public static void setAlianceFromPose(Pose pose) {
         // Determine alliance based on which side of the field the robot starts on.
         Alliance.set(getAllianceFromPose(pose));
     }
 
+    /**
+     * Determines the alliance based on the robot's starting X-coordinate on the field.
+     *
+     * @param pose The {@link Pose} to determine the alliance from.
+     * @return The {@link Alliance} that the robot is on.
+     */
     public static Alliance getAllianceFromPose(Pose pose) {
         if (pose.getX() > (Constants.FIELD_SIZE_X_INCHES / 2)) {
             return Alliance.RED;

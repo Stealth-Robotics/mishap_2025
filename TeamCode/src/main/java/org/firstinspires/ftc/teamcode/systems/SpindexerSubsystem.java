@@ -41,16 +41,16 @@ public class SpindexerSubsystem {
     /** slot 0 (aka 1) offset should be 0 since INDEX_OFFSET_TICKS will align this slot **/
     private static final int SLOT_0_OFFSET = 0;
     /** slot 1 (aka 2) offset seems to be a litle higher **/
-    private static final int SLOT_1_OFFSET = -3;
+    private static final int SLOT_1_OFFSET = -4;
     /** slot 2 (aka 3) offset seems to be a little lower **/
-    private static final int SLOT_2_OFFSET = 7;
+    private static final int SLOT_2_OFFSET = 8;
 
     /** Number of ticks to roll the spindexer forward while intaking **/
-    private static final int INTAKING_OFFSET_TICKS = 55;
+    private static final int INTAKING_OFFSET_TICKS = 50;
     /**
      * The tolerance, in ticks, for considering the motor to have reached its target position.
      */
-    private static final int POSITION_TOLERANCE = 4;
+    private static final int POSITION_TOLERANCE = 3;
 
     /**
      * Per Slot PID values. Slot 1 seems stickiest while slot 2 loose
@@ -62,7 +62,12 @@ public class SpindexerSubsystem {
     /**
      * This value protects the spindexer from jamming and/or crushing the world.
      */
-    private static final double OVERLOAD_AMPS = 7.0;
+    private static final double OVERLOAD_AMPS = 7.5;
+
+    /**
+     * Allows brief spikes in the current to be ignored.
+     */
+    private static final long CURRENT_SPIKE_TIMEOUT_MS = 400;
 
     /**
      * The number of absolute ticks of the REV encoder per revolution.
@@ -108,10 +113,6 @@ public class SpindexerSubsystem {
             SLOT_2_OFFSET
     };
 
-    /**
-     * Allows brief spikes in the current to be ignored.
-     */
-    private static final long CURRENT_SPIKE_TIMEOUT_MS = 200;
     private static final double MIN_SORT_TIME_MS = 1500;
     private static final double MIN_ROTATE_TIME_MS = 1000;
     private static final double MIN_HOME_TIME_MS = 1500;

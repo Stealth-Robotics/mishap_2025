@@ -26,8 +26,8 @@ import java.util.HashSet;
 public abstract class AutosDecode extends OpMode {
 
     public static final double READ_MOTIF_TIMEOUT_SECONDS = 5;
-    public static final double AIM_TIMEOUT_MS = 4000;
-    public static final double AIM_MIN_MS = 2000;
+    public static final double AIM_TIMEOUT_MS = 3000;
+    public static final double AIM_MIN_MS = 1000;
 
     public static final double INTAKE_WAIT_MS = 1000;
     protected final ElapsedTime actionTimer = new ElapsedTime();
@@ -351,7 +351,7 @@ public abstract class AutosDecode extends OpMode {
     /**
      * Starts aiming at the target.
      * adjust latency based on the path segment setTimeoutConstraint
-     * @return true if done aiming otherwise false
+     * @return true if aiming started otherwise false
      */
     public boolean startAiming() {
         if (robot.isSpindexerEmpty()) {
@@ -360,7 +360,7 @@ public abstract class AutosDecode extends OpMode {
 
         stateTimer.reset();
 
-        robot.doAimAtTarget(.1,  aimOffset,50);
+        robot.doAimAtTarget(.3,  aimOffset,20);
         return true;
     }
 
@@ -377,7 +377,7 @@ public abstract class AutosDecode extends OpMode {
             done = true;
         }
        else {
-            done = robot.doAimAtTarget(.2, aimOffset, 100);
+            done = robot.doAimAtTarget(.3, aimOffset, 100);
         }
 
         return done && curTimeMs > AIM_MIN_MS;

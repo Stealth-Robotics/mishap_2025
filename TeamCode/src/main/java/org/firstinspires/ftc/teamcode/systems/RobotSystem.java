@@ -5,7 +5,6 @@ import androidx.annotation.Nullable;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
-import com.pedropathing.control.PIDFCoefficients;
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
@@ -19,7 +18,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.common.*;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-import org.opencv.ml.EM;
 
 
 import java.util.HashMap;
@@ -56,7 +54,7 @@ public class RobotSystem {
 
     public static final int MAX_OVER_CURRENT_COUNT = 4;
 
-    private static final double MAX_UNJAM_TIME = 1000;
+    private static final double MAX_UNJAM_TIME = 500;
 
     /** Maps the current motif pattern to a list of slot states. */
     private static final Map<Motif, List<SlotState>> motifSlots = Map.of(
@@ -247,6 +245,8 @@ public class RobotSystem {
         displayTelemetry();
     }
 
+    private SystemState preJamState = SystemState.IDLE;
+
     /**
      * Protects the robot from a jammed spindexer
      */
@@ -255,15 +255,22 @@ public class RobotSystem {
         if (!spindexerSys.isJammed()) {
             if (overCurrentCount > 0) {
                 if (jamTimer.milliseconds() > MAX_UNJAM_TIME) {
-                    if (currentState == SystemState.INTAKING) {
+                    if (preJamState == SystemState.INTAKING) {
+                        startIntake();
+                    }else {
                         stopIntake();
                     }
+
                     // If jam free for over MAX_UNJAM_TIME then reset the counter
                     overCurrentCount = 0;
                 }
             }
 
             return;
+        }
+
+        if (overCurrentCount == 0){
+            preJamState = currentState;
         }
 
         // Increment the counter to track that a jam is ongoing.
@@ -289,7 +296,6 @@ public class RobotSystem {
                 spindexerSys.decreaseOneSlot();       // Actively reverse the spindexer
                 spindexerSys.setBrake();
             } else {
-                this.isAutoIntaking = false;
                 this.stopIntake();
             }
 
@@ -497,6 +503,23 @@ public class RobotSystem {
         }
     }
 
+    public void startEggbeater() {
+        sweeperSys.startEggbeater();
+    }
+
+    public void stopEggbeater() {
+        sweeperSys.stopEggbeater();
+    }
+
+    public boolean isIntaking() {
+        return currentState == SystemState.INTAKING;
+    }
+
+    public boolean isEggbeaterRunning() {
+        return sweeperSys.isEggbeaterRunning();
+    }
+
+
     /**
      * Reverses the intake and spindexer motors to clear jams.
      */
@@ -519,6 +542,7 @@ public class RobotSystem {
             stateTimer.reset();
             spindexerSys.setFloat();
             hoodSys.setShootPose(); // Start moving hood to shoot position immediately.
+            sweeperSys.stopEggbeater();
         }
     }
 
@@ -849,6 +873,9 @@ public class RobotSystem {
     public void setShooterTargetRangeNear() { shooterSys.setTargetRange(ZoneDistance.NEAR); }
     public void setShooterTargetRangeFar() { shooterSys.setTargetRange(ZoneDistance.FAR); }
     public void setShooterTargetRangeMid() { shooterSys.setTargetRange(ZoneDistance.MID); }
+
+    public void setShooterTargetRange(ZoneDistance range) { shooterSys.setTargetRange(range); }
+
 
     /** Toggles the Limelight's active pipeline. */
     public void toggleLimelightTarget() { limelightSys.toggleTargetPileline(); }

@@ -17,8 +17,8 @@ public class AutoBallThief  extends AutosDecode{
      */
     @Override
     protected Path initPaths() {
-        shootIndexes.addAll(Arrays.asList(1, 7));
-        intakeIndexes.addAll(Arrays.asList(3,5));
+        shootIndexes.addAll(Arrays.asList(1, 4, 7));
+        intakeIndexes.addAll(Arrays.asList(3,6));
         return new PathBallThief(robot);
     }
 
@@ -36,9 +36,9 @@ public class AutoBallThief  extends AutosDecode{
         // cahnge the angle of the far shots by a couple of degrees:
         // a negative number turns the bot more to the left positive more to the right
         if (Alliance.isBlue()) {
-            this.aimOffset = -3.5;
+            this.aimOffset = -2.5;
         } else {
-            this.aimOffset = 3.5;
+            this.aimOffset = 2.5;
         }
 
         follower.setStartingPose(paths.getPathStart());
