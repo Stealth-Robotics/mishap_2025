@@ -5,6 +5,7 @@ import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 
+import org.firstinspires.ftc.teamcode.paths.util.PathManager;
 import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 
 public class PathThiefTwo extends PathManager {

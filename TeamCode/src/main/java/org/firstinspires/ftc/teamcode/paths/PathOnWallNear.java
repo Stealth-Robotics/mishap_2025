@@ -1,15 +1,15 @@
 package org.firstinspires.ftc.teamcode.paths;
 
-import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 
 import org.firstinspires.ftc.teamcode.common.Pipeline;
 import org.firstinspires.ftc.teamcode.common.ZoneDistance;
+import org.firstinspires.ftc.teamcode.paths.util.PathManager;
 import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 
-public class PathOnWallNear extends PathManager{
+public class PathOnWallNear extends PathManager {
     /**
      * Designed for squaring the bot against the arttifact sorting wall facing out to the
      * oppposing team

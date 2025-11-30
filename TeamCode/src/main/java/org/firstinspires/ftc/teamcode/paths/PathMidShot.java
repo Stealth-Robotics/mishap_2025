@@ -6,9 +6,10 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 
 import org.firstinspires.ftc.teamcode.common.ZoneDistance;
+import org.firstinspires.ftc.teamcode.paths.util.PathManager;
 import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 
-public class PathMidShot extends PathManager{
+public class PathMidShot extends PathManager {
 
     public PathMidShot(RobotSystem robot){
         super(robot);
@@ -73,7 +74,7 @@ public class PathMidShot extends PathManager{
         addRedPath(
                pathBuilder()
                         .addPath(
-                                // Path 5
+                                // Park
                                 new BezierCurve(
                                         new Pose(90.600, 84.000),
                                         new Pose(88.000, 59.000),

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.paths;
+package org.firstinspires.ftc.teamcode.paths.util;
 
 /**
  * Used to keep track of path states

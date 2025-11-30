@@ -1,11 +1,11 @@
 package org.firstinspires.ftc.teamcode.paths;
 
-import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 
 import org.firstinspires.ftc.teamcode.common.ZoneDistance;
+import org.firstinspires.ftc.teamcode.paths.util.PathManager;
 import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 
 public class PathBallThief extends PathManager {
@@ -21,7 +21,6 @@ public class PathBallThief extends PathManager {
     }
 
     public void addBluePaths() {
-        Follower follower = robot.getFollower();
         addBluePath(
                 // name: Shoot1, color: #89D585
                 pathBuilder()
@@ -117,7 +116,6 @@ public class PathBallThief extends PathManager {
     }
 
     public void addRedPaths() {
-
         addRedPath(
                 // name: Shoot1, color: #89D585
                 pathBuilder()

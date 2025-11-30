@@ -1,10 +1,8 @@
-package org.firstinspires.ftc.teamcode.paths;
+package org.firstinspires.ftc.teamcode.paths.util;
 
 import androidx.annotation.Nullable;
 
-import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.PathBuilder;
 import com.pedropathing.paths.PathChain;
 
 import org.firstinspires.ftc.teamcode.common.Alliance;

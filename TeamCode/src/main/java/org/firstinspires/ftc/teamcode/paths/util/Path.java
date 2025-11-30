@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.paths;
+package org.firstinspires.ftc.teamcode.paths.util;
 
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;

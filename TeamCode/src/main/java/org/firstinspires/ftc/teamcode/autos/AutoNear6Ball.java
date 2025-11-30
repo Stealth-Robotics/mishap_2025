@@ -29,13 +29,14 @@ public class AutoNearOne extends AutosDecode {
 
     @Override
     protected void setStartingPose() {
-        // change the angle of the far shots by a couple of degrees:
         // a negative number turns the bot more to the left positive more to the right
         if (Alliance.isBlue()) {
             this.aimOffset = 0;
         } else {
             this.aimOffset = 0;
         }
+
+        this.aimTolerance = .8;
 
         Pose startPose = paths.getPathStart();
         if (lastPose != null) {

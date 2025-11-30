@@ -1,11 +1,12 @@
-package org.firstinspires.ftc.teamcode.paths;
+package org.firstinspires.ftc.teamcode.paths.util;
 
-import static org.firstinspires.ftc.teamcode.paths.PathManager.*;
+import static org.firstinspires.ftc.teamcode.paths.util.PathManager.*;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Curve;
 import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathBuilder;
+import com.pedropathing.paths.callbacks.PathCallback;
 
 import org.firstinspires.ftc.teamcode.common.ZoneDistance;
 import org.firstinspires.ftc.teamcode.systems.RobotSystem;
@@ -13,15 +14,25 @@ import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 /**
  * Extends PathBuilder to add some custom functionality for Decode.
  * Note: that because PathBuilder doesn't expose paths we had to get
- * inventive some of the calls (such as addCallback)
+ * inventive some of the calls to add an infinite callback
  */
 public class PathBuilderDecode extends PathBuilder {
 
     private final RobotSystem robot;
+    
+    private int pathCount = 0;
 
     public PathBuilderDecode(RobotSystem robot) {
         super(robot.getFollower());
         this.robot = robot;
+    }
+
+    /**
+     * Gets the number of paths added to the path builder
+     * @return The number of paths added to the path builder
+     */
+    public int getPathsCount() {
+        return pathCount;
     }
 
     /**
@@ -49,7 +60,7 @@ public class PathBuilderDecode extends PathBuilder {
             robot.stopEggbeater();
             robot.getFollower().setMaxPower(SLOW_SPEED);
         };
-    };
+    }
 
     /**
      * resumes the intake and sets the speed to the max speed
@@ -70,21 +81,46 @@ public class PathBuilderDecode extends PathBuilder {
      * @return The modified PathBuilder with the intake sequence added.
      */
     public PathBuilderDecode applyIntakeSequence() {
+        return this.applyIntakeSequence(.1, INTAKE_SPEED);
+    }
+
+    /**
+     * Applies a standard intake sequence to a path builder with custom power settings.
+     *
+     * @param p Percentage of the path to start the Sequence .01 to 1
+     * @return The modified PathBuilder with the intake sequence added
+     */
+    public PathBuilderDecode applyIntakeSequence(double p) {
+        return this.applyIntakeSequence(p, INTAKE_SPEED);
+    }
+
+
+    /**
+     * Applies the intake sequence to a path builder with custom power settings.
+     * This sequence starts the intake, sets a slower speed, and adds conditional callbacks
+     * for pausing/resuming based on artifact detection and stopping when the spindexer is full.
+     * @param p Percentage of the path to start the Sequence
+     * @param power Percent power to send to the motors .01->1
+     * @return The modified PathBuilder with the intake sequence added.
+     */
+    public PathBuilderDecode applyIntakeSequence(double p, double power){
         Follower follower = robot.getFollower();
         addParametricCallback(.01, robot::startIntake)
-        .addParametricCallback(.1, ()->follower.setMaxPower(INTAKE_SPEED))
-        .addParametricCallback(.99, robot::stopIntake)
-        .addCallback(shouldPauseIntaking(), pauseIntaking())
-        .addCallback(shouldResumeIntaking(), resumeIntaking())
-        .addCallback(robot::isSpindexerFull, () -> {
-            robot.stopIntake();
-            follower.setMaxPower(MAX_SPEED);
-            // this causes the follower to pickup the next path from the closest point
-            follower.breakFollowing();
-        });
+                .addParametricCallback(p, ()->follower.setMaxPower(power))
+                .addParametricCallback(.99, robot::stopIntake)
+                .addInfiniteCallback(shouldPauseIntaking(), pauseIntaking())
+                .addInfiniteCallback(shouldResumeIntaking(), resumeIntaking())
+                .addInfiniteCallback(robot::isSpindexerFull, () -> {
+                    robot.stopIntake();
+                    follower.setMaxPower(MAX_SPEED);
+                    // this causes the follower to pickup the next path from the closest point
+                    follower.breakFollowing();
+                });
 
         return this;
+        
     }
+    
     /**
      * Applies a standard shooting sequence to a path builder.
      * This sequence ensures the robot is at max speed, sorts the spindexer if needed,
@@ -129,6 +165,48 @@ public class PathBuilderDecode extends PathBuilder {
         return this;
     }
 
+    /**
+     * Adds a callback that will run indefinitely any time the condition is met.
+     * This method associates the callback with the *last* path that was added.
+     *
+     * @param condition The condition that must be met for the callback to start running.
+     * @param action    The action to run when the condition is met.
+     * @return This returns itself with the updated data.
+     */
+    public PathBuilderDecode addInfiniteCallback(CallbackCondition condition, Runnable action) {
+
+        final int pathIndex = getPathsCount() - 1;
+
+        // A path must exist to add a callback to it.
+        if (pathIndex < 0) {
+            throw new IllegalStateException("No paths have been added to the path builder.");
+        }
+
+        PathCallback infiniteCallback = new PathCallback() {
+            @Override
+            public boolean run() {
+                action.run();
+                return true;
+            }
+
+            @Override
+            public boolean isReady() {
+                return condition.isReady();
+            }
+
+            @Override
+            public int getPathIndex() {
+                return pathIndex;
+            }
+        };
+
+        // The parent addCallback method takes a PathCallback and wraps it in a FiniteRunAction.
+        // To use InfiniteRunAction, we need to add our custom wrapper to the callback list.
+        // We can do this by calling the parent method that takes a raw PathCallback.
+        super.addLoopedCallback(new InfiniteRunAction(infiniteCallback));
+        return this;
+    }
+
     //*****************************************************************************************
     //
     // Passthrough overrides to return the correct object type
@@ -137,16 +215,32 @@ public class PathBuilderDecode extends PathBuilder {
 
     @Override
     public PathBuilderDecode addPath(Path path) {
+        pathCount++;
         super.addPath(path);
         return this;
     }
 
     @Override
     public PathBuilderDecode addPath(Curve curve) {
+        pathCount++;
         super.addPath(curve);
         return this;
     }
-
+    
+    @Override 
+    public PathBuilderDecode addPaths(Path... paths) {
+        pathCount += paths.length;
+        super.addPaths(paths);
+        return this;
+    }
+    
+    @Override
+    public PathBuilder addPaths(Curve... curves){
+        pathCount += curves.length;
+        super.addPaths(curves);
+        return this;
+    }
+    
     @Override
     public PathBuilderDecode setLinearHeadingInterpolation(double startHeading, double endHeading) {
         super.setLinearHeadingInterpolation(startHeading, endHeading);
@@ -195,4 +289,15 @@ public class PathBuilderDecode extends PathBuilder {
         return this;
     }
 
+    @Override
+    public PathBuilderDecode addTemporalCallback(double time, Runnable runnable) {
+        super.addTemporalCallback(time, runnable);
+        return this;
+    }
+
+    @Override
+    public PathBuilderDecode addLoopedCallback(PathCallback callback) {
+        super.addLoopedCallback(callback);
+        return this;
+    }
 }

@@ -1,7 +1,9 @@
-package org.firstinspires.ftc.teamcode.pedroPathing;
-
+package org.firstinspires.ftc.teamcode.paths.util;
 import com.pedropathing.paths.callbacks.PathCallback;
 
+/**
+ * This is the InfiniteRunAction class. It handles running Runnables indefinitely, until a reset is called.
+ */
 public class InfiniteRunAction implements PathCallback {
     private boolean initialized = false;
 
@@ -52,7 +54,7 @@ public class InfiniteRunAction implements PathCallback {
     /**
      * This checks if the callback is completed.
      *
-     * @return true if the callback is completed
+     * @return always returns false
      */
     @Override
     public boolean isCompleted() {

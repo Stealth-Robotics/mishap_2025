@@ -1,49 +1,48 @@
 package org.firstinspires.ftc.teamcode.autos;
 
+import com.bylazar.configurables.annotations.Configurable;
+import com.pedropathing.geometry.Pose;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
 import org.firstinspires.ftc.teamcode.common.Alliance;
 import org.firstinspires.ftc.teamcode.paths.Path;
-import org.firstinspires.ftc.teamcode.paths.PathFarAuto1;
-import org.firstinspires.ftc.teamcode.paths.PathFarSmelt;
+import org.firstinspires.ftc.teamcode.paths.PathNearAuto1;
 import org.firstinspires.ftc.teamcode.paths.PathState;
 
 import java.util.Arrays;
 
-//@Autonomous(name = "Shoot Far either Side", group = "Autonomous", preselectTeleOp = "_TeleOp_Driver_Operator")
-//@Configurable
-//@Disabled
-public class AutoFarSmelt extends AutosDecode {
-
+public class AutoNearOne extends AutosDecode {
 
     @Override
     protected Path initPaths() {
         shootIndexes.addAll(Arrays.asList(1, 4));
         intakeIndexes.addAll(Arrays.asList(3));
-
-        return new PathFarSmelt(robot);
+        return new PathNearAuto1(robot);
     }
 
     @Override
-    protected void setSpindexerSlots(){
+    protected void setSpindexerSlots() {
 
         robot.initSpindxerSlotsEmpty();
     }
 
-    /**
-     * This is overriding using the limelight as the start Pose
-     * this can be removed once limelight is tuned
-     */
     @Override
     protected void setStartingPose() {
-
-        // cahnge the angle of the far shots by a couple of degrees:
         // a negative number turns the bot more to the left positive more to the right
         if (Alliance.isBlue()) {
-            this.aimOffset = -3.5;
+            this.aimOffset = 0;
         } else {
-            this.aimOffset = 3.5;
+            this.aimOffset = 0;
         }
 
-        follower.setStartingPose(paths.getPathStart());
+        this.aimTolerance = .8;
+
+        Pose startPose = paths.getPathStart();
+        if (lastPose != null) {
+            startPose = startPose.setHeading(lastPose.getHeading());
+        }
+        follower.setStartingPose(startPose);
     }
 
     @Override
@@ -59,4 +58,5 @@ public class AutoFarSmelt extends AutosDecode {
 
         return PathState.IDLE;
     }
+
 }
