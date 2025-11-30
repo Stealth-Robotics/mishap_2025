@@ -1,14 +1,11 @@
 package org.firstinspires.ftc.teamcode.autos;
 
-import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.geometry.Pose;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.common.Alliance;
-import org.firstinspires.ftc.teamcode.paths.Path;
+import org.firstinspires.ftc.teamcode.paths.util.Path;
 import org.firstinspires.ftc.teamcode.paths.PathMidShot;
-import org.firstinspires.ftc.teamcode.paths.PathState;
+import org.firstinspires.ftc.teamcode.paths.util.PathState;
 
 import java.util.Arrays;
 
@@ -31,10 +28,12 @@ public class AutoMidshotOne extends AutosDecode {
         // change the angle of the far shots by a couple of degrees:
         // a negative number turns the bot more to the left positive more to the right
         if (Alliance.isBlue()) {
-            this.aimOffset = 2;
+            this.aimOffset = -1;
         } else {
-            this.aimOffset = -3;
+            this.aimOffset = 1;
         }
+
+        this.aimTolerance = 0.6;
 
         Pose startPose = paths.getPathStart();
         if (lastPose != null) {

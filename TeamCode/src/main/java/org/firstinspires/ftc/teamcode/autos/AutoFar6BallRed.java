@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.common.Alliance;
 
 @Autonomous(name = "Shoot Far Red 6 Ball", group = "Red", preselectTeleOp = "_TeleOp_Driver_Operator")
 @Configurable
-public class AutoFarRed extends AutoFar6Ball {
+public class AutoFar6BallRed extends AutoFar6Ball {
     @Override
     protected void setAlliance() {
         // Set the specific alliance for this OpMode

@@ -7,7 +7,7 @@ import org.firstinspires.ftc.teamcode.common.Alliance;
 
 @Autonomous(name = "Shoot Far Blue 6 Ball", group = "Blue", preselectTeleOp = "_TeleOp_Driver_Operator")
 @Configurable
-public class AutoFarBlue extends AutoFar6Ball {
+public class AutoFar6BallBlue extends AutoFar6Ball {
     @Override
     protected void setAlliance() {
         Alliance.set(Alliance.BLUE);

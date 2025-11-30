@@ -793,9 +793,10 @@ public class RobotSystem {
 
         if (!isSortingArtifacts){
             isSortingArtifacts = true;
-            // Assume the spindexer is empty to shortcut a spin cycle
+            // Try one more slot
             if (spindexerSys.getIntakeSlotState() == SlotState.EMPTY) {
-                return true;
+                spindexerSys.advanceOneSlot();
+                return false;
             }
         }
 

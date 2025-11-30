@@ -408,6 +408,7 @@ public class SpindexerSubsystem {
         // if all artifacts have a color then we can stop
         if (Arrays.stream(slotStates)
                 .noneMatch(state -> state == SlotState.EMPTY || state == SlotState.UNKNOWN)) {
+            this.sortingState = SortingState.DONE;
             return true;
         }
 
@@ -417,6 +418,7 @@ public class SpindexerSubsystem {
             setStandbySlotState(SlotState.ARTIFACT_PURPLE);
             // just incase this is not set
             setIntakeSlotState(SlotState.ARTIFACT_GREEN);
+            sortingState = SortingState.DONE;
             return true;
         }
 
@@ -439,6 +441,11 @@ public class SpindexerSubsystem {
         // and the color sensor to detect the artifact
         if (minSorterTimer.milliseconds() > MIN_SORT_TIME_MS) {
             minSorterTimer.reset();
+            // we have tried these slots and are now empty
+            if (this.getIntakeSlotState().equals(SlotState.EMPTY)) {
+                this.sortingState = SortingState.DONE;
+                return true;
+            }
             this.advanceOneSlot();
         }
 

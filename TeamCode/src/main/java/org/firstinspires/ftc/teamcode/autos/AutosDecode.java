@@ -12,10 +12,9 @@ import org.firstinspires.ftc.teamcode.common.Alliance;
 import org.firstinspires.ftc.teamcode.common.FinalPose;
 import org.firstinspires.ftc.teamcode.common.Motif;
 import org.firstinspires.ftc.teamcode.common.Pipeline;
-import org.firstinspires.ftc.teamcode.common.SpindexerIndex;
-import org.firstinspires.ftc.teamcode.paths.Path;
-import org.firstinspires.ftc.teamcode.paths.PathManager;
-import org.firstinspires.ftc.teamcode.paths.PathState;
+import org.firstinspires.ftc.teamcode.paths.util.Path;
+import org.firstinspires.ftc.teamcode.paths.util.PathManager;
+import org.firstinspires.ftc.teamcode.paths.util.PathState;
 import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 
 import java.util.HashSet;
@@ -25,11 +24,11 @@ import java.util.HashSet;
  */
 public abstract class AutosDecode extends OpMode {
 
-    public static final double READ_MOTIF_TIMEOUT_SECONDS = 5;
-    public static final double AIM_TIMEOUT_MS = 3000;
-    public static final double AIM_MIN_MS = 1000;
-
-    public static final double INTAKE_WAIT_MS = 1000;
+    protected static final double READ_MOTIF_TIMEOUT_SECONDS = 5;
+    protected static final double AIM_TIMEOUT_MS = 3000;
+    protected static final double AIM_MIN_MS = 1000;
+    protected static final double AIM_TOLERANCE = 0.3;
+    protected static final double INTAKE_WAIT_MS = 1000;
     protected final ElapsedTime actionTimer = new ElapsedTime();
     protected static final long INTAKE_DELAY = 5000; // delay to keep hood open
     protected final HashSet<Integer> shootIndexes = new HashSet<>();
@@ -37,6 +36,7 @@ public abstract class AutosDecode extends OpMode {
     protected int subActionStep = 0;
     protected int lastPathIndex = -1;
 
+    protected double aimTolerance = AIM_TOLERANCE;
     protected double startWaitTimeSeconds = 0;
 
     protected int motifIndex = 0;
@@ -360,7 +360,7 @@ public abstract class AutosDecode extends OpMode {
 
         stateTimer.reset();
 
-        robot.doAimAtTarget(.3,  aimOffset,20);
+        robot.doAimAtTarget(aimTolerance,  aimOffset,20);
         return true;
     }
 
@@ -377,7 +377,7 @@ public abstract class AutosDecode extends OpMode {
             done = true;
         }
        else {
-            done = robot.doAimAtTarget(.3, aimOffset, 100);
+            done = robot.doAimAtTarget(aimTolerance, aimOffset, 100);
         }
 
         return done && curTimeMs > AIM_MIN_MS;

@@ -3,9 +3,9 @@ package org.firstinspires.ftc.teamcode.autos;
 import com.pedropathing.geometry.Pose;
 
 import org.firstinspires.ftc.teamcode.common.Alliance;
-import org.firstinspires.ftc.teamcode.paths.Path;
+import org.firstinspires.ftc.teamcode.paths.util.Path;
 import org.firstinspires.ftc.teamcode.paths.PathOnWallNear;
-import org.firstinspires.ftc.teamcode.paths.PathState;
+import org.firstinspires.ftc.teamcode.paths.util.PathState;
 
 import java.util.Arrays;
 

@@ -21,7 +21,7 @@ public class TeleOpDupliOp extends OpMode {
     private boolean autoAim = false;
 
     // State machine for shooting process
-    private enum ShootState { IDLE, PREPARING, READY, SHOOTING }
+    private enum ShootState { IDLE, PREPARING, READY }
     private ShootState shootState = ShootState.IDLE;
 
     private RobotSystem robot;
@@ -32,7 +32,7 @@ public class TeleOpDupliOp extends OpMode {
 
     private boolean wasTriggerPressed = false;
     private boolean resetInProgress = false;
-
+    private boolean isReverseIntake = false;
 
     /**
      * This method is run once when the driver hits "INIT" on the Driver Station.
@@ -183,13 +183,8 @@ public class TeleOpDupliOp extends OpMode {
 
         if (shootState == ShootState.READY) {
             if (robot.tryShoot()) {
-                shootState = ShootState.SHOOTING; // Move to a transient state
+                shootState = ShootState.IDLE; // Move to a transient state
             }
-        }
-
-        // After shooting, automatically return to idle
-        if (shootState == ShootState.SHOOTING) {
-            shootState = ShootState.IDLE;
         }
 
         // Manual RPM adjustments
@@ -235,12 +230,16 @@ public class TeleOpDupliOp extends OpMode {
 
         if (gamepad1.leftBumperWasPressed()) {
             robot.reverseIntake();
-            if (robot.isHoodIntakePose()) {
-                robot.decrementSpindexerSlot();
-            }
+            isReverseIntake = true;
+
         } else if (gamepad1.leftBumperWasReleased()) {
             // Stop intake only if neither bumper is pressed
             robot.stopIntake();
+            isReverseIntake = false;
+        }
+
+        if (robot.isHoodIntakePose() && isReverseIntake && !robot.isSpindexerBusy()) {
+            robot.decrementSpindexerSlot();
         }
 
         if (gamepad2.startWasPressed() || gamepad1.startWasPressed()){

@@ -1,9 +1,7 @@
 package org.firstinspires.ftc.teamcode.autos;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-
 import org.firstinspires.ftc.teamcode.common.Alliance;
-import org.firstinspires.ftc.teamcode.paths.Path;
+import org.firstinspires.ftc.teamcode.paths.util.Path;
 import org.firstinspires.ftc.teamcode.paths.PathBallThief;
 
 import java.util.Arrays;
@@ -40,6 +38,8 @@ public class AutoBallThief  extends AutosDecode{
         } else {
             this.aimOffset = 2.5;
         }
+
+        this.aimTolerance = .2;
 
         follower.setStartingPose(paths.getPathStart());
     }

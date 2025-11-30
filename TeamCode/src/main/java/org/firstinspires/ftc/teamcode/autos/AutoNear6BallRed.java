@@ -1,19 +1,13 @@
 package org.firstinspires.ftc.teamcode.autos;
 
 import com.bylazar.configurables.annotations.Configurable;
-import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.common.Alliance;
-import org.firstinspires.ftc.teamcode.paths.Path;
-import org.firstinspires.ftc.teamcode.paths.PathNearAuto1;
-import org.firstinspires.ftc.teamcode.paths.PathState;
 
-import java.util.Arrays;
-
-    @Autonomous(name = "Shoot Near red Side", group = "Red", preselectTeleOp = "_TeleOp_Driver_Operator")
+@Autonomous(name = "Shoot Near 6 ball Red", group = "Red", preselectTeleOp = "_TeleOp_Driver_Operator")
     @Configurable
-public class AutoNearRed extends AutoNearOne {
+public class AutoNear6BallRed extends AutoNear6Ball {
 
     @Override
     protected void setAlliance() {

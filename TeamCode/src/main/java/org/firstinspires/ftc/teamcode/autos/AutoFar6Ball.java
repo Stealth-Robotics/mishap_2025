@@ -1,17 +1,13 @@
 package org.firstinspires.ftc.teamcode.autos;
 
-import com.bylazar.configurables.annotations.Configurable;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-
 import org.firstinspires.ftc.teamcode.common.Alliance;
-import org.firstinspires.ftc.teamcode.paths.Path;
+import org.firstinspires.ftc.teamcode.paths.util.Path;
 import org.firstinspires.ftc.teamcode.paths.PathFarAuto1;
-import org.firstinspires.ftc.teamcode.paths.PathState;
+import org.firstinspires.ftc.teamcode.paths.util.PathState;
 
 import java.util.Arrays;
 
-public class AutoFarOne extends AutosDecode {
+public class AutoFar6Ball extends AutosDecode {
 
     @Override
     protected Path initPaths() {
@@ -39,7 +35,7 @@ public class AutoFarOne extends AutosDecode {
         if (Alliance.isBlue()) {
             this.aimOffset = -2.0;
         } else {
-            this.aimOffset = 2.5;
+            this.aimOffset = 2.0;
         }
 
         follower.setStartingPose(paths.getPathStart());
