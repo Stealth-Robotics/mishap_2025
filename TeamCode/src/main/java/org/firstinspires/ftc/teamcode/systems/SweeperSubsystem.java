@@ -15,7 +15,7 @@ public class SweeperSubsystem {
 
     public static double MAX_SWEEPER_SPEED = 1; // 1.0
 
-    public static double MAX_EGG_BEATER_SPEED = .55; // 1.0
+    public static double MAX_EGG_BEATER_SPEED = .75; // 1.0
 
     public double curSweeperSpeed = MAX_SWEEPER_SPEED;
 
