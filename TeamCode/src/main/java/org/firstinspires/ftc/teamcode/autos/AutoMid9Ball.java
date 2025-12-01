@@ -3,19 +3,19 @@ package org.firstinspires.ftc.teamcode.autos;
 import com.pedropathing.geometry.Pose;
 
 import org.firstinspires.ftc.teamcode.common.Alliance;
+import org.firstinspires.ftc.teamcode.paths.PathMid9Ball;
 import org.firstinspires.ftc.teamcode.paths.util.Path;
-import org.firstinspires.ftc.teamcode.paths.PathNear6Ball;
 import org.firstinspires.ftc.teamcode.paths.util.PathState;
 
 import java.util.Arrays;
 
-public class AutoNear6Ball extends AutosDecode {
+public class AutoMid9Ball extends AutosDecode {
 
     @Override
     protected Path initPaths() {
-        shootIndexes.addAll(Arrays.asList(1, 4));
-        intakeIndexes.addAll(Arrays.asList(3));
-        return new PathNear6Ball(robot);
+        shootIndexes.addAll(Arrays.asList(1, 4, 7));
+        intakeIndexes.addAll(Arrays.asList(3, 6));
+        return new PathMid9Ball(robot);
     }
 
     @Override
@@ -28,12 +28,12 @@ public class AutoNear6Ball extends AutosDecode {
     protected void setStartingPose() {
         // a negative number turns the bot more to the left positive more to the right
         if (Alliance.isBlue()) {
-            this.aimOffset = 0;
+            this.aimOffset = -0.5;
         } else {
-            this.aimOffset = 0;
+            this.aimOffset = 0.5;
         }
 
-        this.aimTolerance = .8;
+        this.aimTolerance = .5;
 
         Pose startPose = paths.getPathStart();
         if (lastPose != null) {

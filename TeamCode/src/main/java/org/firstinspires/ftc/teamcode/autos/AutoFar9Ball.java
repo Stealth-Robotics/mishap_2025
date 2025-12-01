@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.autos;
 
 import org.firstinspires.ftc.teamcode.common.Alliance;
 import org.firstinspires.ftc.teamcode.paths.PathFar9Ball;
-import org.firstinspires.ftc.teamcode.paths.PathFarAuto1;
 import org.firstinspires.ftc.teamcode.paths.util.Path;
 import org.firstinspires.ftc.teamcode.paths.util.PathState;
 

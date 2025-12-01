@@ -300,4 +300,16 @@ public class PathBuilderDecode extends PathBuilder {
         super.addLoopedCallback(callback);
         return this;
     }
+
+    @Override
+    public PathBuilderDecode setBrakingStart(double start) {
+        super.setBrakingStart(start);
+        return this;
+    }
+
+    @Override
+    public PathBuilderDecode setBrakingStrength(double strength) {
+        super.setBrakingStrength(strength);
+        return this;
+    }
 }

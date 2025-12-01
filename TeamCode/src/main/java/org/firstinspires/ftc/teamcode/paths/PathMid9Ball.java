@@ -1,0 +1,186 @@
+package org.firstinspires.ftc.teamcode.paths;
+
+import com.pedropathing.geometry.BezierCurve;
+import com.pedropathing.geometry.BezierLine;
+import com.pedropathing.geometry.Pose;
+
+import org.firstinspires.ftc.teamcode.common.ZoneDistance;
+import org.firstinspires.ftc.teamcode.paths.util.PathManager;
+import org.firstinspires.ftc.teamcode.systems.RobotSystem;
+
+public class PathMid9Ball extends PathManager {
+
+    public PathMid9Ball(RobotSystem robot) {
+        super(robot);
+        addPaths();
+    }
+
+    public void addPaths ( ) {
+        addRedPaths();
+        addBluePaths();
+    }
+
+    public void addBluePaths() {
+        addBluePath(
+        // name: To Shoot1, color: #66B85C
+                pathBuilder()
+                        .addPath(
+                                // To Shoot1
+                                new BezierLine(new Pose(18.000, 115.000), new Pose(54.000, 107.000))
+                        )
+                        .setLinearHeadingInterpolation(Math.toRadians(15), Math.toRadians(130))
+                        .applyFirstShotSequence(ZoneDistance.NEAR)
+                        .build()
+        );
+        addBluePath(
+        // name: Goto PPG, color: #9AB55D
+                pathBuilder()
+                        .addPath(
+                                new BezierLine(new Pose(54.000, 107.000), new Pose(48.000, 85.300))
+                        )
+                        .setLinearHeadingInterpolation(Math.toRadians(130.000), Math.toRadians(0.000))
+                        .addParametricCallback(.9, robot::startIntake)
+                        .build()
+        );
+        addBluePath(
+        // name: Intake PPG, color: #8878CD
+                pathBuilder()
+                        .addPath(
+                                new BezierLine(new Pose(48.000, 85.300), new Pose(16.000, 84.000))
+                        )
+                        .setConstantHeadingInterpolation(Math.toRadians(0.000))
+                        .applyIntakeSequence()
+                        .build()
+        );
+        addBluePath(
+        // name: Shoot2, color: #6BCD9D
+                pathBuilder()
+                        .addPath(
+                                new BezierLine(new Pose(16.000, 84.000), new Pose(50.600, 86.200))
+                        )
+                        .setLinearHeadingInterpolation(Math.toRadians(0.000), Math.toRadians(135.000))
+                        .applyFollowupShotSequence(ZoneDistance.MID)
+                        .build()
+        );
+        addBluePath(
+        // name: Goto PGP, color: #8DC859
+                pathBuilder()
+                        .addPath(
+                                new BezierCurve(
+                                        new Pose(50.600, 86.200)
+                                        , new Pose(58.000, 70.600)
+                                        , new Pose(47.600, 62.000)
+                                )
+                        )
+                        .setLinearHeadingInterpolation(Math.toRadians(135.000), Math.toRadians(0.000))
+                        .addParametricCallback(.9, robot::startIntake)
+                        .build()
+        );
+        addBluePath(
+        // name: Intake PGP, color: #56D7BB
+                pathBuilder()
+                        .addPath(
+                                new BezierLine(new Pose(47.600, 62.000), new Pose(11.000, 59.800))
+                        )
+                        .setConstantHeadingInterpolation(Math.toRadians(0.000))
+                        .applyIntakeSequence()
+                        .build()
+        );
+        addBluePath(
+        // name: Shoot3 Near, color: #85A6C7
+                pathBuilder()
+                        .addPath(
+                                new BezierCurve(
+                                        new Pose(11.000, 59.800)
+                                        , new Pose(57.600, 53.400)
+                                        , new Pose(55.000, 106.800)
+                                )
+                        )
+                        .setTangentHeadingInterpolation()
+                        .applyFollowupShotSequence(ZoneDistance.NEAR)
+                        .build()
+        );
+    }
+
+    public void addRedPaths() {
+        addRedPath(
+        // name: To Shoot1, color: #66B85C
+                pathBuilder()
+                        .addPath(
+                                // To Shoot1
+                                new BezierLine(new Pose(126.000, 115.000), new Pose(90.000, 107.000))
+                        )
+                        .setLinearHeadingInterpolation(Math.toRadians(165), Math.toRadians(50))
+                        .applyFirstShotSequence(ZoneDistance.NEAR)
+                        .build()
+        );
+        addRedPath(
+        // name: Goto PPG, color: #9AB55D
+                pathBuilder()
+                        .addPath(
+                                new BezierLine(new Pose(90.000, 107.000), new Pose(96.000, 85.300))
+                        )
+                        .setLinearHeadingInterpolation(Math.toRadians(50.000), Math.toRadians(-180.000))
+                        .addParametricCallback(.9, robot::startIntake)
+                        .build()
+        );
+        addRedPath(
+        // name: Intake PPG, color: #8878CD
+                pathBuilder()
+                        .addPath(
+                                new BezierLine(new Pose(96.000, 85.300), new Pose(128.000, 84.000))
+                        )
+                        .setConstantHeadingInterpolation(Math.toRadians(-180.000))
+                        .applyIntakeSequence()
+                        .build()
+        );
+        addRedPath(
+        // name: Shoot2, color: #6BCD9D
+                pathBuilder()
+                        .addPath(
+                                new BezierLine(new Pose(128.000, 84.000), new Pose(93.400, 86.200))
+                        )
+                        .setLinearHeadingInterpolation(Math.toRadians(-180.000), Math.toRadians(45.000))
+                        .applyFollowupShotSequence(ZoneDistance.MID)
+                        .build()
+        );
+        addRedPath(
+        // name: Goto PGP, color: #8DC859
+                pathBuilder()
+                        .addPath(
+                                new BezierCurve(
+                                        new Pose(93.400, 86.200)
+                                        , new Pose(86.000, 70.600)
+                                        , new Pose(96.400, 62.000)
+                                )
+                        )
+                        .setLinearHeadingInterpolation(Math.toRadians(45.000), Math.toRadians(-180.000))
+                        .addParametricCallback(.9, robot::startIntake)
+                        .build()
+        );
+        addRedPath(
+        // name: Intake PGP, color: #56D7BB
+                pathBuilder()
+                        .addPath(
+                                new BezierLine(new Pose(96.400, 62.000), new Pose(133.000, 59.800))
+                        )
+                        .setConstantHeadingInterpolation(Math.toRadians(-180.000))
+                        .applyIntakeSequence()
+                        .build()
+        );
+        addRedPath(
+        // name: Shoot3 Near, color: #85A6C7
+                pathBuilder()
+                        .addPath(
+                                new BezierCurve(
+                                        new Pose(133.000, 59.800)
+                                        , new Pose(86.400, 53.400)
+                                        , new Pose(89.000, 106.800)
+                                )
+                        )
+                        .setTangentHeadingInterpolation()
+                        .applyFollowupShotSequence(ZoneDistance.NEAR)
+                        .build()
+        );
+    }
+}

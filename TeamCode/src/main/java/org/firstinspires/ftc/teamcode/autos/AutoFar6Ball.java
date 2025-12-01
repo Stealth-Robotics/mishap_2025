@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.autos;
 
 import org.firstinspires.ftc.teamcode.common.Alliance;
 import org.firstinspires.ftc.teamcode.paths.util.Path;
-import org.firstinspires.ftc.teamcode.paths.PathFarAuto1;
+import org.firstinspires.ftc.teamcode.paths.PathFar6Ball;
 import org.firstinspires.ftc.teamcode.paths.util.PathState;
 
 import java.util.Arrays;
@@ -14,7 +14,7 @@ public class AutoFar6Ball extends AutosDecode {
         shootIndexes.addAll(Arrays.asList(1, 4));
         intakeIndexes.addAll(Arrays.asList(3));
 
-        return new PathFarAuto1(robot);
+        return new PathFar6Ball(robot);
     }
 
     @Override

@@ -4,7 +4,7 @@ import com.pedropathing.geometry.Pose;
 
 import org.firstinspires.ftc.teamcode.common.Alliance;
 import org.firstinspires.ftc.teamcode.paths.util.Path;
-import org.firstinspires.ftc.teamcode.paths.PathNearAuto1;
+import org.firstinspires.ftc.teamcode.paths.PathNear6Ball;
 import org.firstinspires.ftc.teamcode.paths.util.PathState;
 
 import java.util.Arrays;
@@ -15,7 +15,7 @@ public class AutoSushi extends AutosDecode {
     protected Path initPaths() {
         shootIndexes.addAll(Arrays.asList(1));
         //intakeIndexes.addAll(Arrays.asList(2));
-        return new PathNearAuto1(robot);
+        return new PathNear6Ball(robot);
     }
 
     @Override

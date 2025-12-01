@@ -25,9 +25,9 @@ public class PathNear9Ball extends PathManager {
         // name: To Shoot 1, color: #66B85C
                 pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(18.000, 112.200), new Pose(54.000, 110.000))
+                                new BezierLine(new Pose(18.000, 115), new Pose(54.000, 110.000))
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(28.000), Math.toRadians(146.000))
+                        .setLinearHeadingInterpolation(Math.toRadians(15), Math.toRadians(146.000))
                         .applyFirstShotSequence(ZoneDistance.NEAR)
                         .build()
         );
@@ -110,9 +110,9 @@ public class PathNear9Ball extends PathManager {
         // name: To Shoot 1, color: #66B85C
                 pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(126.000, 112.200), new Pose(89.000, 111.000))
+                                new BezierLine(new Pose(126.000, 115), new Pose(89.000, 111.000))
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(152.000), Math.toRadians(34.000))
+                        .setLinearHeadingInterpolation(Math.toRadians(165), Math.toRadians(34.000))
                         .applyFirstShotSequence(ZoneDistance.NEAR)
                         .build()
         );
@@ -127,7 +127,7 @@ public class PathNear9Ball extends PathManager {
                                 )
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(34.000), Math.toRadians(-180.000))
-                        .addParametricCallback(.99, robot::startIntake)
+                        .addParametricCallback(.9, robot::startIntake)
                         .build()
         );
         addRedPath(

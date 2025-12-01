@@ -8,13 +8,13 @@ import org.firstinspires.ftc.teamcode.common.ZoneDistance;
 import org.firstinspires.ftc.teamcode.paths.util.PathManager;
 import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 
-public class PathFarAuto1 extends PathManager {
+public class PathFar6Ball extends PathManager {
     /**
      * Constructs a new PathManager with the given start pose.
      *
      * @param robot The robot instance.
      */
-    public PathFarAuto1(RobotSystem robot) {
+    public PathFar6Ball(RobotSystem robot) {
         super(robot);
         buildPaths();
     }

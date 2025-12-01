@@ -94,7 +94,7 @@ public abstract class AutosDecode extends OpMode {
     }
 
     /**
-     * Called repeatively after init but before start.
+     * Called repetitively after init but before start.
      */
     @Override
     public void init_loop() {
@@ -121,7 +121,7 @@ public abstract class AutosDecode extends OpMode {
 
     /**
      * Sets the alliance for this autonomous routine.
-     * Use limitlight if not overriden.
+     * Use limitlight if not overridden.
      */
     protected void setAlliance() {
         // this means if we don't get a pose we will default to RED alliance
@@ -152,7 +152,7 @@ public abstract class AutosDecode extends OpMode {
     @Override
     public void start() {
         robot.update();
-        // TODO: Any addtional 1 time actions when start button is pressed
+        // TODO: Any additional 1 time actions when start button is pressed
 
         // must be called before initPaths
         setAlliance();
@@ -311,7 +311,7 @@ public abstract class AutosDecode extends OpMode {
     }
 
     /**
-     * Any acctions required durring the intake phase
+     * Any actions required during the intake phase
      * @return true once done otherwise false
      */
     protected boolean doIntakeAction()
@@ -333,7 +333,7 @@ public abstract class AutosDecode extends OpMode {
      * @return false for still looking true for found or timed out.
      */
     protected boolean doMotifOrTimeout() {
-        // If we timout set the mofif to the loaded pattern of GPP
+        // If we timeout set the motif to the loaded pattern of GPP
         if (stateTimer.seconds() > READ_MOTIF_TIMEOUT_SECONDS) {
             robot.setMotifPattern(Motif.PPG);
             return true;

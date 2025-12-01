@@ -22,7 +22,7 @@ public class PathFar9Ball extends PathManager {
     }
 
     public void addBluePaths() {
-        Follower follower = robot.getFollower();
+
         addBluePath(
         // name: Shoot1, color: #89D585
                pathBuilder()
@@ -96,6 +96,7 @@ public class PathFar9Ball extends PathManager {
                         .build()
         );
     }
+
     public void addRedPaths() {
         addRedPath(
                 // name: Shoot1, color: #89D585

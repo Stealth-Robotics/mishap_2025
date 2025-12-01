@@ -29,7 +29,7 @@ public class PathMidShot extends PathManager {
                         .addPath(
                                 // To Shoot 1
                                 new BezierCurve(
-                                        new Pose(126.000, 112.200),
+                                        new Pose(126.000, 115),
                                         new Pose(92.600, 109.900),
                                         new Pose(90.600, 84.000)
                                 )
@@ -95,7 +95,7 @@ public class PathMidShot extends PathManager {
                         .addPath(
                                 // To Shoot 1
                                 new BezierCurve(
-                                        new Pose(18.000, 112.200),
+                                        new Pose(18.000, 115),
                                         new Pose(51.400, 109.900),
                                         new Pose(53.400, 84.000)
                                 )
