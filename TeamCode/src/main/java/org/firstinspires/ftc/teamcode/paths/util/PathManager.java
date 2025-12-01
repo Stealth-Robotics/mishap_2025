@@ -21,7 +21,7 @@ import java.util.List;
 public class PathManager implements Path {
 
     public static double MAX_SPEED = 1;
-    public static double INTAKE_SPEED = 0.22;
+    public static double INTAKE_SPEED = 0.25;
 
     public static double SLOW_SPEED = .1;
 

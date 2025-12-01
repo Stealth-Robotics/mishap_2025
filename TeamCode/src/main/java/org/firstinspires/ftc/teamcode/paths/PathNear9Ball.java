@@ -25,7 +25,7 @@ public class PathNear9Ball extends PathManager {
         // name: To Shoot 1, color: #66B85C
                 pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(18.000, 112.200), new Pose(55.000, 111.000))
+                                new BezierLine(new Pose(18.000, 112.200), new Pose(54.000, 110.000))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(28.000), Math.toRadians(146.000))
                         .applyFirstShotSequence(ZoneDistance.NEAR)
@@ -36,7 +36,7 @@ public class PathNear9Ball extends PathManager {
                 pathBuilder()
                         .addPath(
                                 new BezierCurve(
-                                        new Pose(55.000, 111.000)
+                                        new Pose(54.000, 110.000)
                                         , new Pose(57.100, 90.200)
                                         , new Pose(47.700, 85.000)
                                 )
@@ -53,14 +53,14 @@ public class PathNear9Ball extends PathManager {
                         )
                         .setTangentHeadingInterpolation()
                         .setReversed()
-                        .applyIntakeSequence()
+                        .applyIntakeSequence(.15, .25)
                         .build()
         );
         addBluePath(
         // name: Shoot 2, color: #6BCD9D
                 pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(16.000, 84.000), new Pose(55.000, 109.500))
+                                new BezierLine(new Pose(16.000, 84.000), new Pose(54.000, 109.500))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(0.000), Math.toRadians(146.000))
                         .applyFollowupShotSequence(ZoneDistance.NEAR)
@@ -71,7 +71,7 @@ public class PathNear9Ball extends PathManager {
                 pathBuilder()
                         .addPath(
                                 new BezierCurve(
-                                        new Pose(55.000, 109.500)
+                                        new Pose(54.000, 109.500)
                                         , new Pose(66.100, 67.300)
                                         , new Pose(48.000, 61.000)
                                 )

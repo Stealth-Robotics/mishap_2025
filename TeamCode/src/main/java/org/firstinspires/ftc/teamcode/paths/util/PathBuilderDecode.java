@@ -81,7 +81,7 @@ public class PathBuilderDecode extends PathBuilder {
      * @return The modified PathBuilder with the intake sequence added.
      */
     public PathBuilderDecode applyIntakeSequence() {
-        return this.applyIntakeSequence(.1, INTAKE_SPEED);
+        return this.applyIntakeSequence(.15, INTAKE_SPEED);
     }
 
     /**
@@ -108,9 +108,9 @@ public class PathBuilderDecode extends PathBuilder {
         addParametricCallback(.01, robot::startIntake)
                 .addParametricCallback(p, ()->follower.setMaxPower(power))
                 .addParametricCallback(.99, robot::stopIntake)
-                .addInfiniteCallback(shouldPauseIntaking(), pauseIntaking())
-                .addInfiniteCallback(shouldResumeIntaking(), resumeIntaking())
-                .addInfiniteCallback(robot::isSpindexerFull, () -> {
+                .addCallback(shouldPauseIntaking(), pauseIntaking())
+                .addCallback(shouldResumeIntaking(), resumeIntaking())
+                .addCallback(robot::isSpindexerFull, () -> {
                     robot.stopIntake();
                     follower.setMaxPower(MAX_SPEED);
                     // this causes the follower to pickup the next path from the closest point

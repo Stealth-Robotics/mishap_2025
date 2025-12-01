@@ -33,7 +33,7 @@ public class ShooterSubsystem {
     public static final double MIN_RPM = 2000;
     public static final double DEFAULT_RPM_NEAR = 2580;
     public static final double DEFAULT_RPM_MID = 2650;
-    public static final double DEFAULT_RPM_FAR =2910;
+    public static final double DEFAULT_RPM_FAR =2890;
 
     public static final double RPM_CHANGE_AMOUNT = 50;
     private static final double VELOCITY_TOLERANCE_LOW = 5; // The allowed RPM error in which the shooter is considered "ready".
