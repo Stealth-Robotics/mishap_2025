@@ -1,7 +1,7 @@
 {
   "startPoint": {
-    "x": 126,
-    "y": 112.2,
+    "x": 125.4,
+    "y": 117,
     "heading": "linear",
     "startDeg": 90,
     "endDeg": -180
@@ -10,10 +10,10 @@
     {
       "name": "To Shoot 1",
       "endPoint": {
-        "x": 89,
-        "y": 111,
+        "x": 90,
+        "y": 110,
         "heading": "linear",
-        "startDeg": 152,
+        "startDeg": 167,
         "endDeg": 34
       },
       "controlPoints": [],
@@ -51,7 +51,7 @@
     {
       "name": "Shoot 2",
       "endPoint": {
-        "x": 89,
+        "x": 90,
         "y": 109.5,
         "heading": "linear",
         "reverse": false,
@@ -94,8 +94,8 @@
     {
       "name": "Shoot3",
       "endPoint": {
-        "x": 89,
-        "y": 107.5,
+        "x": 90,
+        "y": 109,
         "heading": "tangential",
         "reverse": false
       },
@@ -111,6 +111,5 @@
       ],
       "color": "#B6CC89"
     }
-  ],
-  "shapes": []
+  ]
 }
