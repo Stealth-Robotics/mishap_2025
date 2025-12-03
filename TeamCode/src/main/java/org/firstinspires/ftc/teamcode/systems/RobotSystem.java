@@ -970,7 +970,7 @@ public class RobotSystem {
 
                 if (kickerSys.isReady()) {
                     // Stop the shooter unless burst fire is active.
-                    if (!isBurstFire) {
+                    if (!isBurstFire || spindexerSys.isEmpty()) {
                         shooterSys.stop();
                     }
                     // We will auto handle the rotation
@@ -992,10 +992,12 @@ public class RobotSystem {
                     break;
             case IDLE:
 
+                // this call first checks all needed checks before initiating the reset
+                spindexerSys.resetSpindexerOffsetsFast();
                 // IDLE state keep an eye on the intaking slot
                 // if there is a change update the state
-                if (!this.isSpindexerBusy()) {
-                    // Use a debouncer to prevent transient uknown or empty etections
+                if (!this.isSpindexerBusy() && spindexerSys.isHomed()) {
+                    // Use a debouncer to prevent transient unknown or empty detections
                     SlotState detectedState = colorSensorSys.getLastDetection();
                     SlotState currentSlotState = spindexerSys.getIntakeSlotState();
                     boolean isArtifactPresent = !detectedState.equals(SlotState.EMPTY) && !detectedState.equals(SlotState.UNKNOWN);
@@ -1039,6 +1041,7 @@ public class RobotSystem {
                         }
                     }
                 }
+
                 break;
             case REVERSING_INTAKE:
                 break;
@@ -1081,19 +1084,19 @@ public class RobotSystem {
             txt = "Right";
         }
 
-        telemetryM.addData("Robot State", currentState.name());
-        telemetryM.addData("isShootReady:", isShootReady);
-//        telemetryM.addData("Current zone", shooterSys.getCurrentZone());
-//        telemetryM.addLine(String.format("Current Aim Angle: %.2f (%s)", getCurrentAimOffset(), txt));
-//        telemetryM.addData("Target RPM", shooterSys.getTargetRpm());
-//        telemetryM.addData("Shooter RPM (avg)", shooterSys.getCurrentRpm());
+        telemetryM.addData("Current zone", shooterSys.getCurrentZone());
+        telemetryM.addData("Target RPM", shooterSys.getTargetRpm());
+        telemetryM.addData("Shooter RPM (avg)", shooterSys.getCurrentRpm());
 ////        telemetryM.addData("LeftRpm", shooterSys.getLeftRpm());
 ////        telemetryM.addData("RightRpm", shooterSys.getRightRpm());
+        telemetryM.addLine(String.format("Current Aim Angle: %.2f (%s)", getCurrentAimOffset(), txt));
 
-////        telemetryM.addData("Auto Intaking:", isAutoIntaking);
-////        telemetryM.addData("Burst MODE", isBurstFire);
-//        telemetryM.addData("Spindexer offset:", spindexerSys.getCurrentOffset());
-//        telemetryM.addData("Is Spindexer Ready", spindexerSys.isReady());
+        telemetryM.addData("Robot State", currentState.name());
+        telemetryM.addData("isShootReady:", isShootReady);
+        telemetryM.addData("Auto Intaking:", isAutoIntaking);
+        telemetryM.addData("Burst MODE", isBurstFire);
+        telemetryM.addData("Spindexer offset:", spindexerSys.getCurrentOffset());
+        telemetryM.addData("Spindexer Ready", spindexerSys.isReady());
 //        telemetryM.addData("shooterSys Ready:", shooterSys.isReadyToShoot());
 //        telemetryM.addData("Hood Ready:", hoodSys.isReadyToShoot());
 //        telemetryM.addData("Kicker Ready:", kickerSys.isReady());
@@ -1101,9 +1104,10 @@ public class RobotSystem {
         telemetryM.addData("Standby Slot State:", spindexerSys.getStandbySlotState());
         telemetryM.addData("Intake Slot State:", spindexerSys.getIntakeSlotState());
         telemetryM.addData("Shoot Slot Number:", spindexerSys.getCurShootSlot());
-//       telemetryM.addData("IsMotif available", spindexerSys.isMotifAvailable());
-//        telemetryM.addData("Spindexer Raw Position", spindexerSys.getCurrentPosition());
-//        telemetryM.addData("CURRENT HEADING", follower.getHeading());
+        telemetryM.addData("IsMotif available", spindexerSys.isMotifAvailable());
+        telemetryM.addData("Spindexer Raw Position", spindexerSys.getCurrentPosition());
+        telemetryM.addData("Spindexer ABS Pos", spindexerSys.getCurrentAbsolutePosition());
+        telemetryM.addData("CURRENT HEADING", Math.toDegrees(follower.getHeading()));
 
         // TODO: THIS SHOULD BE REMOVED BEFORE COMP
         this.draw();

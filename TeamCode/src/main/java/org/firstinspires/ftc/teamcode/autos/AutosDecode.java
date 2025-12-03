@@ -77,6 +77,7 @@ public abstract class AutosDecode extends OpMode {
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
         robot = new RobotSystem(hardwareMap, telemetry);
         follower = robot.getFollower();
+
         setSpindexerInitState();
         telemetryM.debug("Status", "Initialized");
         robot.setLimelightPipeline(Pipeline.APRILTAG_TARGET_BOTH);

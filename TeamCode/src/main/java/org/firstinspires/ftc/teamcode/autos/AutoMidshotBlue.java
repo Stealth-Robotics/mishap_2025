@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.common.Alliance;
 
-@Autonomous(name = "Shoot Mid blue Side", group = "Blue", preselectTeleOp = "_TeleOp_Driver_Operator")
+@Autonomous(name = "Mid 6ball blue", group = "Blue", preselectTeleOp = "_TeleOp_Driver_Operator")
 @Disabled
 public class AutoMidshotBlue extends AutoMidshotOne {
 

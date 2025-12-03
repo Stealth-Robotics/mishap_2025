@@ -47,7 +47,7 @@ public class PathFar6Ball extends PathManager {
                                 )
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(70), Math.toRadians(-180))
-                        .addParametricCallback(.99, robot::startIntake)
+                        .addParametricCallback(.9, robot::startIntake)
                         .build());
         // Start Chomp
         addRedPath(
@@ -102,6 +102,7 @@ public class PathFar6Ball extends PathManager {
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(110))
                         .applyFirstShotSequence(ZoneDistance.FAR)
+
                         .build());
         // Move to line 1 intake area
         addBluePath(
@@ -109,13 +110,13 @@ public class PathFar6Ball extends PathManager {
                         .addPath(
                                 // SlowIntake1
                                 new BezierCurve(
-                                        new Pose(58.000, 17.000),
+                                        new Pose(58.000, 18.00),
                                         new Pose(58.400, 34.600),
                                         new Pose(48.000, 35.000)
                                 )
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(110), Math.toRadians(0))
-                        .addParametricCallback(.99, robot::startIntake)
+                        .addParametricCallback(.9, robot::startIntake)
                         .build());
         // Start Chomp
         addBluePath(
@@ -125,7 +126,7 @@ public class PathFar6Ball extends PathManager {
                                 new BezierLine(new Pose(48.000, 36.000), new Pose(11.000, 36.000))
                         )
                         .setConstantHeadingInterpolation(Math.toRadians(0))
-                        .applyIntakeSequence()
+                        .applyIntakeSequence(.15, .28)
                         .build()
         );
 
@@ -134,7 +135,7 @@ public class PathFar6Ball extends PathManager {
                         .addPath(
                                 // Shoot2
                                 new BezierCurve(
-                                        new Pose(11.000, 36.000),
+                                        new Pose(15.000, 36.000),
                                         new Pose(28.200, 18.500),
                                         new Pose(54.000, 18.000)
                                 )

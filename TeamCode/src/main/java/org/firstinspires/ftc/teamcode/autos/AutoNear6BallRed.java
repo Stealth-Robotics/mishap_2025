@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.common.Alliance;
 
-@Autonomous(name = "Shoot Near 6 ball Red", group = "Red", preselectTeleOp = "_TeleOp_Driver_Operator")
+@Autonomous(name = "Near 6 ball Red", group = "Red", preselectTeleOp = "_TeleOp_Driver_Operator")
     @Configurable
 public class AutoNear6BallRed extends AutoNear6Ball {
 

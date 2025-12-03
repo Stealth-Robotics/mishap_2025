@@ -11,11 +11,11 @@ public class Debouncer {
         kBoth
     }
 
-    private final double m_debounceTimeSeconds;
-    private final DebounceType m_debounceType;
-    private boolean m_baseline;
+    private final double debounceTimeSeconds;
+    private final DebounceType debounceType;
+    private boolean baseline;
 
-    private double m_prevTimeSeconds;
+    private double prevTimeSeconds;
 
     /**
      * Creates a new Debouncer.
@@ -25,18 +25,18 @@ public class Debouncer {
      * @param type         Which type of state change the debouncing will be performed on.
      */
     public Debouncer(double debounceTime, DebounceType type) {
-        m_debounceTimeSeconds = debounceTime;
-        m_debounceType = type;
+        debounceTimeSeconds = debounceTime;
+        debounceType = type;
 
         resetTimer();
 
-        switch (m_debounceType) {
+        switch (debounceType) {
             case kBoth: // fall-through
             case kRising:
-                m_baseline = false;
+                baseline = false;
                 break;
             case kFalling:
-                m_baseline = true;
+                baseline = true;
                 break;
             default:
                 throw new IllegalArgumentException("Invalid debounce type!");
@@ -53,15 +53,15 @@ public class Debouncer {
         this(debounceTime, DebounceType.kRising);
     }
 
-    private void resetTimer() {
+        private void resetTimer() {
         // nanoTime gives us nanoseconds (1 billionth of a second), but we prefer to work in seconds
         // here. We can convert by dividing by 1000000000 which we can more easily express in
         // scientific notation as 1e9. We can also multiply by the inverse, 1e-9.
-        m_prevTimeSeconds = System.nanoTime() * 1e-9;
+        prevTimeSeconds = System.nanoTime() * 1e-9;
     }
 
     private boolean hasElapsed() {
-        return (System.nanoTime() * 1e-9) - m_prevTimeSeconds >= m_debounceTimeSeconds;
+        return (System.nanoTime() * 1e-9) - prevTimeSeconds >= debounceTimeSeconds;
     }
 
     /**
@@ -71,18 +71,18 @@ public class Debouncer {
      * @return The debounced value of the input stream.
      */
     public boolean calculate(boolean input) {
-        if (input == m_baseline) {
+        if (input == baseline) {
             resetTimer();
         }
 
         if (hasElapsed()) {
-            if (m_debounceType == DebounceType.kBoth) {
-                m_baseline = input;
+            if (debounceType == DebounceType.kBoth) {
+                baseline = input;
                 resetTimer();
             }
             return input;
         } else {
-            return m_baseline;
+            return baseline;
         }
     }
 }

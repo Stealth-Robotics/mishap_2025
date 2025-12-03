@@ -148,7 +148,7 @@ public class PathBuilderDecode extends PathBuilder {
         Follower follower = robot.getFollower();
         addParametricCallback(0.01, () -> {
             follower.setMaxPower(MAX_SPEED);
-            robot.stopIntake(); // just incase
+            robot.stopIntake(); // just in case
         })
         // Check in on the spindexer to see if there are any unknown artifacts and try to sort them
         .addCallback(
@@ -278,7 +278,7 @@ public class PathBuilderDecode extends PathBuilder {
     }
 
     /**
-     * Changes the default behavoir of addCallback to make the Finite action run closer to Infinite
+     * Changes the default behavior of addCallback to make the Finite action run closer to Infinite
      * @param condition The condition that must be met for the callback to run.
      * @param runnable The action to run when the condition is met.
      * @return The modified PathBuilderDecode with the new callback added.

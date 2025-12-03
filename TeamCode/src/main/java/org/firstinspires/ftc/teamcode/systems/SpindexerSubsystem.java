@@ -56,7 +56,7 @@ public class SpindexerSubsystem {
      * Per Slot PID values. Slot 1 seems stickiest while slot 2 loose
      */
     public static double[] KP = {0.0092, 0.0099, 0.0077};
-    public static double[] KI = {0.05,  0.055,  0.048};
+    public static double[] KI = {0.09,  0.095,  0.088};
     public static double[] KD = {0.0008, 0.0008, 0.0008};
 
     /**
@@ -176,8 +176,7 @@ public class SpindexerSubsystem {
         SEARCHING_FORWARD,  // Moving forward to find the un-pressed edge of the switch
         SEARCHING_BACKWARD, // Moving backward to find the pressed edge again
         MOVING_TO_OFFSET,   // Moving to the final calculated zero position
-        HOMED,              // Homing is complete and successful
-        DONE                // Intermediate state before HOMED to finalize motor settings
+        HOMED               // Homing is complete and successful
     }
 
     /**
@@ -246,11 +245,10 @@ public class SpindexerSubsystem {
      */
     public void update() {
         octoquad.refreshCache();
-        resetSpindexerOffsetsFast();
         updatePidf();
-
-        if (isReady() && homingState.equals(HomingState.HOMED)) {
-            SpindexerIndex.setPosition(this.getCurrentPosition(), curShootSlot);
+        int curPosition = this.getCurrentPosition();
+        if (isReady() && homingState.equals(HomingState.HOMED) && curPosition != 0) {
+            SpindexerIndex.setPosition(curPosition, curShootSlot);
         } else if (homingState.equals(HomingState.HOMED)) {
             SpindexerIndex.setInvalid();
         }
@@ -261,9 +259,10 @@ public class SpindexerSubsystem {
      * slot 0 position after x number of complete rotations to
      * help prevent rounding drift.
      */
-    private void resetSpindexerOffsetsFast() {
+    public void resetSpindexerOffsetsFast() {
         if (curShootSlot != 0
                 || !isReady()
+                || !isHomed()
                 || Math.abs(getCurrentPosition()) < (2 * TICKS_PER_REV)) {
             return;
         }
@@ -301,6 +300,12 @@ public class SpindexerSubsystem {
 
         int adjustedPose = lastTargetPosition + SLOT_OFFSET_TICKS[curShootSlot];
         int currentPosition = this.getCurrentPosition();
+
+        if (currentPosition == 0) {
+            telemetryM.debug("Spindexer: Current Position is 0");
+            return;
+        }
+
         if (this.isIntaking) {
             adjustedPose += INTAKING_OFFSET_TICKS;
         }
@@ -394,6 +399,10 @@ public class SpindexerSubsystem {
         return false;
     }
 
+    public boolean isHomed() {
+        return homingState.equals(HomingState.HOMED);
+    }
+
     /**
      * A state machine to check for artifacts.
      * Currently contains logic to auto-fill slots if a green artifact is detected.
@@ -416,8 +425,6 @@ public class SpindexerSubsystem {
         if (getIntakeSlotState() == SlotState.ARTIFACT_GREEN) {
             setShootSlotState(SlotState.ARTIFACT_PURPLE);
             setStandbySlotState(SlotState.ARTIFACT_PURPLE);
-            // just incase this is not set
-            setIntakeSlotState(SlotState.ARTIFACT_GREEN);
             sortingState = SortingState.DONE;
             return true;
         }
@@ -446,6 +453,8 @@ public class SpindexerSubsystem {
                 this.sortingState = SortingState.DONE;
                 return true;
             }
+
+
             this.advanceOneSlot();
         }
 

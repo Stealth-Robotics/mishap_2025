@@ -149,7 +149,7 @@ public class PathMidShot extends PathManager {
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(135), Math.toRadians(0))
                         // get the shooter motors spinning early
-                        .build()
+                       .build()
         );
     }
 }

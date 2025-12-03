@@ -23,19 +23,19 @@ public class Constants {
     private static final double forwardPodOffsetMm = 82.55;
     private static final double strafePodOffsetMm = 165.1;
 
-    private static final double forwardVelocity = 61.6;
-    private static final double strafeVelocity = 50.1;
+    private static final double forwardVelocity = 59.65;
+    private static final double strafeVelocity = 47.2;
 
     // Acceleration of the drivetrain when power is cut in inches/second^2 (should be negative)
     // if not negative, then the robot thinks that its going to go faster under 0 power
     // The smaller (negative) the number the further the robot will travel under 0 power
-    private static final double forwardZeroPowerAcceleration = -37.14; // -38.7776 LOW // -51.637 FULL;
+    private static final double forwardZeroPowerAcceleration = -33.5; // -38.7776 LOW // -51.637 FULL;
 
     // Acceleration of the drivetrain when power is cut in inches/second^2 (should be negative)
     // if not negative, then the robot thinks that its going to go faster under 0 power
-    private static final double lateralZeroPowerAcceleration = -66.36; // 90.7 FULL
+    private static final double lateralZeroPowerAcceleration = -62.989; // 90.7 FULL
 
-    public static double mass = 11.0;
+    public static double mass = 12.0;
 
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(mass)
@@ -71,6 +71,7 @@ public class Constants {
             1.2);
 
     public static Follower createFollower(HardwareMap hardwareMap) {
+        followerConstants.setAutomaticHoldEnd(true);
         Follower f = new FollowerBuilder(followerConstants, hardwareMap)
                 .pinpointLocalizer(pinpointConstants)
                 .mecanumDrivetrain(mecanumConstants)

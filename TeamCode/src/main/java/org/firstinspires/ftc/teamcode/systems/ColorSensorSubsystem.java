@@ -33,8 +33,8 @@ public class ColorSensorSubsystem {
     public static double[] purpleArtifactFarHSV = {169, 240, .4, .59, 0.05, .2};
 
     // --- DISTANCE THRESHOLDS ---
-    private static final double MIN_DISTANCE_MM = 20;
-    private static final double MAX_DISTANCE_MM = 72;
+    private static final double MIN_DISTANCE_MM = 10;
+    private static final double MAX_DISTANCE_MM = 73;
     // This value separates "close" from "far" range. Tune this as needed.
     private static final double CLOSE_FAR_THRESHOLD_MM = 58;
 
