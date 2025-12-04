@@ -110,14 +110,15 @@ public class TeleOpDupliOp extends OpMode {
             return;
         }
 
-        if (gamepad2.yWasPressed()) {
+        // --- Driver Controls ---
+        handleDriveControls();
+
+        if (gamepad2.yWasPressed() && !resetInProgress) {
             //Resets all of the states
             robot.resetRobot();
             this.resetInProgress = true;
         }
 
-        // --- Driver Controls ---
-        handleDriveControls();
         if (resetInProgress) {
             SpindexerIndex.setInvalid();
             resetInProgress = !robot.doInitSpindexer(true);
@@ -262,6 +263,16 @@ public class TeleOpDupliOp extends OpMode {
         }
         if (gamepad2.dpadRightWasPressed()) {
             robot.increaseSpindexer();
+        }
+
+        if(gamepad2.xWasPressed())
+        {
+            robot.rotateToPurple();
+        }
+
+        if(gamepad2.aWasPressed())
+        {
+            robot.rotateToGreen();
         }
     }
 

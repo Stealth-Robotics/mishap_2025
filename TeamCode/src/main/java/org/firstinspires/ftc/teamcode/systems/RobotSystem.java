@@ -766,6 +766,14 @@ public class RobotSystem {
     // Passthrough and Utility Methods
     //==================================================================================================
 
+    public void rotateToPurple(){
+        spindexerSys.rotateToArtifact(SlotState.ARTIFACT_PURPLE);
+    }
+
+    public void rotateToGreen(){
+        spindexerSys.rotateToArtifact(SlotState.ARTIFACT_GREEN);
+    }
+
     public void stopShooter() {
         if (shooterSys.isRunning()){
             kickerSys.setReady();

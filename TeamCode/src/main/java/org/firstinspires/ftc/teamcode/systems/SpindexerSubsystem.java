@@ -374,16 +374,21 @@ public class SpindexerSubsystem {
         if (homingState.equals(HomingState.START)) {
             // force the octoquad to reset the wrap value
             this.resetOctoQuad();
-            // Option 1
-            this.curShootSlot = this.getClosestSlotNumber();
-            int currentPosition = getCurrentPosition();
-            double shortestPathDelta = calculateShortestPathDelta(currentPosition, getAbsoluteSloteTicks(curShootSlot), TICKS_PER_REV);
 
-            // If you want to rotate to slot 0 for init swap this for option 1
-//            this.curShootSlot = 0;
-//            int currentPosition = getCurrentPosition();
-//            double shortestPathDelta = calculateShortestPathDelta(currentPosition, INDEX_OFFSET_TICKS, TICKS_PER_REV);
-            // Important that selected slot ticks are removed as they are added back in durring the PIDF calc
+            double shortestPathDelta = 0;
+            int currentPosition = 0;
+
+            if (!force) {
+                // Option 1
+                this.curShootSlot = this.getClosestSlotNumber();
+                currentPosition = getCurrentPosition();
+                shortestPathDelta = calculateShortestPathDelta(currentPosition, getAbsoluteSloteTicks(curShootSlot), TICKS_PER_REV);
+            } else {
+                // If you want to rotate to slot 0 for init swap this for option 1
+                this.curShootSlot = 0;
+            }
+
+            // Important that selected slot ticks are removed as they are added back in during the PIDF calc
             this.lastTargetPosition = (int) Math.round(currentPosition + shortestPathDelta - SLOT_OFFSET_TICKS[curShootSlot]);
             minHomeTimer.reset();
             homingState = HomingState.MOVING_TO_OFFSET;
