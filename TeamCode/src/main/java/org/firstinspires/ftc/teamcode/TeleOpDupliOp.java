@@ -120,7 +120,6 @@ public class TeleOpDupliOp extends OpMode {
         }
 
         if (resetInProgress) {
-            SpindexerIndex.setInvalid();
             resetInProgress = !robot.doInitSpindexer(true);
         }
         else {

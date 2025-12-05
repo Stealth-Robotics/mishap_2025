@@ -177,7 +177,7 @@ public class RobotSystem {
         headingController.setIntegrationBounds(-.08, .08);
         zoneMap = new HashMap<>();
         zoneMap.put(ZoneDistance.FAR, 0.0);
-        zoneMap.put(ZoneDistance.MID, 0.0);
+        zoneMap.put(ZoneDistance.MIDDLE, 0.0);
         zoneMap.put(ZoneDistance.NEAR, 0.0);
     }
 
@@ -305,10 +305,10 @@ public class RobotSystem {
     }
 
     public void setCurrentZone(double distanceInch){
-        if (distanceInch < ZoneDistance.MID.id){
+        if (distanceInch < ZoneDistance.MIDDLE.id){
             currentZone = ZoneDistance.NEAR;
         }else if (distanceInch < ZoneDistance.FAR.id) {
-            currentZone = ZoneDistance.MID;
+            currentZone = ZoneDistance.MIDDLE;
         }else {
             currentZone = ZoneDistance.FAR;
         }
@@ -476,7 +476,9 @@ public class RobotSystem {
         sweeperSys.stopIntake();
         shooterSys.stop();
         spindexerSys.resetEmergencyStop();
-
+        spindexerSys.setBrake();
+        spindexerSys.setIntaking(false);
+        SpindexerIndex.setInvalid();
     }
 
     /**
@@ -881,7 +883,7 @@ public class RobotSystem {
     /** Sets the shooter's target range */
     public void setShooterTargetRangeNear() { shooterSys.setTargetRange(ZoneDistance.NEAR); }
     public void setShooterTargetRangeFar() { shooterSys.setTargetRange(ZoneDistance.FAR); }
-    public void setShooterTargetRangeMid() { shooterSys.setTargetRange(ZoneDistance.MID); }
+    public void setShooterTargetRangeMid() { shooterSys.setTargetRange(ZoneDistance.MIDDLE); }
 
     public void setShooterTargetRange(ZoneDistance range) { shooterSys.setTargetRange(range); }
 

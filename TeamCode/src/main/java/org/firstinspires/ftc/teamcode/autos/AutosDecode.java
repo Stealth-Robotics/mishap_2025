@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.common.Alliance;
 import org.firstinspires.ftc.teamcode.common.FinalPose;
 import org.firstinspires.ftc.teamcode.common.Motif;
 import org.firstinspires.ftc.teamcode.common.Pipeline;
+import org.firstinspires.ftc.teamcode.common.SpindexerIndex;
 import org.firstinspires.ftc.teamcode.paths.util.Path;
 import org.firstinspires.ftc.teamcode.paths.util.PathManager;
 import org.firstinspires.ftc.teamcode.paths.util.PathState;
@@ -79,9 +80,9 @@ public abstract class AutosDecode extends OpMode {
         follower = robot.getFollower();
 
         setSpindexerInitState();
-        telemetryM.debug("Status", "Initialized");
         robot.setLimelightPipeline(Pipeline.APRILTAG_TARGET_BOTH);
         robot.update();
+        SpindexerIndex.setInvalid();
     }
 
     /**
@@ -99,13 +100,13 @@ public abstract class AutosDecode extends OpMode {
      */
     @Override
     public void init_loop() {
-        robot.update();
         if (!isSpindexerReady) {
-            isSpindexerReady = robot.doInitSpindexer(true);
+            isSpindexerReady = robot.doInitSpindexer(false);
         } else if (!areArtifactsSorted) {
             areArtifactsSorted = robot.doArtifactSort();
         }
 
+        robot.update();
 
         // TODO: Use this to get robot position from limelight while waiting
         telemetryM.addData("Limelight Pipeline:", robot.getLimelightPipeline());

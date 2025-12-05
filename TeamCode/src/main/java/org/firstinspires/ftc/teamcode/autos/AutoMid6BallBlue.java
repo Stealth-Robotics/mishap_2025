@@ -1,14 +1,13 @@
 package org.firstinspires.ftc.teamcode.autos;
 
-import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.common.Alliance;
 
-@Autonomous(name = "Mid 6ball blue", group = "Blue", preselectTeleOp = "_TeleOp_Driver_Operator")
+@Autonomous(name = "Mid 6 ball blue", group = "Blue", preselectTeleOp = "_TeleOp_Driver_Operator")
 @Disabled
-public class AutoMidshotBlue extends AutoMidshotOne {
+public class AutoMid6BallBlue extends AutoMid6Ball {
 
     @Override
     protected void setAlliance() {

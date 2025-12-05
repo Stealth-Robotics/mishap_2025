@@ -11,8 +11,8 @@ public class AutoFar9Ball extends AutosDecode{
 
     @Override
     protected Path initPaths() {
-        shootIndexes.addAll(Arrays.asList(1, 4));
-        intakeIndexes.addAll(Arrays.asList(3));
+        shootIndexes.addAll(Arrays.asList(1, 4, 7));
+        intakeIndexes.addAll(Arrays.asList(3, 6));
 
         return new PathFar9Ball(robot);
     }
@@ -35,7 +35,7 @@ public class AutoFar9Ball extends AutosDecode{
         if (Alliance.isBlue()) {
             this.aimOffset = -2.0;
         } else {
-            this.aimOffset = 2.0;
+            this.aimOffset = 2.5;
         }
 
         follower.setStartingPose(paths.getPathStart());

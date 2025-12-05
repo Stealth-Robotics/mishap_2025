@@ -52,6 +52,9 @@ public class SpindexerSubsystem {
      */
     private static final int POSITION_TOLERANCE = 3;
 
+    private static final int INTAKING_POSITION_TOLERANCE = 10;
+
+
     /**
      * Per Slot PID values. Slot 1 seems stickiest while slot 2 loose
      */
@@ -88,6 +91,8 @@ public class SpindexerSubsystem {
      * The maximum power limit for spindexer rotation.
      */
     public static double SPINDEXER_POWER_LIMIT = .98;
+
+    public static double SPINDEXER_INTAKING_POWER_LIMIT = 1;
 
     private final PIDController spindexerPid = new PIDController(KP[0], KI[0], KD[0]);
 
@@ -328,7 +333,8 @@ public class SpindexerSubsystem {
             spindexerPid.reset();
         }
 
-        spindexer.setPower(Math.max(-SPINDEXER_POWER_LIMIT, Math.min(power, SPINDEXER_POWER_LIMIT)));
+        double clampedPower = isIntaking ? SPINDEXER_INTAKING_POWER_LIMIT : SPINDEXER_POWER_LIMIT;
+        spindexer.setPower(Math.max(-clampedPower, Math.min(power, clampedPower)));
 
         // Telemetry to monitor PID performance
 //        telemetryM.addData("ShootSlot", curShootSlot);
@@ -373,7 +379,6 @@ public class SpindexerSubsystem {
         // start a rotate to nearest slot position
         if (homingState.equals(HomingState.START)) {
             // force the octoquad to reset the wrap value
-            this.resetOctoQuad();
 
             double shortestPathDelta = 0;
             int currentPosition = 0;
@@ -383,14 +388,19 @@ public class SpindexerSubsystem {
                 this.curShootSlot = this.getClosestSlotNumber();
                 currentPosition = getCurrentPosition();
                 shortestPathDelta = calculateShortestPathDelta(currentPosition, getAbsoluteSloteTicks(curShootSlot), TICKS_PER_REV);
+
+                // Important that selected slot ticks are removed as they are added back in during the PIDF calc
+                this.lastTargetPosition = (int) Math.round(currentPosition + shortestPathDelta - SLOT_OFFSET_TICKS[curShootSlot]);
             } else {
                 // If you want to rotate to slot 0 for init swap this for option 1
+                this.resetOctoQuad();
                 this.curShootSlot = 0;
+                this.lastTargetPosition = INDEX_OFFSET_TICKS;
             }
 
-            // Important that selected slot ticks are removed as they are added back in during the PIDF calc
-            this.lastTargetPosition = (int) Math.round(currentPosition + shortestPathDelta - SLOT_OFFSET_TICKS[curShootSlot]);
+            this.resetOctoQuad();
             minHomeTimer.reset();
+            spindexerPid.reset();
             homingState = HomingState.MOVING_TO_OFFSET;
             return false;
         }
@@ -529,7 +539,11 @@ public class SpindexerSubsystem {
 
         double error = finalTarget - this.getCurrentPosition();
 
-        return Math.abs(error) <= POSITION_TOLERANCE && minRotateTimer.milliseconds() > MIN_ROTATE_TIME_MS;
+        // if we are intaking we can be sloppy about the position error
+        return isIntaking ?
+                Math.abs(error) <= INTAKING_POSITION_TOLERANCE :
+                Math.abs(error) <= POSITION_TOLERANCE && minRotateTimer.milliseconds() > MIN_ROTATE_TIME_MS;
+
     }
 
     /**

@@ -115,6 +115,12 @@ public class PathBuilderDecode extends PathBuilder {
                     follower.setMaxPower(MAX_SPEED);
                     // this causes the follower to pickup the next path from the closest point
                     follower.breakFollowing();
+                })
+                .addCallback(follower::isRobotStuck, () -> {
+                    follower.setMaxPower(MAX_SPEED);
+                    robot.stopIntake();
+                    // this causes the follower to pickup the next path from the closest point
+                    follower.breakFollowing();
                 });
 
         return this;

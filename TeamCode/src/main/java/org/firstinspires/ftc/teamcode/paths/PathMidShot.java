@@ -35,7 +35,7 @@ public class PathMidShot extends PathManager {
                                 )
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(152), Math.toRadians(50))
-                        .applyFirstShotSequence(ZoneDistance.MID)
+                        .applyFirstShotSequence(ZoneDistance.MIDDLE)
                         .build());
         // Move to line 1 intake area
         addRedPath(
@@ -67,7 +67,7 @@ public class PathMidShot extends PathManager {
                                 new BezierLine(new Pose(128.000, 84.000), new Pose(90.600, 84.000))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(-180), Math.toRadians(45))
-                        .applyFollowupShotSequence(ZoneDistance.MID)
+                        .applyFollowupShotSequence(ZoneDistance.MIDDLE)
                         .build()
         );
 
@@ -101,7 +101,7 @@ public class PathMidShot extends PathManager {
                                 )
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(28), Math.toRadians(130))
-                        .applyFirstShotSequence(ZoneDistance.MID)
+                        .applyFirstShotSequence(ZoneDistance.MIDDLE)
                         .build());
         // Move to line 1 intake area
         addBluePath(
@@ -133,7 +133,7 @@ public class PathMidShot extends PathManager {
                                 new BezierLine(new Pose(16.000, 84.000), new Pose(53.400, 84.000))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(135))
-                        .applyFollowupShotSequence(ZoneDistance.MID)
+                        .applyFollowupShotSequence(ZoneDistance.MIDDLE)
                         .build()
         );
 

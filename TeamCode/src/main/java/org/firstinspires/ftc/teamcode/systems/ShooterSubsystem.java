@@ -64,7 +64,7 @@ public class ShooterSubsystem {
     public ShooterSubsystem(HardwareMap hardwareMap) {
         zoneMap = new HashMap<>();
         zoneMap.put(ZoneDistance.FAR, DEFAULT_RPM_FAR);
-        zoneMap.put(ZoneDistance.MID, DEFAULT_RPM_MID);
+        zoneMap.put(ZoneDistance.MIDDLE, DEFAULT_RPM_MID);
         zoneMap.put(ZoneDistance.NEAR, DEFAULT_RPM_NEAR);
 
         // Initialize the shooter motors from the hardware map.
@@ -98,10 +98,10 @@ public class ShooterSubsystem {
      */
     public void setTargetRpmFromDisance(double distanceInch){
 
-        if (distanceInch < ZoneDistance.MID.id){
+        if (distanceInch < ZoneDistance.MIDDLE.id){
             currentRpmZone = ZoneDistance.NEAR;
         }else if (distanceInch < ZoneDistance.FAR.id) {
-            currentRpmZone = ZoneDistance.MID;
+            currentRpmZone = ZoneDistance.MIDDLE;
         }else {
             currentRpmZone = ZoneDistance.FAR;
         }

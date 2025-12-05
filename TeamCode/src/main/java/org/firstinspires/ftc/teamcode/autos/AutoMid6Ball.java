@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.paths.util.PathState;
 
 import java.util.Arrays;
 
-public class AutoMidshotOne extends AutosDecode {
+public class AutoMid6Ball extends AutosDecode {
 
     @Override
     protected Path initPaths() {
