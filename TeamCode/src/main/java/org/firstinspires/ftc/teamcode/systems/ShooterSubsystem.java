@@ -273,10 +273,15 @@ public class ShooterSubsystem {
      * @param zoneDistance ZoneDistance enum representing the desired target RPM.
      */
     public void setTargetRange(ZoneDistance zoneDistance) {
+        if (zoneDistance == currentRpmZone) {
+            return;
+        }
+
         this.currentRpmZone = zoneDistance;
 
         // If the shooter is already running, update its speed to the new target
         if (isShooterEnabled) {
+            isShooterEnabled = false;
             runShooter();
         }
     }
