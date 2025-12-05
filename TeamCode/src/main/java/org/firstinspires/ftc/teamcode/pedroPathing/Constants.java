@@ -41,8 +41,8 @@ public class Constants {
             .mass(mass)
             .forwardZeroPowerAcceleration(forwardZeroPowerAcceleration)
             .lateralZeroPowerAcceleration(lateralZeroPowerAcceleration)
-            .translationalPIDFCoefficients(new PIDFCoefficients(0.15, 0, 0.0001, .02))
-            .headingPIDFCoefficients(new PIDFCoefficients(1.2, 0.0, 0.001, 0.02))
+            .translationalPIDFCoefficients(new PIDFCoefficients(0.15, 0, 0.007, .02))
+            .headingPIDFCoefficients(new PIDFCoefficients(2, 0.0, 0.05, 0.02))
             .centripetalScaling(0.0008)
             ;
 
@@ -77,8 +77,7 @@ public class Constants {
                 .mecanumDrivetrain(mecanumConstants)
                 .pathConstraints(pathConstraints)
                 .build();
-        f.activateDrive();
-        f.activateHeading();
+        f.activateAllPIDFs();
         return f;
     }
 }
