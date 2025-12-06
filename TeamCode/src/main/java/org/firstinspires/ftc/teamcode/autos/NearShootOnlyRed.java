@@ -1,14 +1,12 @@
 package org.firstinspires.ftc.teamcode.autos;
 
-import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.common.Alliance;
 
-@Autonomous(name = "Shoot Sushi red Side", group = "Red", preselectTeleOp = "_TeleOp_Driver_Operator")
-@Disabled
-public class AutoSushiRed extends AutoSushi
+@Autonomous(name = "Near Shoot Only Red", group = "Red", preselectTeleOp = "_TeleOp_Driver_Operator")
+public class NearShootOnlyRed extends NearShootOnly
 {
     @Override
     protected void setAlliance() {

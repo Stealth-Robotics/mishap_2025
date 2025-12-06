@@ -58,7 +58,7 @@ public class PathFar6Ball extends PathManager {
                         )
                         .setTangentHeadingInterpolation()
                         .setReversed()
-                        .applyIntakeSequence()
+                        .applyIntakeSequence(.15, .28)
                         .build()
         );
 

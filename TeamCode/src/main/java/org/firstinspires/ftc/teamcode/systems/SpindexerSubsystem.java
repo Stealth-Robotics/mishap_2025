@@ -58,9 +58,9 @@ public class SpindexerSubsystem {
     /**
      * Per Slot PID values. Slot 1 seems stickiest while slot 2 loose
      */
-    public static double[] KP = {0.0092, 0.0099, 0.0077};
-    public static double[] KI = {0.09,  0.095,  0.088};
-    public static double[] KD = {0.0008, 0.0008, 0.0008};
+    public static double[] KP = {0.0099, 0.0099, 0.0098};
+    public static double[] KI = {0.15,  0.15,  0.15};
+    public static double[] KD = {0.0005, 0.0005, 0.00055};
 
     /**
      * This value protects the spindexer from jamming and/or crushing the world.
@@ -90,7 +90,7 @@ public class SpindexerSubsystem {
     /**
      * The maximum power limit for spindexer rotation.
      */
-    public static double SPINDEXER_POWER_LIMIT = .98;
+    public static double SPINDEXER_POWER_LIMIT = .99;
 
     public static double SPINDEXER_INTAKING_POWER_LIMIT = 1;
 

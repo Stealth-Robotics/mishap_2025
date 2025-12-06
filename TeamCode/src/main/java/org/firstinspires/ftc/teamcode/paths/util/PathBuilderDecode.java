@@ -135,8 +135,8 @@ public class PathBuilderDecode extends PathBuilder {
      * @return The modified PathBuilder with the shooting sequence added.
      */
     public PathBuilderDecode applyFirstShotSequence(ZoneDistance distance) {
-        addParametricCallback(0.01, robot::trySelectFirstMotifSlot)
-        .addParametricCallback(.99, ()-> {
+        addParametricCallback(0.1, robot::trySelectFirstMotifSlot)
+        .addParametricCallback(.9, ()-> {
             robot.setShooterTargetRange(distance);
             robot.startShooter();
         });
@@ -152,7 +152,7 @@ public class PathBuilderDecode extends PathBuilder {
      */
     public PathBuilderDecode applyFollowupShotSequence(ZoneDistance distance) {
         Follower follower = robot.getFollower();
-        addParametricCallback(0.01, () -> {
+        addParametricCallback(0.1, () -> {
             follower.setMaxPower(MAX_SPEED);
             robot.stopIntake(); // just in case
         })
@@ -164,7 +164,7 @@ public class PathBuilderDecode extends PathBuilder {
                 robot::incrementSpindexerSlot, 3)
 
         .addParametricCallback(.7, robot::trySelectFirstMotifSlot)
-        .addParametricCallback(.99, ()-> {
+        .addParametricCallback(.9, ()-> {
             robot.setShooterTargetRange(distance);
             robot.startShooter();
         });

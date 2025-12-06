@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.autos;
 import com.pedropathing.geometry.Pose;
 
 import org.firstinspires.ftc.teamcode.common.Alliance;
+import org.firstinspires.ftc.teamcode.paths.PathMid6Ball;
+import org.firstinspires.ftc.teamcode.paths.PathMid6BallPark;
 import org.firstinspires.ftc.teamcode.paths.util.Path;
 import org.firstinspires.ftc.teamcode.paths.PathMidShot;
 import org.firstinspires.ftc.teamcode.paths.util.PathState;
@@ -15,7 +17,7 @@ public class AutoMid6Ball extends AutosDecode {
     protected Path initPaths() {
         shootIndexes.addAll(Arrays.asList(1, 4));
         intakeIndexes.addAll(Arrays.asList(3));
-        return new PathMidShot(robot);
+        return new PathMid6BallPark(robot);
     }
 
     @Override

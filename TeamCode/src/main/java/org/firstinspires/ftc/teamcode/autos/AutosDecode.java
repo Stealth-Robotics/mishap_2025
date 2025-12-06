@@ -128,7 +128,7 @@ public abstract class AutosDecode extends OpMode {
     protected void setAlliance() {
         // this means if we don't get a pose we will default to RED alliance
         if (lastPose != null) {
-            PathManager.setAlianceFromPose(lastPose);
+            PathManager.setAllianceFromPose(lastPose);
         }
     }
 

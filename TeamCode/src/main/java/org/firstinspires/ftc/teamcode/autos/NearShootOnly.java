@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.paths.util.PathState;
 
 import java.util.Arrays;
 
-public class AutoSushi extends AutosDecode {
+public class NearShootOnly extends AutosDecode {
 
     @Override
     protected Path initPaths() {

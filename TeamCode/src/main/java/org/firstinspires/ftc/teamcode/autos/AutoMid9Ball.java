@@ -4,6 +4,7 @@ import com.pedropathing.geometry.Pose;
 
 import org.firstinspires.ftc.teamcode.common.Alliance;
 import org.firstinspires.ftc.teamcode.paths.PathMid9Ball;
+import org.firstinspires.ftc.teamcode.paths.PathMid9BallPark;
 import org.firstinspires.ftc.teamcode.paths.util.Path;
 import org.firstinspires.ftc.teamcode.paths.util.PathState;
 
@@ -13,9 +14,9 @@ public class AutoMid9Ball extends AutosDecode {
 
     @Override
     protected Path initPaths() {
-        shootIndexes.addAll(Arrays.asList(1, 4, 7));
+        shootIndexes.addAll(Arrays.asList(1, 4));
         intakeIndexes.addAll(Arrays.asList(3, 6));
-        return new PathMid9Ball(robot);
+        return new PathMid9BallPark(robot);
     }
 
     @Override

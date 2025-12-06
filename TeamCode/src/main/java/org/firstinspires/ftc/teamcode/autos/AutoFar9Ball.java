@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.autos;
 
 import org.firstinspires.ftc.teamcode.common.Alliance;
 import org.firstinspires.ftc.teamcode.paths.PathFar9Ball;
+import org.firstinspires.ftc.teamcode.paths.PathFar9BallPark;
 import org.firstinspires.ftc.teamcode.paths.util.Path;
 import org.firstinspires.ftc.teamcode.paths.util.PathState;
 
@@ -11,10 +12,10 @@ public class AutoFar9Ball extends AutosDecode{
 
     @Override
     protected Path initPaths() {
-        shootIndexes.addAll(Arrays.asList(1, 4, 7));
+        shootIndexes.addAll(Arrays.asList(1, 4));
         intakeIndexes.addAll(Arrays.asList(3, 6));
 
-        return new PathFar9Ball(robot);
+        return new PathFar9BallPark(robot);
     }
 
     @Override
@@ -30,7 +31,7 @@ public class AutoFar9Ball extends AutosDecode{
     @Override
     protected void setStartingPose() {
 
-        // cahnge the angle of the far shots by a couple of degrees:
+        // change the angle of the far shots by a couple of degrees:
         // a negative number turns the bot more to the left positive more to the right
         if (Alliance.isBlue()) {
             this.aimOffset = -2.0;

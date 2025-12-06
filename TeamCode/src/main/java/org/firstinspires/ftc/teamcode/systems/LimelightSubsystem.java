@@ -18,15 +18,20 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.firstinspires.ftc.teamcode.common.Alliance;
 import org.firstinspires.ftc.teamcode.common.AprilTagIds;
 import org.firstinspires.ftc.teamcode.common.Pipeline;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicIntegerArray;
 
 /**
  * Manages all interactions with the Limelight camera, including pipeline switching,
@@ -377,7 +382,7 @@ public class LimelightSubsystem {
             case APRILTAG_TARGET_BOTH:
                 List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
                 if (fiducials != null && !fiducials.isEmpty()) {
-                    return AprilTagIds.fromId(fiducials.get(0).getFiducialId());
+                    return filterMotifIds(fiducials);
                 }
                 return AprilTagIds.TAG_ID_NONE;
             default:
@@ -394,6 +399,38 @@ public class LimelightSubsystem {
         return resultsQueue;
     }
 
+    private AprilTagIds filterMotifIds(List<LLResultTypes.FiducialResult> fiducials) {
+        if (fiducials.size() == 1) {
+            return AprilTagIds.fromId(fiducials.get(0).getFiducialId());
+        }
+
+
+        HashMap<Integer, Boolean> fields = new HashMap<>(3);
+
+        for (int i = 0; i < fiducials.size(); i++) {
+            fields.put(fiducials.get(i).getFiducialId(), true);
+        }
+
+        if (Alliance.isRed()) {
+            if (fields.containsKey(21) && fields.containsKey(22)) {
+                return AprilTagIds.fromId(22);
+            } else if (fields.containsKey(22) && fields.containsKey(23)) {
+                return AprilTagIds.fromId(23);
+            } else if (fields.containsKey(23) && fields.containsKey(21)) {
+                return AprilTagIds.fromId(21);
+            }
+        } else { // Blue Alliance
+            if (fields.containsKey(21) && fields.containsKey(22)) {
+                return AprilTagIds.fromId(21);
+            } else if (fields.containsKey(22) && fields.containsKey(23)) {
+                return AprilTagIds.fromId(22);
+            } else if (fields.containsKey(23) && fields.containsKey(21)) {
+                return AprilTagIds.fromId(23);
+            }
+        }
+
+        return AprilTagIds.TAG_ID_NONE;
+    }
     /**
      * Adds a result to the queue and removes old entries that have expired.
      *

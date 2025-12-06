@@ -21,7 +21,7 @@ import java.util.List;
 public class PathManager implements Path {
 
     public static double MAX_SPEED = 1;
-    public static double INTAKE_SPEED = 0.27;
+    public static double INTAKE_SPEED = 0.25;
 
     public static double SLOW_SPEED = .1;
 
@@ -110,7 +110,7 @@ public class PathManager implements Path {
      *
      * @param pose The {@link Pose} to determine the alliance from.
      */
-    public static void setAlianceFromPose(Pose pose) {
+    public static void setAllianceFromPose(Pose pose) {
         // Determine alliance based on which side of the field the robot starts on.
         Alliance.set(getAllianceFromPose(pose));
     }

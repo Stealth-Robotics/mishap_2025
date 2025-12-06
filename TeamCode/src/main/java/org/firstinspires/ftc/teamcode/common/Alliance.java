@@ -11,12 +11,14 @@ public enum Alliance {
     RED, BLUE;
 
     private static Alliance alliance = Alliance.RED;
+    private static boolean isSet = false;
 
     /**
      * Set the alliance once, at the beginning of your op-mode
      */
     public static void set(Alliance a) {
         alliance = a;
+        isSet = true;
     }
 
     /**
@@ -25,6 +27,11 @@ public enum Alliance {
     public static Alliance get() {
         return alliance;
     }
+
+    public static boolean isSet() {
+        return isSet;
+    }
+
 
     /**
      * Selects one of two values, depending on what alliance we're on, red or blue (in that order!)

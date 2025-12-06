@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.common.Alliance;
 import org.firstinspires.ftc.teamcode.common.FinalPose;
 import org.firstinspires.ftc.teamcode.common.Motif;
 import org.firstinspires.ftc.teamcode.common.SpindexerIndex;
+import org.firstinspires.ftc.teamcode.common.ZoneDistance;
 import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 
 @TeleOp (name = "_TeleOp_Driver_Operator", group = "Main")
@@ -60,6 +61,14 @@ public class TeleOpDupliOp extends OpMode {
         }
 
         follower.setStartingPose(finalPose);
+
+        if (Alliance.isSet()) {
+            if (Alliance.isBlue()) {
+                robot.setAimOffset(-2.0, ZoneDistance.FAR);
+            } else {
+                robot.setAimOffset(2.0, ZoneDistance.FAR);
+            }
+        }
 
         telemetryM.addData("Robot Initialized", "Waiting for start...");
     }

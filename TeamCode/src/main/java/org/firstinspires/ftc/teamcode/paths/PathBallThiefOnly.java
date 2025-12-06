@@ -47,12 +47,12 @@ public class PathBallThiefOnly extends PathManager {
                         .addPath(
                                 new BezierCurve(
                                         new Pose(121.700, 19.500)
-                                        , new Pose(137.300, 20.800)
+                                        , new Pose(136.700, 23.400)
                                         , new Pose(125.000, 9.200)
                                 )
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(-180.000), Math.toRadians(90.000))
-                        .applyIntakeSequence(.15, .4)
+                        .setLinearHeadingInterpolation(Math.toRadians(-180.000), Math.toRadians(82.000))
+                        .applyIntakeSequence()
                         .build()
         );
         addRedPath(
@@ -62,7 +62,7 @@ public class PathBallThiefOnly extends PathManager {
                                 new BezierCurve(
                                         new Pose(125.000, 9.200)
                                         , new Pose(116.200, 7.400)
-                                        , new Pose(89.000, 17.000)
+                                        , new Pose(90.000, 17.000)
                                 )
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(82.000), Math.toRadians(72.000))
@@ -73,7 +73,7 @@ public class PathBallThiefOnly extends PathManager {
         // name: Park, color: #9985B5
                 pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(89.000, 17.000), new Pose(89.000, 29.000))
+                                new BezierLine(new Pose(90.000, 17.000), new Pose(90.000, 29.000))
                         )
                         .setTangentHeadingInterpolation()
                         .build()
@@ -107,13 +107,12 @@ public class PathBallThiefOnly extends PathManager {
                         .addPath(
                                 new BezierCurve(
                                         new Pose(22.300, 19.500)
-                                        , new Pose(6.700, 20.800)
+                                        , new Pose(7.300, 23.400)
                                         , new Pose(19.000, 9.200)
                                 )
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(0.000), Math.toRadians(90.000))
-                        .applyIntakeSequence(.15, .4)
-
+                        .setLinearHeadingInterpolation(Math.toRadians(0.000), Math.toRadians(98.000))
+                        .applyIntakeSequence(.2, .4)
                         .build()
         );
         addBluePath(
@@ -123,7 +122,7 @@ public class PathBallThiefOnly extends PathManager {
                                 new BezierCurve(
                                         new Pose(19.000, 9.200)
                                         , new Pose(27.800, 7.400)
-                                        , new Pose(55.000, 17.000)
+                                        , new Pose(54.000, 17.000)
                                 )
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(98.000), Math.toRadians(108.000))
@@ -134,10 +133,11 @@ public class PathBallThiefOnly extends PathManager {
         // name: Park, color: #9985B5
                 pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(55.000, 17.000), new Pose(55.000, 29.000))
+                                new BezierLine(new Pose(54.000, 17.000), new Pose(54.000, 29.000))
                         )
                         .setTangentHeadingInterpolation()
                         .build()
         );
     }
+
 }

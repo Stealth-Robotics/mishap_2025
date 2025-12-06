@@ -26,7 +26,7 @@ public class ShooterSubsystem {
     private final ElapsedTime shootTimer = new ElapsedTime();
 
     private static final double MIN_SHOOT_TIME_MS = 500;
-    private static final double MAX_SHOOT_TIME_MS = 2000;
+    private static final double MAX_SHOOT_TIME_MS = 1500;
 
     // --- Constants ---
     public static final double MAX_RPM = 5200;
@@ -36,7 +36,7 @@ public class ShooterSubsystem {
     public static final double DEFAULT_RPM_FAR =2890;
 
     public static final double RPM_CHANGE_AMOUNT = 50;
-    private static final double VELOCITY_TOLERANCE_LOW = 5; // The allowed RPM error in which the shooter is considered "ready".
+    private static final double VELOCITY_TOLERANCE_LOW = 10; // The allowed RPM error in which the shooter is considered "ready".
     private static final double VELOCITY_TOLERANCE_HIGH = 75;
     // Encoder ticks per revolution for a GoBILDA Yellow Jacket motor.
     private static final double TICKS_PER_REV = 28;
@@ -96,7 +96,7 @@ public class ShooterSubsystem {
      * @param distanceInch distance in inches to target
      * TODO: use a range Pid to control the target rpm based on distance
      */
-    public void setTargetRpmFromDisance(double distanceInch){
+    public void setTargetRpmFromDistance(double distanceInch){
 
         if (distanceInch < ZoneDistance.MIDDLE.id){
             currentRpmZone = ZoneDistance.NEAR;
@@ -236,7 +236,7 @@ public class ShooterSubsystem {
 
         // The current RPM is updated periodically by the update() method
         // Check if the current RPM is within the tolerance range.
-        double delta = currentRpm - getTargetRpm();
+        double delta = getMotorRpms() - getTargetRpm();
         return (delta >= VELOCITY_TOLERANCE_LOW
                 && delta <= VELOCITY_TOLERANCE_HIGH)
                 || curMs > MAX_SHOOT_TIME_MS;

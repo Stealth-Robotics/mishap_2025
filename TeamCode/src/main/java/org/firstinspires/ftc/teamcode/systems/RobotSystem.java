@@ -116,10 +116,10 @@ public class RobotSystem {
 
     // --- Control and Telemetry ---
     private final PIDFController headingController = new PIDFController(
-            .014,
-            .51,
+            .010,
+            .46,
             0,
-            .068
+            .069
     );
 
     private final TelemetryManager telemetryM;
@@ -174,7 +174,7 @@ public class RobotSystem {
         Drawing.init();
         this.telemetry = telemetry;
         this.telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
-        headingController.setIntegrationBounds(-.08, .08);
+        headingController.setIntegrationBounds(-.085, .085);
         zoneMap = new HashMap<>();
         zoneMap.put(ZoneDistance.FAR, 0.0);
         zoneMap.put(ZoneDistance.MIDDLE, 0.0);
@@ -337,6 +337,10 @@ public class RobotSystem {
         zoneMap.put(currentZone, value);
     }
 
+    public void setAimOffset(double offset, ZoneDistance zone) {
+        zoneMap.put(zone, offset);
+    }
+
     /**
      * Controls the robot's drivetrain movement and wraps the follower's tele-op drive logic.
      *
@@ -358,7 +362,7 @@ public class RobotSystem {
             if (llPose != null) {
                 // Calculate the turn power needed to center the target.
                 double distance = LimelightSubsystem.calcGoalDistanceByTy(llPose.getY());
-                shooterSys.setTargetRpmFromDisance(distance);
+                shooterSys.setTargetRpmFromDistance(distance);
                 this.setCurrentZone(distance);
                 telemetryM.addData("LimeLightTX:", llPose.getX());
                 // The output is applied to the rotation power (note: may need to be inverted).
@@ -404,7 +408,7 @@ public class RobotSystem {
             // Calculate the turn power needed to center the target.
             double output = getScaledTxOutput(llPose.getX() + offset, tolerance);
             double distance = LimelightSubsystem.calcGoalDistanceByTy(llPose.getY());
-            shooterSys.setTargetRpmFromDisance(distance);
+            shooterSys.setTargetRpmFromDistance(distance);
             // The output is applied to the rotation power (note: may need to be inverted).
             turn = output;
         } else {
