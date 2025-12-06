@@ -26,7 +26,7 @@ public class PathBallThiefOnly extends PathManager {
                 pathBuilder()
                         .setGlobalDeceleration()
                         .addPath(
-                                new BezierLine(new Pose(87.000, 9.000), new Pose(87.000, 17.000))
+                                new BezierLine(new Pose(86.000, 9.000), new Pose(86.000, 17.000))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(90.000), Math.toRadians(72.000))
                         .applyFirstShotSequence(ZoneDistance.FAR)
@@ -37,7 +37,7 @@ public class PathBallThiefOnly extends PathManager {
                 pathBuilder()
                         .setGlobalDeceleration()
                         .addPath(
-                                new BezierLine(new Pose(87.000, 17.000), new Pose(121.700, 19.500))
+                                new BezierLine(new Pose(86.000, 17.000), new Pose(121.700, 19.500))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(72.000), Math.toRadians(135.000))
                         .addParametricCallback(.9, robot::startIntake)
@@ -92,7 +92,7 @@ public class PathBallThiefOnly extends PathManager {
                 pathBuilder()
                         .setGlobalDeceleration()
                         .addPath(
-                                new BezierLine(new Pose(57.000, 9.000), new Pose(57.000, 17.000))
+                                new BezierLine(new Pose(58.000, 9.000), new Pose(58.000, 17.000))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(90.000), Math.toRadians(108.000))
                         .applyFirstShotSequence(ZoneDistance.FAR)
@@ -103,7 +103,7 @@ public class PathBallThiefOnly extends PathManager {
                 pathBuilder()
                         .setGlobalDeceleration()
                         .addPath(
-                                new BezierLine(new Pose(57.000, 17.000), new Pose(22.300, 19.500))
+                                new BezierLine(new Pose(58.000, 17.000), new Pose(22.300, 19.500))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(108.000), Math.toRadians(45.000))
                         .addParametricCallback(.9, robot::startIntake)

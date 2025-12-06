@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.autos;
 import com.pedropathing.geometry.Pose;
 
 import org.firstinspires.ftc.teamcode.common.Alliance;
+import org.firstinspires.ftc.teamcode.paths.PathNearShootOnly;
 import org.firstinspires.ftc.teamcode.paths.util.Path;
 import org.firstinspires.ftc.teamcode.paths.PathNear6Ball;
 import org.firstinspires.ftc.teamcode.paths.util.PathState;
@@ -15,7 +16,7 @@ public class AutoNearShootOnly extends AutosDecode {
     protected Path initPaths() {
         shootIndexes.addAll(Arrays.asList(1));
         //intakeIndexes.addAll(Arrays.asList(2));
-        return new PathNear6Ball(robot);
+        return new PathNearShootOnly(robot);
     }
 
     @Override
@@ -28,9 +29,9 @@ public class AutoNearShootOnly extends AutosDecode {
         // change the angle of the far shots by a couple of degrees:
         // a negative number turns the bot more to the left positive more to the right
         if (Alliance.isBlue()) {
-            this.aimOffset = 0;
+            this.aimOffset = 1;
         } else {
-            this.aimOffset = 0;
+            this.aimOffset = -1;
         }
 
         Pose startPose = paths.getPathStart();
@@ -38,6 +39,7 @@ public class AutoNearShootOnly extends AutosDecode {
             startPose = startPose.setHeading(lastPose.getHeading());
         }
         follower.setStartingPose(startPose);
+        startWaitTimeSeconds = 5;
     }
 
     @Override
