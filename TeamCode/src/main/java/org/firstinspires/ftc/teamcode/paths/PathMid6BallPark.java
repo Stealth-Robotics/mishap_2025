@@ -24,6 +24,7 @@ public class PathMid6BallPark extends PathManager {
         addRedPath(
         // name: Shoot1 Near, color: #66B85C
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierLine(new Pose(126.000, 115.000), new Pose(90.100, 107.000))
                         )
@@ -34,6 +35,7 @@ public class PathMid6BallPark extends PathManager {
         addRedPath(
         // name: Goto PPG, color: #9AB55D
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierLine(new Pose(90.100, 107.000), new Pose(95.600, 84.500))
                         )
@@ -44,6 +46,7 @@ public class PathMid6BallPark extends PathManager {
         addRedPath(
         // name: Intake PPG, color: #8878CD
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierLine(new Pose(95.600, 84.500), new Pose(128.000, 84.000))
                         )
@@ -54,6 +57,7 @@ public class PathMid6BallPark extends PathManager {
         addRedPath(
         // name: Shoot2 Mid, color: #6BCD9D
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierLine(new Pose(128.000, 84.000), new Pose(93.400, 86.200))
                         )
@@ -62,12 +66,14 @@ public class PathMid6BallPark extends PathManager {
                         .build()
         );
         addRedPath(
-        // name: ParkNearGate, color: #8DC859
+        // name: Park NearGate, color: #8DC859
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierLine(new Pose(93.400, 86.200), new Pose(119.100, 79.500))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(45.000), Math.toRadians(0.000))
+                        .applyParkSequence()
                         .build()
         );
     }
@@ -76,6 +82,7 @@ public class PathMid6BallPark extends PathManager {
         addBluePath(
         // name: Shoot1 Near, color: #66B85C
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierLine(new Pose(18.000, 115.000), new Pose(53.900, 107.000))
                         )
@@ -86,6 +93,7 @@ public class PathMid6BallPark extends PathManager {
         addBluePath(
         // name: Goto PPG, color: #9AB55D
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierLine(new Pose(53.900, 107.000), new Pose(48.400, 84.500))
                         )
@@ -96,6 +104,7 @@ public class PathMid6BallPark extends PathManager {
         addBluePath(
         // name: Intake PPG, color: #8878CD
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierLine(new Pose(48.400, 84.500), new Pose(16.000, 84.000))
                         )
@@ -106,6 +115,7 @@ public class PathMid6BallPark extends PathManager {
         addBluePath(
         // name: Shoot2 Mid, color: #6BCD9D
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierLine(new Pose(16.000, 84.000), new Pose(50.600, 86.200))
                         )
@@ -114,12 +124,14 @@ public class PathMid6BallPark extends PathManager {
                         .build()
         );
         addBluePath(
-        // name: ParkNearGate, color: #8DC859
+        // name: Park NearGate, color: #8DC859
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierLine(new Pose(50.600, 86.200), new Pose(24.900, 79.500))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(135.000), Math.toRadians(-180.000))
+                        .applyParkSequence()
                         .build()
         );
     }

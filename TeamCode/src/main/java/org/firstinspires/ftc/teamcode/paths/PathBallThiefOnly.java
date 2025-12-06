@@ -24,6 +24,7 @@ public class PathBallThiefOnly extends PathManager {
         addRedPath(
         // name: Shoot1 Far, color: #89D585
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierLine(new Pose(87.000, 9.000), new Pose(87.000, 17.000))
                         )
@@ -34,30 +35,33 @@ public class PathBallThiefOnly extends PathManager {
         addRedPath(
         // name: Goto PGP, color: #87AAA9
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierLine(new Pose(87.000, 17.000), new Pose(121.700, 19.500))
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(72.000), Math.toRadians(-180.000))
+                        .setLinearHeadingInterpolation(Math.toRadians(72.000), Math.toRadians(135.000))
                         .addParametricCallback(.9, robot::startIntake)
                         .build()
         );
         addRedPath(
-        // name: Intake PGP, color: #9B5B6A
+        // name: Intake Take, color: #9B5B6A
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierCurve(
                                         new Pose(121.700, 19.500)
-                                        , new Pose(136.700, 23.400)
+                                        , new Pose(139.100, 23.400)
                                         , new Pose(125.000, 9.200)
                                 )
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(-180.000), Math.toRadians(82.000))
-                        .applyIntakeSequence()
+                        .setLinearHeadingInterpolation(Math.toRadians(135.000), Math.toRadians(82.000))
+                        .applyIntakeSequence(.2, .4)
                         .build()
         );
         addRedPath(
         // name: Shoot2 Far, color: #75A6BA
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierCurve(
                                         new Pose(125.000, 9.200)
@@ -72,10 +76,12 @@ public class PathBallThiefOnly extends PathManager {
         addRedPath(
         // name: Park, color: #9985B5
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
-                                new BezierLine(new Pose(90.000, 17.000), new Pose(90.000, 29.000))
+                                new BezierLine(new Pose(90.000, 17.000), new Pose(108.000, 17.000))
                         )
-                        .setTangentHeadingInterpolation()
+                        .setLinearHeadingInterpolation(Math.toRadians(72.000), Math.toRadians(180.000))
+                        .applyParkSequence()
                         .build()
         );
     }
@@ -84,6 +90,7 @@ public class PathBallThiefOnly extends PathManager {
         addBluePath(
         // name: Shoot1 Far, color: #89D585
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierLine(new Pose(57.000, 9.000), new Pose(57.000, 17.000))
                         )
@@ -94,30 +101,33 @@ public class PathBallThiefOnly extends PathManager {
         addBluePath(
         // name: Goto PGP, color: #87AAA9
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierLine(new Pose(57.000, 17.000), new Pose(22.300, 19.500))
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(108.000), Math.toRadians(0.000))
+                        .setLinearHeadingInterpolation(Math.toRadians(108.000), Math.toRadians(45.000))
                         .addParametricCallback(.9, robot::startIntake)
                         .build()
         );
         addBluePath(
-        // name: Intake PGP, color: #9B5B6A
+        // name: Intake Take, color: #9B5B6A
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierCurve(
                                         new Pose(22.300, 19.500)
-                                        , new Pose(7.300, 23.400)
+                                        , new Pose(4.900, 23.400)
                                         , new Pose(19.000, 9.200)
                                 )
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(0.000), Math.toRadians(98.000))
+                        .setLinearHeadingInterpolation(Math.toRadians(45.000), Math.toRadians(98.000))
                         .applyIntakeSequence(.2, .4)
                         .build()
         );
         addBluePath(
         // name: Shoot2 Far, color: #75A6BA
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierCurve(
                                         new Pose(19.000, 9.200)
@@ -132,10 +142,12 @@ public class PathBallThiefOnly extends PathManager {
         addBluePath(
         // name: Park, color: #9985B5
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
-                                new BezierLine(new Pose(54.000, 17.000), new Pose(54.000, 29.000))
+                                new BezierLine(new Pose(54.000, 17.000), new Pose(36.000, 17.000))
                         )
-                        .setTangentHeadingInterpolation()
+                        .setLinearHeadingInterpolation(Math.toRadians(108.000), Math.toRadians(0.000))
+                        .applyParkSequence()
                         .build()
         );
     }

@@ -24,6 +24,7 @@ public class PathNearShootOnly extends PathManager {
         addBluePath(
         // name: Shoot 1, color: #66B85C
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierLine(new Pose(18.000, 115.000), new Pose(56.000, 123.000))
                         )
@@ -34,10 +35,12 @@ public class PathNearShootOnly extends PathManager {
         addBluePath(
         // name: Park, color: #D7DA66
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierLine(new Pose(56.000, 123.000), new Pose(56.000, 134.000))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(166.000), Math.toRadians(180.000))
+                        .applyParkSequence()
                         .build()
         );
     }
@@ -46,6 +49,7 @@ public class PathNearShootOnly extends PathManager {
         addRedPath(
         // name: Shoot 1, color: #66B85C
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierLine(new Pose(126.000, 115.000), new Pose(88.000, 123.000))
                         )
@@ -56,10 +60,12 @@ public class PathNearShootOnly extends PathManager {
         addRedPath(
         // name: Park, color: #D7DA66
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierLine(new Pose(88.000, 123.000), new Pose(88.000, 134.000))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(14.000), Math.toRadians(0.000))
+                        .applyParkSequence()
                         .build()
         );
     }

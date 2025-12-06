@@ -6,6 +6,7 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Curve;
 import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathBuilder;
+import com.pedropathing.paths.PathConstraints;
 import com.pedropathing.paths.callbacks.PathCallback;
 
 import org.firstinspires.ftc.teamcode.common.ZoneDistance;
@@ -81,7 +82,7 @@ public class PathBuilderDecode extends PathBuilder {
      * @return The modified PathBuilder with the intake sequence added.
      */
     public PathBuilderDecode applyIntakeSequence() {
-        return this.applyIntakeSequence(.15, INTAKE_SPEED);
+        return this.applyIntakeSequence(.08, INTAKE_SPEED);
     }
 
     /**
@@ -107,7 +108,10 @@ public class PathBuilderDecode extends PathBuilder {
         Follower follower = robot.getFollower();
         addParametricCallback(.01, robot::startIntake)
                 .addParametricCallback(p, ()->follower.setMaxPower(power))
-                .addParametricCallback(.99, robot::stopIntake)
+                .addParametricCallback(.99, () -> {
+                    robot.stopIntake();
+                    follower.setMaxPower(MAX_SPEED);
+                })
                 .addCallback(shouldPauseIntaking(), pauseIntaking())
                 .addCallback(shouldResumeIntaking(), resumeIntaking())
                 .addCallback(robot::isSpindexerFull, () -> {
@@ -152,7 +156,7 @@ public class PathBuilderDecode extends PathBuilder {
      */
     public PathBuilderDecode applyFollowupShotSequence(ZoneDistance distance) {
         Follower follower = robot.getFollower();
-        addParametricCallback(0.1, () -> {
+        addParametricCallback(0.01, () -> {
             follower.setMaxPower(MAX_SPEED);
             robot.stopIntake(); // just in case
         })
@@ -168,6 +172,16 @@ public class PathBuilderDecode extends PathBuilder {
             robot.setShooterTargetRange(distance);
             robot.startShooter();
         });
+        return this;
+    }
+
+    public PathBuilderDecode applyParkSequence() {
+        Follower follower = robot.getFollower();
+        addParametricCallback(.01, () -> {
+            robot.stopIntake();
+            follower.setMaxPower(MAX_SPEED);
+        });
+
         return this;
     }
 
@@ -318,4 +332,23 @@ public class PathBuilderDecode extends PathBuilder {
         super.setBrakingStrength(strength);
         return this;
     }
+
+    @Override
+    public PathBuilderDecode setConstraintsForLast(PathConstraints constraints) {
+        super.setConstraintsForLast(constraints);
+        return this;
+    }
+
+    @Override
+    public PathBuilderDecode setTimeoutConstraint(double timeout) {
+        super.setTimeoutConstraint(timeout);
+        return this;
+    }
+
+    @Override
+    public PathBuilderDecode setGlobalDeceleration() {
+        super.setGlobalDeceleration();
+        return this;
+    }
+
 }

@@ -364,10 +364,10 @@ public class RobotSystem {
                 double distance = LimelightSubsystem.calcGoalDistanceByTy(llPose.getY());
                 shooterSys.setTargetRpmFromDistance(distance);
                 this.setCurrentZone(distance);
-                telemetryM.addData("LimeLightTX:", llPose.getX());
+                //telemetryM.addData("LimeLightTX:", llPose.getX());
                 // The output is applied to the rotation power (note: may need to be inverted).
                 turn = getScaledTxOutput(llPose.getX() + getCurrentAimOffset(), AUTO_AIM_TOLERANCE);
-                telemetryM.addData("Power OUT:", turn);
+                //telemetryM.addData("Power OUT:", turn);
 
             } else {
                 // If the target is lost, reset the PID controller to prevent integral windup.
@@ -1105,11 +1105,11 @@ public class RobotSystem {
 ////        telemetryM.addData("RightRpm", shooterSys.getRightRpm());
         telemetryM.addLine(String.format("Current Aim Angle: %.2f (%s)", getCurrentAimOffset(), txt));
 
-        telemetryM.addData("Robot State", currentState.name());
-        telemetryM.addData("isShootReady:", isShootReady);
+//        telemetryM.addData("Robot State", currentState.name());
+//        telemetryM.addData("isShootReady:", isShootReady);
         telemetryM.addData("Auto Intaking:", isAutoIntaking);
         telemetryM.addData("Burst MODE", isBurstFire);
-        telemetryM.addData("Spindexer offset:", spindexerSys.getCurrentOffset());
+//        telemetryM.addData("Spindexer offset:", spindexerSys.getCurrentOffset());
         telemetryM.addData("Spindexer Ready", spindexerSys.isReady());
 //        telemetryM.addData("shooterSys Ready:", shooterSys.isReadyToShoot());
 //        telemetryM.addData("Hood Ready:", hoodSys.isReadyToShoot());
@@ -1118,10 +1118,10 @@ public class RobotSystem {
         telemetryM.addData("Standby Slot State:", spindexerSys.getStandbySlotState());
         telemetryM.addData("Intake Slot State:", spindexerSys.getIntakeSlotState());
         telemetryM.addData("Shoot Slot Number:", spindexerSys.getCurShootSlot());
-        telemetryM.addData("IsMotif available", spindexerSys.isMotifAvailable());
-        telemetryM.addData("Spindexer Raw Position", spindexerSys.getCurrentPosition());
-        telemetryM.addData("Spindexer ABS Pos", spindexerSys.getCurrentAbsolutePosition());
-        telemetryM.addData("CURRENT HEADING", Math.toDegrees(follower.getHeading()));
+//        telemetryM.addData("IsMotif available", spindexerSys.isMotifAvailable());
+//        telemetryM.addData("Spindexer Raw Position", spindexerSys.getCurrentPosition());
+//        telemetryM.addData("Spindexer ABS Pos", spindexerSys.getCurrentAbsolutePosition());
+//        telemetryM.addData("CURRENT HEADING", Math.toDegrees(follower.getHeading()));
 
         // TODO: THIS SHOULD BE REMOVED BEFORE COMP
         this.draw();

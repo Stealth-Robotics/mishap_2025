@@ -102,7 +102,7 @@ public class PathFar6Ball extends PathManager {
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(110))
                         .applyFirstShotSequence(ZoneDistance.FAR)
-
+                        .setGlobalDeceleration()
                         .build());
         // Move to line 1 intake area
         addBluePath(
@@ -115,6 +115,7 @@ public class PathFar6Ball extends PathManager {
                                         new Pose(48.000, 35.000)
                                 )
                         )
+                        .setGlobalDeceleration()
                         .setLinearHeadingInterpolation(Math.toRadians(110), Math.toRadians(0))
                         .addParametricCallback(.9, robot::startIntake)
                         .build());
@@ -140,6 +141,7 @@ public class PathFar6Ball extends PathManager {
                                         new Pose(54.000, 18.000)
                                 )
                         )
+                        .setGlobalDeceleration()
                         .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(110))
                         .applyFollowupShotSequence(ZoneDistance.FAR)
                         .build()
@@ -155,6 +157,7 @@ public class PathFar6Ball extends PathManager {
                                         new Pose(48.000, 59.600)
                                 )
                         )
+                        .setGlobalDeceleration()
                         .setLinearHeadingInterpolation(Math.toRadians(110), Math.toRadians(0))
                         .build()
         );

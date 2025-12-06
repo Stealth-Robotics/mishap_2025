@@ -24,6 +24,7 @@ public class PathFar6BallPark extends PathManager {
         addBluePath(
         // name: Shoot1 Far, color: #89D585
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierLine(new Pose(57.000, 9.000), new Pose(58.000, 17.000))
                         )
@@ -34,6 +35,7 @@ public class PathFar6BallPark extends PathManager {
         addBluePath(
         // name: GoTo GPP, color: #87AAA9
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierCurve(
                                         new Pose(58.000, 17.000)
@@ -42,11 +44,13 @@ public class PathFar6BallPark extends PathManager {
                                 )
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(108.000), Math.toRadians(0.000))
+                        .addParametricCallback(.9, robot::startIntake)
                         .build()
         );
         addBluePath(
         // name: Intake GPP, color: #979D79
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierLine(new Pose(48.000, 35.000), new Pose(11.000, 36.000))
                         )
@@ -57,6 +61,7 @@ public class PathFar6BallPark extends PathManager {
         addBluePath(
         // name: Shoot2 Far, color: #B577AD
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierCurve(
                                         new Pose(11.000, 36.000)
@@ -71,10 +76,12 @@ public class PathFar6BallPark extends PathManager {
         addBluePath(
         // name: Park, color: #7BAAAC
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierLine(new Pose(54.000, 17.000), new Pose(16.000, 36.000))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(108.000), Math.toRadians(90.000))
+                        .applyParkSequence()
                         .build()
         );
     }
@@ -83,6 +90,7 @@ public class PathFar6BallPark extends PathManager {
         addRedPath(
         // name: Shoot1 Far, color: #89D585
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierLine(new Pose(87.000, 9.000), new Pose(86.000, 17.000))
                         )
@@ -93,6 +101,7 @@ public class PathFar6BallPark extends PathManager {
         addRedPath(
         // name: GoTo GPP, color: #87AAA9
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierCurve(
                                         new Pose(86.000, 17.000)
@@ -101,11 +110,13 @@ public class PathFar6BallPark extends PathManager {
                                 )
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(72.000), Math.toRadians(-180.000))
+                        .addParametricCallback(.9, robot::startIntake)
                         .build()
         );
         addRedPath(
         // name: Intake GPP, color: #979D79
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierLine(new Pose(96.000, 35.000), new Pose(133.000, 36.000))
                         )
@@ -116,6 +127,7 @@ public class PathFar6BallPark extends PathManager {
         addRedPath(
         // name: Shoot2 Far, color: #B577AD
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierCurve(
                                         new Pose(133.000, 36.000)
@@ -130,10 +142,12 @@ public class PathFar6BallPark extends PathManager {
         addRedPath(
         // name: Park, color: #7BAAAC
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierLine(new Pose(90.000, 17.000), new Pose(128.000, 36.000))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(72.000), Math.toRadians(90.000))
+                        .applyParkSequence()
                         .build()
         );
     }

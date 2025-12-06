@@ -24,6 +24,7 @@ public class PathMid9BallPark extends PathManager {
         addRedPath(
         // name: Shoot1 Near, color: #66B85C
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierLine(new Pose(126.000, 115.000), new Pose(90.100, 107.000))
                         )
@@ -34,6 +35,7 @@ public class PathMid9BallPark extends PathManager {
         addRedPath(
         // name: Goto PPG, color: #9AB55D
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierLine(new Pose(90.100, 107.000), new Pose(95.600, 84.500))
                         )
@@ -44,6 +46,7 @@ public class PathMid9BallPark extends PathManager {
         addRedPath(
         // name: Intake PPG, color: #8878CD
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierLine(new Pose(95.600, 84.500), new Pose(128.000, 84.000))
                         )
@@ -54,6 +57,7 @@ public class PathMid9BallPark extends PathManager {
         addRedPath(
         // name: Shoot2 Mid, color: #6BCD9D
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierLine(new Pose(128.000, 84.000), new Pose(93.400, 86.200))
                         )
@@ -64,8 +68,9 @@ public class PathMid9BallPark extends PathManager {
         addRedPath(
         // name: Goto PGP, color: #8DC859
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
-                                new BezierLine(new Pose(93.400, 86.200), new Pose(95.600, 60.800))
+                                new BezierLine(new Pose(93.400, 86.200), new Pose(95.600, 60.300))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(45.000), Math.toRadians(-180.000))
                         .addParametricCallback(.9, robot::startIntake)
@@ -74,20 +79,23 @@ public class PathMid9BallPark extends PathManager {
         addRedPath(
         // name: Intake PGP, color: #56D7BB
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
-                                new BezierLine(new Pose(95.600, 60.800), new Pose(133.000, 59.600))
+                                new BezierLine(new Pose(95.600, 60.300), new Pose(133.000, 59.600))
                         )
                         .setConstantHeadingInterpolation(Math.toRadians(-180.000))
                         .applyIntakeSequence()
                         .build()
         );
         addRedPath(
-        // name: Path 7, color: #B7C997
+        // name: Park, color: #B7C997
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierLine(new Pose(133.000, 59.600), new Pose(107.000, 60.000))
                         )
                         .setTangentHeadingInterpolation()
+                        .applyParkSequence()
                         .build()
         );
     }
@@ -96,6 +104,7 @@ public class PathMid9BallPark extends PathManager {
         addBluePath(
         // name: Shoot1 Near, color: #66B85C
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierLine(new Pose(18.000, 115.000), new Pose(53.900, 107.000))
                         )
@@ -106,6 +115,7 @@ public class PathMid9BallPark extends PathManager {
         addBluePath(
         // name: Goto PPG, color: #9AB55D
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierLine(new Pose(53.900, 107.000), new Pose(48.400, 84.500))
                         )
@@ -116,6 +126,7 @@ public class PathMid9BallPark extends PathManager {
         addBluePath(
         // name: Intake PPG, color: #8878CD
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierLine(new Pose(48.400, 84.500), new Pose(16.000, 84.000))
                         )
@@ -126,6 +137,7 @@ public class PathMid9BallPark extends PathManager {
         addBluePath(
         // name: Shoot2 Mid, color: #6BCD9D
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierLine(new Pose(16.000, 84.000), new Pose(50.600, 86.200))
                         )
@@ -136,8 +148,9 @@ public class PathMid9BallPark extends PathManager {
         addBluePath(
         // name: Goto PGP, color: #8DC859
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
-                                new BezierLine(new Pose(50.600, 86.200), new Pose(48.400, 60.800))
+                                new BezierLine(new Pose(50.600, 86.200), new Pose(48.400, 60.300))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(135.000), Math.toRadians(0.000))
                         .addParametricCallback(.9, robot::startIntake)
@@ -146,20 +159,23 @@ public class PathMid9BallPark extends PathManager {
         addBluePath(
         // name: Intake PGP, color: #56D7BB
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
-                                new BezierLine(new Pose(48.400, 60.800), new Pose(11.000, 59.600))
+                                new BezierLine(new Pose(48.400, 60.300), new Pose(11.000, 59.600))
                         )
                         .setConstantHeadingInterpolation(Math.toRadians(0.000))
                         .applyIntakeSequence()
                         .build()
         );
         addBluePath(
-        // name: Path 7, color: #B7C997
+        // name: Park, color: #B7C997
                 pathBuilder()
+                        .setGlobalDeceleration()
                         .addPath(
                                 new BezierLine(new Pose(11.000, 59.600), new Pose(37.000, 60.000))
                         )
                         .setTangentHeadingInterpolation()
+                        .applyParkSequence()
                         .build()
         );
     }
