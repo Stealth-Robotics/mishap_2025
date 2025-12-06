@@ -1,0 +1,1 @@
+{"startPoint":{"x":18,"y":115,"heading":"linear","startDeg":90,"endDeg":0},"lines":[{"name":"Shoot 1","endPoint":{"x":56,"y":123,"heading":"linear","startDeg":28,"endDeg":166},"controlPoints":[],"color":"#66B85C"},{"name":"Park","endPoint":{"x":56,"y":134,"heading":"linear","reverse":false,"startDeg":166,"endDeg":180},"controlPoints":[],"color":"#D7DA66"}],"shapes":[]}
