@@ -40,7 +40,7 @@ public class PathFar9BallPark extends PathManager {
                                 new BezierCurve(
                                         new Pose(58.000, 17.000)
                                         , new Pose(58.400, 34.600)
-                                        , new Pose(48.000, 35.000)
+                                        , new Pose(48.000, 35.800)
                                 )
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(108.000), Math.toRadians(0.000))
@@ -52,7 +52,7 @@ public class PathFar9BallPark extends PathManager {
                 pathBuilder()
                         .setGlobalDeceleration()
                         .addPath(
-                                new BezierLine(new Pose(48.000, 35.000), new Pose(11.000, 36.000))
+                                new BezierLine(new Pose(48.000, 35.800), new Pose(11.000, 36.000))
                         )
                         .setConstantHeadingInterpolation(Math.toRadians(0.000))
                         .applyIntakeSequence()
@@ -81,7 +81,7 @@ public class PathFar9BallPark extends PathManager {
                                 new BezierCurve(
                                         new Pose(54.000, 17.000)
                                         , new Pose(58.700, 53.400)
-                                        , new Pose(48.000, 59.000)
+                                        , new Pose(48.000, 59.500)
                                 )
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(108.000), Math.toRadians(0.000))
@@ -93,7 +93,7 @@ public class PathFar9BallPark extends PathManager {
                 pathBuilder()
                         .setGlobalDeceleration()
                         .addPath(
-                                new BezierLine(new Pose(48.000, 59.000), new Pose(11.000, 60.000))
+                                new BezierLine(new Pose(48.000, 59.500), new Pose(11.000, 60.000))
                         )
                         .setConstantHeadingInterpolation(Math.toRadians(0.000))
                         .applyIntakeSequence()
@@ -104,7 +104,7 @@ public class PathFar9BallPark extends PathManager {
                 pathBuilder()
                         .setGlobalDeceleration()
                         .addPath(
-                                new BezierLine(new Pose(11.000, 60.000), new Pose(37.600, 60.000))
+                                new BezierLine(new Pose(11.000, 60.000), new Pose(29.000, 59.000))
                         )
                         .setTangentHeadingInterpolation()
                         .applyParkSequence()
@@ -132,7 +132,7 @@ public class PathFar9BallPark extends PathManager {
                                 new BezierCurve(
                                         new Pose(86.000, 17.000)
                                         , new Pose(85.600, 34.600)
-                                        , new Pose(96.000, 35.000)
+                                        , new Pose(96.000, 35.800)
                                 )
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(72.000), Math.toRadians(-180.000))
@@ -144,7 +144,7 @@ public class PathFar9BallPark extends PathManager {
                 pathBuilder()
                         .setGlobalDeceleration()
                         .addPath(
-                                new BezierLine(new Pose(96.000, 35.000), new Pose(133.000, 36.000))
+                                new BezierLine(new Pose(96.000, 35.800), new Pose(133.000, 36.000))
                         )
                         .setConstantHeadingInterpolation(Math.toRadians(-180.000))
                         .applyIntakeSequence()
@@ -173,7 +173,7 @@ public class PathFar9BallPark extends PathManager {
                                 new BezierCurve(
                                         new Pose(90.000, 17.000)
                                         , new Pose(85.300, 53.400)
-                                        , new Pose(96.000, 59.000)
+                                        , new Pose(96.000, 59.500)
                                 )
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(72.000), Math.toRadians(-180.000))
@@ -185,7 +185,7 @@ public class PathFar9BallPark extends PathManager {
                 pathBuilder()
                         .setGlobalDeceleration()
                         .addPath(
-                                new BezierLine(new Pose(96.000, 59.000), new Pose(133.000, 60.000))
+                                new BezierLine(new Pose(96.000, 59.500), new Pose(133.000, 60.000))
                         )
                         .setConstantHeadingInterpolation(Math.toRadians(-180.000))
                         .applyIntakeSequence()
@@ -196,7 +196,7 @@ public class PathFar9BallPark extends PathManager {
                 pathBuilder()
                         .setGlobalDeceleration()
                         .addPath(
-                                new BezierLine(new Pose(133.000, 60.000), new Pose(106.400, 60.000))
+                                new BezierLine(new Pose(133.000, 60.000), new Pose(115.000, 59.000))
                         )
                         .setTangentHeadingInterpolation()
                         .applyParkSequence()

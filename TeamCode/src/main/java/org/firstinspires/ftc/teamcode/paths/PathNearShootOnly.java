@@ -22,11 +22,11 @@ public class PathNearShootOnly extends PathManager {
 
     public void addBluePaths() {
         addBluePath(
-        // name: Shoot 1, color: #66B85C
+        // name: Shoot 1 Near, color: #66B85C
                 pathBuilder()
                         .setGlobalDeceleration()
                         .addPath(
-                                new BezierLine(new Pose(18.000, 115.000), new Pose(56.000, 125.000))
+                                new BezierLine(new Pose(18.000, 115.000), new Pose(59.000, 125.000))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(28.000), Math.toRadians(166.000))
                         .applyFirstShotSequence(ZoneDistance.NEAR)
@@ -37,7 +37,7 @@ public class PathNearShootOnly extends PathManager {
                 pathBuilder()
                         .setGlobalDeceleration()
                         .addPath(
-                                new BezierLine(new Pose(56.000, 125.000), new Pose(56.000, 134.000))
+                                new BezierLine(new Pose(59.000, 125.000), new Pose(56.000, 131.000))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(166.000), Math.toRadians(180.000))
                         .applyParkSequence()
@@ -47,11 +47,11 @@ public class PathNearShootOnly extends PathManager {
 
     public void addRedPaths() {
         addRedPath(
-        // name: Shoot 1, color: #66B85C
+        // name: Shoot 1 Near, color: #66B85C
                 pathBuilder()
                         .setGlobalDeceleration()
                         .addPath(
-                                new BezierLine(new Pose(126.000, 115.000), new Pose(88.000, 125.000))
+                                new BezierLine(new Pose(126.000, 115.000), new Pose(85.000, 125.000))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(152.000), Math.toRadians(14.000))
                         .applyFirstShotSequence(ZoneDistance.NEAR)
@@ -62,7 +62,7 @@ public class PathNearShootOnly extends PathManager {
                 pathBuilder()
                         .setGlobalDeceleration()
                         .addPath(
-                                new BezierLine(new Pose(88.000, 125.000), new Pose(88.000, 134.000))
+                                new BezierLine(new Pose(85.000, 125.000), new Pose(88.000, 131.000))
                         )
                         .setLinearHeadingInterpolation(Math.toRadians(14.000), Math.toRadians(0.000))
                         .applyParkSequence()
