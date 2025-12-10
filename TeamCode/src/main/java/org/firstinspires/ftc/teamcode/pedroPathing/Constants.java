@@ -23,26 +23,26 @@ public class Constants {
     private static final double forwardPodOffsetMm = 82.55;
     private static final double strafePodOffsetMm = 165.1;
 
-    private static final double forwardVelocity = 61.6;
-    private static final double strafeVelocity = 50.1;
+    private static final double forwardVelocity = 59.65;
+    private static final double strafeVelocity = 47.2;
 
     // Acceleration of the drivetrain when power is cut in inches/second^2 (should be negative)
     // if not negative, then the robot thinks that its going to go faster under 0 power
     // The smaller (negative) the number the further the robot will travel under 0 power
-    private static final double forwardZeroPowerAcceleration = -37.14; // -38.7776 LOW // -51.637 FULL;
+    private static final double forwardZeroPowerAcceleration = -32.5; // -38.7776 LOW // -51.637 FULL;
 
     // Acceleration of the drivetrain when power is cut in inches/second^2 (should be negative)
     // if not negative, then the robot thinks that its going to go faster under 0 power
-    private static final double lateralZeroPowerAcceleration = -66.36; // 90.7 FULL
+    private static final double lateralZeroPowerAcceleration = -64.989; // 90.7 FULL
 
-    public static double mass = 11.0;
+    public static double mass = 12.15;
 
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(mass)
             .forwardZeroPowerAcceleration(forwardZeroPowerAcceleration)
             .lateralZeroPowerAcceleration(lateralZeroPowerAcceleration)
-            .translationalPIDFCoefficients(new PIDFCoefficients(0.15, 0, 0.0001, .02))
-            .headingPIDFCoefficients(new PIDFCoefficients(1.2, 0.0, 0.001, 0.02))
+            .translationalPIDFCoefficients(new PIDFCoefficients(0.15, 0, 0.007, .02))
+            .headingPIDFCoefficients(new PIDFCoefficients(2, 0.0, 0.05, 0.02))
             .centripetalScaling(0.0008)
             ;
 
@@ -67,17 +67,17 @@ public class Constants {
     public static PathConstraints pathConstraints = new PathConstraints(
             0.99,
             100,
-            1,
-            1.2);
+            .95,
+            1);
 
     public static Follower createFollower(HardwareMap hardwareMap) {
+        followerConstants.setAutomaticHoldEnd(true);
         Follower f = new FollowerBuilder(followerConstants, hardwareMap)
                 .pinpointLocalizer(pinpointConstants)
                 .mecanumDrivetrain(mecanumConstants)
                 .pathConstraints(pathConstraints)
                 .build();
-        f.activateDrive();
-        f.activateHeading();
+        f.activateAllPIDFs();
         return f;
     }
 }

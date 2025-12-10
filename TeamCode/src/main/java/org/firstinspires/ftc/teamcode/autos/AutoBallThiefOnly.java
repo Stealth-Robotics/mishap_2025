@@ -1,0 +1,46 @@
+package org.firstinspires.ftc.teamcode.autos;
+
+import org.firstinspires.ftc.teamcode.common.Alliance;
+import org.firstinspires.ftc.teamcode.paths.util.Path;
+import org.firstinspires.ftc.teamcode.paths.PathBallThiefOnly;
+
+import java.util.Arrays;
+
+public class AutoBallThiefOnly extends AutosDecode {
+    /**
+     * Initializes the specific paths for this autonomous routine.
+     *
+     * @return The configured Path object.
+     */
+    @Override
+    protected Path initPaths() {
+        shootIndexes.addAll(Arrays.asList(1, 4));
+        intakeIndexes.addAll(Arrays.asList(3));
+        return new PathBallThiefOnly(robot);
+    }
+
+    /**
+     *
+     */
+    @Override
+    protected void setSpindexerSlots() {
+        robot.initSpindxerSlotsAuto();
+    }
+
+    @Override
+    protected void setStartingPose() {
+
+        // cahnge the angle of the far shots by a couple of degrees:
+        // a negative number turns the bot more to the left positive more to the right
+        if (Alliance.isBlue()) {
+            this.aimOffset = -2.5;
+        } else {
+            this.aimOffset = 2.5;
+        }
+
+        this.aimTolerance = .2;
+
+        follower.setStartingPose(paths.getPathStart());
+    }
+}
+

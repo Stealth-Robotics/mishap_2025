@@ -13,9 +13,9 @@ import org.firstinspires.ftc.teamcode.common.FinalPose;
 import org.firstinspires.ftc.teamcode.common.Motif;
 import org.firstinspires.ftc.teamcode.common.Pipeline;
 import org.firstinspires.ftc.teamcode.common.SpindexerIndex;
-import org.firstinspires.ftc.teamcode.paths.Path;
-import org.firstinspires.ftc.teamcode.paths.PathManager;
-import org.firstinspires.ftc.teamcode.paths.PathState;
+import org.firstinspires.ftc.teamcode.paths.util.Path;
+import org.firstinspires.ftc.teamcode.paths.util.PathManager;
+import org.firstinspires.ftc.teamcode.paths.util.PathState;
 import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 
 import java.util.HashSet;
@@ -25,11 +25,11 @@ import java.util.HashSet;
  */
 public abstract class AutosDecode extends OpMode {
 
-    public static final double READ_MOTIF_TIMEOUT_SECONDS = 5;
-    public static final double AIM_TIMEOUT_MS = 4000;
-    public static final double AIM_MIN_MS = 2000;
-
-    public static final double INTAKE_WAIT_MS = 1000;
+    protected static final double READ_MOTIF_TIMEOUT_SECONDS = 5;
+    protected static final double AIM_TIMEOUT_MS = 3000;
+    protected static final double AIM_MIN_MS = 1000;
+    protected static final double AIM_TOLERANCE = 0.3;
+    protected static final double INTAKE_WAIT_MS = 1000;
     protected final ElapsedTime actionTimer = new ElapsedTime();
     protected static final long INTAKE_DELAY = 5000; // delay to keep hood open
     protected final HashSet<Integer> shootIndexes = new HashSet<>();
@@ -37,6 +37,7 @@ public abstract class AutosDecode extends OpMode {
     protected int subActionStep = 0;
     protected int lastPathIndex = -1;
 
+    protected double aimTolerance = AIM_TOLERANCE;
     protected double startWaitTimeSeconds = 0;
 
     protected int motifIndex = 0;
@@ -77,10 +78,11 @@ public abstract class AutosDecode extends OpMode {
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
         robot = new RobotSystem(hardwareMap, telemetry);
         follower = robot.getFollower();
+
         setSpindexerInitState();
-        telemetryM.debug("Status", "Initialized");
         robot.setLimelightPipeline(Pipeline.APRILTAG_TARGET_BOTH);
         robot.update();
+        SpindexerIndex.setInvalid();
     }
 
     /**
@@ -89,22 +91,22 @@ public abstract class AutosDecode extends OpMode {
      */
     protected void setSpindexerInitState()
     {
-        //robot.initSpindxerSlotsEmpty();
-        robot.initSpindxerSlotsAuto();
+        robot.initSpindxerSlotsEmpty();
+        //robot.initSpindxerSlotsAuto();
     }
 
     /**
-     * Called repeatively after init but before start.
+     * Called repetitively after init but before start.
      */
     @Override
     public void init_loop() {
-        robot.update();
         if (!isSpindexerReady) {
-            isSpindexerReady = robot.doInitSpindexer(true);
+            isSpindexerReady = robot.doInitSpindexer(false);
         } else if (!areArtifactsSorted) {
             areArtifactsSorted = robot.doArtifactSort();
         }
 
+        robot.update();
 
         // TODO: Use this to get robot position from limelight while waiting
         telemetryM.addData("Limelight Pipeline:", robot.getLimelightPipeline());
@@ -121,12 +123,12 @@ public abstract class AutosDecode extends OpMode {
 
     /**
      * Sets the alliance for this autonomous routine.
-     * Use limitlight if not overriden.
+     * Use limitlight if not overridden.
      */
     protected void setAlliance() {
         // this means if we don't get a pose we will default to RED alliance
         if (lastPose != null) {
-            PathManager.setAlianceFromPose(lastPose);
+            PathManager.setAllianceFromPose(lastPose);
         }
     }
 
@@ -152,7 +154,7 @@ public abstract class AutosDecode extends OpMode {
     @Override
     public void start() {
         robot.update();
-        // TODO: Any addtional 1 time actions when start button is pressed
+        // TODO: Any additional 1 time actions when start button is pressed
 
         // must be called before initPaths
         setAlliance();
@@ -311,7 +313,7 @@ public abstract class AutosDecode extends OpMode {
     }
 
     /**
-     * Any acctions required durring the intake phase
+     * Any actions required during the intake phase
      * @return true once done otherwise false
      */
     protected boolean doIntakeAction()
@@ -333,7 +335,7 @@ public abstract class AutosDecode extends OpMode {
      * @return false for still looking true for found or timed out.
      */
     protected boolean doMotifOrTimeout() {
-        // If we timout set the mofif to the loaded pattern of GPP
+        // If we timeout set the motif to the loaded pattern of GPP
         if (stateTimer.seconds() > READ_MOTIF_TIMEOUT_SECONDS) {
             robot.setMotifPattern(Motif.PPG);
             return true;
@@ -351,7 +353,7 @@ public abstract class AutosDecode extends OpMode {
     /**
      * Starts aiming at the target.
      * adjust latency based on the path segment setTimeoutConstraint
-     * @return true if done aiming otherwise false
+     * @return true if aiming started otherwise false
      */
     public boolean startAiming() {
         if (robot.isSpindexerEmpty()) {
@@ -360,7 +362,7 @@ public abstract class AutosDecode extends OpMode {
 
         stateTimer.reset();
 
-        robot.doAimAtTarget(.1,  aimOffset,50);
+        robot.doAimAtTarget(aimTolerance,  aimOffset,20);
         return true;
     }
 
@@ -377,7 +379,7 @@ public abstract class AutosDecode extends OpMode {
             done = true;
         }
        else {
-            done = robot.doAimAtTarget(.2, aimOffset, 100);
+            done = robot.doAimAtTarget(aimTolerance, aimOffset, 100);
         }
 
         return done && curTimeMs > AIM_MIN_MS;

@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.common.Alliance;
 import org.firstinspires.ftc.teamcode.common.FinalPose;
 import org.firstinspires.ftc.teamcode.common.Motif;
 import org.firstinspires.ftc.teamcode.common.SpindexerIndex;
+import org.firstinspires.ftc.teamcode.common.ZoneDistance;
 import org.firstinspires.ftc.teamcode.systems.RobotSystem;
 
 @TeleOp (name = "_TeleOp_Driver_Operator", group = "Main")
@@ -21,7 +22,7 @@ public class TeleOpDupliOp extends OpMode {
     private boolean autoAim = false;
 
     // State machine for shooting process
-    private enum ShootState { IDLE, PREPARING, READY, SHOOTING }
+    private enum ShootState { IDLE, PREPARING, READY }
     private ShootState shootState = ShootState.IDLE;
 
     private RobotSystem robot;
@@ -32,7 +33,7 @@ public class TeleOpDupliOp extends OpMode {
 
     private boolean wasTriggerPressed = false;
     private boolean resetInProgress = false;
-
+    private boolean isReverseIntake = false;
 
     /**
      * This method is run once when the driver hits "INIT" on the Driver Station.
@@ -60,6 +61,14 @@ public class TeleOpDupliOp extends OpMode {
         }
 
         follower.setStartingPose(finalPose);
+
+        if (Alliance.isSet()) {
+            if (Alliance.isBlue()) {
+                robot.setAimOffset(-2.0, ZoneDistance.FAR);
+            } else {
+                robot.setAimOffset(2.0, ZoneDistance.FAR);
+            }
+        }
 
         telemetryM.addData("Robot Initialized", "Waiting for start...");
     }
@@ -110,16 +119,16 @@ public class TeleOpDupliOp extends OpMode {
             return;
         }
 
-        if (gamepad2.yWasPressed()) {
+        // --- Driver Controls ---
+        handleDriveControls();
+
+        if (gamepad2.yWasPressed() && !resetInProgress) {
             //Resets all of the states
             robot.resetRobot();
             this.resetInProgress = true;
         }
 
-        // --- Driver Controls ---
-        handleDriveControls();
         if (resetInProgress) {
-            SpindexerIndex.setInvalid();
             resetInProgress = !robot.doInitSpindexer(true);
         }
         else {
@@ -169,16 +178,10 @@ public class TeleOpDupliOp extends OpMode {
      * Manages the shooting state machine.
      */
     private void handleShooterControls() {
-        // 'A' button toggles the shooting sequence
+        // 'A' button starts the shooting sequence
         if (gamepad1.aWasPressed()) {
-            if (shootState == ShootState.IDLE) {
                 shootState = ShootState.PREPARING;
                 robot.setReadyShoot(); // Start preparing the shooter
-            }
-//            else {
-//                // A quick double press will keep the shooter spinning
-//                shootState = ShootState.IDLE;
-//            }
         }
 
         if (shootState == ShootState.PREPARING) {
@@ -189,13 +192,8 @@ public class TeleOpDupliOp extends OpMode {
 
         if (shootState == ShootState.READY) {
             if (robot.tryShoot()) {
-                shootState = ShootState.SHOOTING; // Move to a transient state
+                shootState = ShootState.IDLE; // Move to a transient state
             }
-        }
-
-        // After shooting, automatically return to idle
-        if (shootState == ShootState.SHOOTING) {
-            shootState = ShootState.IDLE;
         }
 
         // Manual RPM adjustments
@@ -241,12 +239,16 @@ public class TeleOpDupliOp extends OpMode {
 
         if (gamepad1.leftBumperWasPressed()) {
             robot.reverseIntake();
-            if (robot.isHoodIntakePose()) {
-                robot.decrementSpindexerSlot();
-            }
-        } else if (gamepad2.leftBumperWasReleased()) {
+            isReverseIntake = true;
+
+        } else if (gamepad1.leftBumperWasReleased()) {
             // Stop intake only if neither bumper is pressed
             robot.stopIntake();
+            isReverseIntake = false;
+        }
+
+        if (robot.isHoodIntakePose() && isReverseIntake && !robot.isSpindexerBusy()) {
+            robot.decrementSpindexerSlot();
         }
 
         if (gamepad2.startWasPressed() || gamepad1.startWasPressed()){
@@ -265,10 +267,20 @@ public class TeleOpDupliOp extends OpMode {
             robot.decrementSpindexerSlot();
         }
         if (gamepad2.dpadLeftWasPressed()) {
-            robot.increaseSpindexer();
+            robot.decreaseSpindexer();
         }
         if (gamepad2.dpadRightWasPressed()) {
-            robot.decreaseSpindexer();
+            robot.increaseSpindexer();
+        }
+
+        if(gamepad2.xWasPressed())
+        {
+            robot.rotateToPurple();
+        }
+
+        if(gamepad2.aWasPressed())
+        {
+            robot.rotateToGreen();
         }
     }
 

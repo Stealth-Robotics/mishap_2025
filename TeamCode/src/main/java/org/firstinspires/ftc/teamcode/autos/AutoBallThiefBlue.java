@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import org.firstinspires.ftc.teamcode.common.Alliance;
 
 @SuppressWarnings("unused")
-@Autonomous(name="Ball Thief Blue", group="Blue", preselectTeleOp="_TeleOp_Driver_Operator")
+@Autonomous(name="Ball Thief 9 Ball Blue (beta)", group="Blue", preselectTeleOp="_TeleOp_Driver_Operator")
 @Disabled
 public class AutoBallThiefBlue extends AutoBallThief{
 

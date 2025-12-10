@@ -12,7 +12,6 @@ import java.util.Queue;
 public class MotorVelocityReader {
     private static final int DEFAULT_FILTER_SIZE = 5;
 
-
     private final DcMotorEx motor;
     private final double ticksPerRev;
     private final ElapsedTime timer;
